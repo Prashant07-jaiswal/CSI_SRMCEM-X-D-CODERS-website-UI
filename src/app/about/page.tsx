@@ -232,7 +232,12 @@ const faqs = [
 
 export default function AboutPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
+  const [flippedCards, setFlippedCards] = useState<Record<string, boolean>>({});
   const { config } = useTheme();
+
+  const toggleCardFlip = (key: string) => {
+    setFlippedCards(prev => ({ ...prev, [key]: !prev[key] }));
+  };
 
   const fadeUp: Variants = {
     hidden: { opacity: 0, y: 30 },
@@ -295,24 +300,12 @@ export default function AboutPage() {
             <Sparkles className="w-3.5 h-3.5 inline mr-1 text-sky-400" />
             The High-Performance Environment
           </span>
-          <h2 className="text-4xl md:text-6xl font-extrabold text-white mb-8 tracking-tight">
+          <h2 className="text-4xl md:text-6xl font-extrabold text-white mb-4 tracking-tight">
             Our <span className={cn("text-transparent bg-clip-text bg-gradient-to-r", config.gradientText)}>Ecosystem</span>
           </h2>
-          
-          <div className="space-y-6 text-left bg-slate-900/40 border border-slate-800/80 p-8 md:p-10 rounded-3xl backdrop-blur-xl shadow-xl">
-            <p className="text-slate-200 text-lg md:text-xl leading-relaxed font-light">
-              At <strong className="text-sky-300 font-semibold">CSI_SRMCEM X D&apos;CODERS</strong>, we are building an ecosystem where students learn, create, compete, and grow together. Our community goes beyond regular classroom learning by providing practical exposure through technical events, collaborative projects, and industry-oriented experiences that help students build confidence and real-world skills.
-            </p>
-            <p className="text-slate-300 text-base md:text-lg leading-relaxed">
-              We regularly organize <strong className="text-white font-medium">Hackathons, Tech Talks, and Technical Workshops</strong>, where students explore emerging technologies, interact with experienced speakers, and gain valuable insights into the tech industry. These sessions are designed to inspire innovation, strengthen technical foundations, and encourage creative problem-solving.
-            </p>
-            <p className="text-slate-300 text-base md:text-lg leading-relaxed">
-              Our ecosystem also focuses heavily on coding excellence through <strong className="text-white font-medium">Daily DSA learning sessions</strong>, where members learn Data Structures and Algorithms with guided explanations, discussions, and practice. To keep learning engaging, we conduct <strong className="text-white font-medium">DSA Contests and coding competitions</strong> that challenge students to improve their problem-solving abilities while competing in a healthy and motivating environment.
-            </p>
-            <p className="text-slate-300 text-base md:text-lg leading-relaxed">
-              Beyond technical learning, we promote <strong className="text-white font-medium">teamwork, leadership, content creation, and community engagement</strong>, ensuring that every member gets opportunities to contribute, learn from others, and grow throughout their journey. At CSI_SRMCEM X D&apos;CODERS, every initiative is aimed at helping students become better developers, stronger leaders, and future-ready professionals.
-            </p>
-          </div>
+          <p className="text-slate-400 max-w-2xl mx-auto text-base md:text-lg">
+            A collaborative student tech ecosystem driving real-world impact across software engineering, creative design, and technical leadership.
+          </p>
         </motion.div>
 
         {/* 5 Interactive Sub-Teams Domain Cards */}
@@ -327,9 +320,13 @@ export default function AboutPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.08 }}
-                className="group h-[380px] [perspective:1000px]"
+                onClick={() => toggleCardFlip(`subteam-${i}`)}
+                className="group h-[380px] [perspective:1000px] cursor-pointer"
               >
-                <div className="relative w-full h-full transition-transform duration-700 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]">
+                <div className={cn(
+                  "relative w-full h-full transition-transform duration-700 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]",
+                  flippedCards[`subteam-${i}`] && "[transform:rotateY(180deg)]"
+                )}>
                   
                   {/* Front Side */}
                   <div className={cn(
@@ -347,10 +344,6 @@ export default function AboutPage() {
                       </span>
                       <h3 className="text-lg font-extrabold text-white mb-2 tracking-tight">{item.title}</h3>
                       <p className="text-slate-400 text-xs leading-relaxed">{item.frontDesc}</p>
-                    </div>
-                    
-                    <div className="flex items-center justify-between pt-3 border-t border-slate-800/80 text-[11px] font-mono text-slate-500">
-                      <span>Hover to flip ↻</span>
                     </div>
                   </div>
 
@@ -425,9 +418,13 @@ export default function AboutPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1 }}
-                className="group h-[380px] [perspective:1000px]"
+                onClick={() => toggleCardFlip(`core-${i}`)}
+                className="group h-[380px] [perspective:1000px] cursor-pointer"
               >
-                <div className="relative w-full h-full transition-transform duration-700 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]">
+                <div className={cn(
+                  "relative w-full h-full transition-transform duration-700 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]",
+                  flippedCards[`core-${i}`] && "[transform:rotateY(180deg)]"
+                )}>
                   
                   {/* Front Side */}
                   <div className={cn(
@@ -445,10 +442,6 @@ export default function AboutPage() {
                       </span>
                       <h3 className="text-xl font-extrabold text-white mb-2.5 tracking-tight">{item.title}</h3>
                       <p className="text-slate-400 text-xs leading-relaxed">{item.frontDesc}</p>
-                    </div>
-                    
-                    <div className="flex items-center justify-between pt-4 border-t border-slate-800/80 text-[11px] font-mono text-slate-400">
-                      <span>Hover to flip ↻</span>
                     </div>
                   </div>
 
@@ -570,9 +563,13 @@ export default function AboutPage() {
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
-          className="group h-[560px] md:h-[480px] [perspective:1000px] w-full"
+          onClick={() => toggleCardFlip('mentor')}
+          className="group h-[560px] md:h-[480px] [perspective:1000px] w-full cursor-pointer"
         >
-          <div className="relative w-full h-full transition-transform duration-700 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)] group-hover:scale-[1.01]">
+          <div className={cn(
+            "relative w-full h-full transition-transform duration-700 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)] group-hover:scale-[1.01]",
+            flippedCards['mentor'] && "[transform:rotateY(180deg)] scale-[1.01]"
+          )}>
 
             {/* Front Side */}
             <div className="absolute inset-0 [backface-visibility:hidden] bg-slate-900/80 border border-slate-800 rounded-3xl p-8 md:p-14 flex flex-col md:flex-row items-center justify-center gap-10 shadow-2xl group-hover:border-sky-500/50 group-hover:shadow-[0_0_35px_rgba(56,189,248,0.3)] transition-all backdrop-blur-xl">
@@ -588,11 +585,7 @@ export default function AboutPage() {
                   Faculty Mentor
                 </span>
                 <h3 className="text-3xl md:text-4xl font-extrabold text-white mb-2 tracking-tight">Pankaj Kumar</h3>
-                <p className="text-lg md:text-xl text-sky-400 font-semibold mb-5">HOD, Department of Computer Science &amp; Engineering (CSE)</p>
-                <div className="text-slate-400 text-sm flex items-center gap-2 justify-center md:justify-start font-mono">
-                  <span>Hover to view mentor&apos;s message</span>
-                  <span className="animate-bounce inline-block text-sky-400">&rarr;</span>
-                </div>
+                <p className="text-lg md:text-xl text-sky-400 font-semibold">HOD, Department of Computer Science &amp; Engineering (CSE)</p>
               </div>
             </div>
 
@@ -602,12 +595,13 @@ export default function AboutPage() {
                 Mentor&apos;s Word
               </span>
               <h3 className="text-2xl md:text-3xl font-extrabold text-white mb-4">Engineering Real Impact</h3>
-              <p className="text-slate-300 leading-relaxed mb-8 max-w-2xl font-light text-base md:text-lg">
+              <p className="text-slate-300 leading-relaxed mb-6 max-w-2xl font-light text-base md:text-lg">
                 &ldquo;The goal of CSI_SRMCEM X D&apos;CODERS is not just to write code, but to engineer solutions that impact society. I am incredibly proud of the innovative spirit, technical excellence, and 100% placement record our students consistently maintain under this chapter.&rdquo;
               </p>
               <div className="flex items-center gap-4">
                 <a 
                   href="#" 
+                  onClick={(e) => e.stopPropagation()}
                   className="px-6 py-3 rounded-full bg-white/5 hover:bg-sky-500/20 border border-white/10 hover:border-sky-500/40 text-slate-300 hover:text-white transition-all flex items-center gap-2 text-xs md:text-sm font-semibold"
                 >
                   <FaLinkedin className="w-4 h-4 text-sky-400" />
@@ -648,9 +642,13 @@ export default function AboutPage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.1 }}
-              className="group h-[380px] [perspective:1000px]"
+              onClick={() => toggleCardFlip(`head-${i}`)}
+              className="group h-[380px] [perspective:1000px] cursor-pointer"
             >
-              <div className="relative w-full h-full transition-transform duration-700 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]">
+              <div className={cn(
+                "relative w-full h-full transition-transform duration-700 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]",
+                flippedCards[`head-${i}`] && "[transform:rotateY(180deg)]"
+              )}>
 
                 {/* Front Side */}
                 <div className="absolute inset-0 [backface-visibility:hidden] rounded-3xl overflow-hidden border border-slate-800 bg-slate-900/80 group-hover:border-sky-500/50 shadow-xl transition-all duration-300">
@@ -665,10 +663,7 @@ export default function AboutPage() {
                     <span className="px-2.5 py-0.5 bg-sky-500/20 text-sky-300 border border-sky-500/30 text-[10px] font-mono font-bold rounded-full uppercase tracking-wider mb-2 inline-block">
                       {head.role}
                     </span>
-                    <h3 className="text-xl font-bold text-white mb-1">{head.name}</h3>
-                    <div className="flex items-center justify-between text-xs text-slate-400 mt-2 font-mono">
-                      <span>Hover to flip ↻</span>
-                    </div>
+                    <h3 className="text-xl font-bold text-white">{head.name}</h3>
                   </div>
                 </div>
 

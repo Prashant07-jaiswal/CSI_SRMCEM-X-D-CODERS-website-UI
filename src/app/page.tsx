@@ -20,6 +20,11 @@ export default function Home() {
     placementRate: "100%"
   });
   const [featuredEvent, setFeaturedEvent] = useState<EventItem | null>(null);
+  const [flippedCards, setFlippedCards] = useState<Record<string, boolean>>({});
+
+  const toggleCardFlip = (key: string) => {
+    setFlippedCards(prev => ({ ...prev, [key]: !prev[key] }));
+  };
 
   const loadData = () => {
     setStats(DataStore.getStats());
@@ -119,28 +124,31 @@ export default function Home() {
           
           <div className="grid md:grid-cols-3 gap-8">
             {/* Card 1: Hackathons */}
-            <div className="group h-84 [perspective:1000px]">
-              <div className="relative w-full h-full transition-transform duration-700 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)] group-hover:scale-105">
+            <div 
+              onClick={() => toggleCardFlip('hackathons')}
+              className="group h-84 [perspective:1000px] cursor-pointer"
+            >
+              <div className={cn(
+                "relative w-full h-full transition-transform duration-700 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)] group-hover:scale-105",
+                flippedCards['hackathons'] && "[transform:rotateY(180deg)] scale-105"
+              )}>
                 {/* Front Side */}
-                <div className="absolute inset-0 [backface-visibility:hidden] bg-slate-900/60 border border-slate-800 rounded-3xl p-8 flex flex-col items-start justify-between backdrop-blur-xl shadow-xl group-hover:border-purple-500/50 group-hover:shadow-[0_0_30px_rgba(168,85,247,0.25)] transition-all">
-                  <div>
-                    <div className="p-3.5 rounded-2xl bg-purple-500/10 border border-purple-500/20 mb-6 inline-block text-purple-400">
-                      <Code className="w-8 h-8" />
-                    </div>
-                    <h3 className="text-2xl font-bold text-white mb-4">Hackathons</h3>
-                    <ul className="text-slate-300 text-sm space-y-2.5">
-                      <li className="flex items-center gap-2">
-                        <span className="w-1.5 h-1.5 rounded-full bg-purple-400" /> 24-48 hour coding marathons
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <span className="w-1.5 h-1.5 rounded-full bg-purple-400" /> Creative problem solving
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <span className="w-1.5 h-1.5 rounded-full bg-purple-400" /> Industry expert mentorship
-                      </li>
-                    </ul>
+                <div className="absolute inset-0 [backface-visibility:hidden] bg-slate-900/60 border border-slate-800 rounded-3xl p-8 flex flex-col items-start justify-center backdrop-blur-xl shadow-xl group-hover:border-purple-500/50 group-hover:shadow-[0_0_30px_rgba(168,85,247,0.25)] transition-all">
+                  <div className="p-3.5 rounded-2xl bg-purple-500/10 border border-purple-500/20 mb-6 inline-block text-purple-400">
+                    <Code className="w-8 h-8" />
                   </div>
-                  <span className="text-[11px] font-mono text-slate-500 uppercase tracking-wider">Hover to flip ↻</span>
+                  <h3 className="text-2xl font-bold text-white mb-4">Hackathons</h3>
+                  <ul className="text-slate-300 text-sm space-y-2.5">
+                    <li className="flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-purple-400" /> 24-48 hour coding marathons
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-purple-400" /> Creative problem solving
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-purple-400" /> Industry expert mentorship
+                    </li>
+                  </ul>
                 </div>
 
                 {/* Back Side */}
@@ -157,28 +165,31 @@ export default function Home() {
             </div>
 
             {/* Card 2: Workshops */}
-            <div className="group h-84 [perspective:1000px]">
-              <div className="relative w-full h-full transition-transform duration-700 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)] group-hover:scale-105">
+            <div 
+              onClick={() => toggleCardFlip('workshops')}
+              className="group h-84 [perspective:1000px] cursor-pointer"
+            >
+              <div className={cn(
+                "relative w-full h-full transition-transform duration-700 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)] group-hover:scale-105",
+                flippedCards['workshops'] && "[transform:rotateY(180deg)] scale-105"
+              )}>
                 {/* Front Side */}
-                <div className="absolute inset-0 [backface-visibility:hidden] bg-slate-900/60 border border-slate-800 rounded-3xl p-8 flex flex-col items-start justify-between backdrop-blur-xl shadow-xl group-hover:border-blue-500/50 group-hover:shadow-[0_0_30px_rgba(59,130,246,0.25)] transition-all">
-                  <div>
-                    <div className="p-3.5 rounded-2xl bg-blue-500/10 border border-blue-500/20 mb-6 inline-block text-blue-400">
-                      <Cpu className="w-8 h-8" />
-                    </div>
-                    <h3 className="text-2xl font-bold text-white mb-4">Workshops</h3>
-                    <ul className="text-slate-300 text-sm space-y-2.5">
-                      <li className="flex items-center gap-2">
-                        <span className="w-1.5 h-1.5 rounded-full bg-blue-400" /> Hands-on technical sessions
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <span className="w-1.5 h-1.5 rounded-full bg-blue-400" /> AI/ML &amp; Web3 focused
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <span className="w-1.5 h-1.5 rounded-full bg-blue-400" /> Live project building
-                      </li>
-                    </ul>
+                <div className="absolute inset-0 [backface-visibility:hidden] bg-slate-900/60 border border-slate-800 rounded-3xl p-8 flex flex-col items-start justify-center backdrop-blur-xl shadow-xl group-hover:border-blue-500/50 group-hover:shadow-[0_0_30px_rgba(59,130,246,0.25)] transition-all">
+                  <div className="p-3.5 rounded-2xl bg-blue-500/10 border border-blue-500/20 mb-6 inline-block text-blue-400">
+                    <Cpu className="w-8 h-8" />
                   </div>
-                  <span className="text-[11px] font-mono text-slate-500 uppercase tracking-wider">Hover to flip ↻</span>
+                  <h3 className="text-2xl font-bold text-white mb-4">Workshops</h3>
+                  <ul className="text-slate-300 text-sm space-y-2.5">
+                    <li className="flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-blue-400" /> Hands-on technical sessions
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-blue-400" /> AI/ML &amp; Web3 focused
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-blue-400" /> Live project building
+                    </li>
+                  </ul>
                 </div>
 
                 {/* Back Side */}
@@ -195,28 +206,31 @@ export default function Home() {
             </div>
 
             {/* Card 3: Open Source */}
-            <div className="group h-84 [perspective:1000px]">
-              <div className="relative w-full h-full transition-transform duration-700 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)] group-hover:scale-105">
+            <div 
+              onClick={() => toggleCardFlip('opensource')}
+              className="group h-84 [perspective:1000px] cursor-pointer"
+            >
+              <div className={cn(
+                "relative w-full h-full transition-transform duration-700 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)] group-hover:scale-105",
+                flippedCards['opensource'] && "[transform:rotateY(180deg)] scale-105"
+              )}>
                 {/* Front Side */}
-                <div className="absolute inset-0 [backface-visibility:hidden] bg-slate-900/60 border border-slate-800 rounded-3xl p-8 flex flex-col items-start justify-between backdrop-blur-xl shadow-xl group-hover:border-orange-500/50 group-hover:shadow-[0_0_30px_rgba(249,115,22,0.25)] transition-all">
-                  <div>
-                    <div className="p-3.5 rounded-2xl bg-orange-500/10 border border-orange-500/20 mb-6 inline-block text-orange-400">
-                      <Globe className="w-8 h-8" />
-                    </div>
-                    <h3 className="text-2xl font-bold text-white mb-4">Open Source</h3>
-                    <ul className="text-slate-300 text-sm space-y-2.5">
-                      <li className="flex items-center gap-2">
-                        <span className="w-1.5 h-1.5 rounded-full bg-orange-400" /> GitHub contributions
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <span className="w-1.5 h-1.5 rounded-full bg-orange-400" /> Community driven tools
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <span className="w-1.5 h-1.5 rounded-full bg-orange-400" /> Code reviews &amp; PRs
-                      </li>
-                    </ul>
+                <div className="absolute inset-0 [backface-visibility:hidden] bg-slate-900/60 border border-slate-800 rounded-3xl p-8 flex flex-col items-start justify-center backdrop-blur-xl shadow-xl group-hover:border-orange-500/50 group-hover:shadow-[0_0_30px_rgba(249,115,22,0.25)] transition-all">
+                  <div className="p-3.5 rounded-2xl bg-orange-500/10 border border-orange-500/20 mb-6 inline-block text-orange-400">
+                    <Globe className="w-8 h-8" />
                   </div>
-                  <span className="text-[11px] font-mono text-slate-500 uppercase tracking-wider">Hover to flip ↻</span>
+                  <h3 className="text-2xl font-bold text-white mb-4">Open Source</h3>
+                  <ul className="text-slate-300 text-sm space-y-2.5">
+                    <li className="flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-orange-400" /> GitHub contributions
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-orange-400" /> Community driven tools
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-orange-400" /> Code reviews &amp; PRs
+                    </li>
+                  </ul>
                 </div>
 
                 {/* Back Side */}
@@ -278,15 +292,15 @@ export default function Home() {
         
         <div className="max-w-7xl mx-auto">
           {/* Section Header */}
-          <div className="text-center max-w-3xl mx-auto mb-16">
+          <div className="text-center max-w-4xl mx-auto mb-16 p-8 md:p-12 rounded-3xl bg-slate-900/60 border border-slate-800 backdrop-blur-xl">
             <div className="inline-block mb-4">
-              <span className="inline-flex items-center gap-2 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-sky-400 bg-sky-500/10 rounded-full border border-sky-500/30 backdrop-blur-md shadow-[0_0_15px_rgba(56,189,248,0.2)]">
+              <span className="inline-flex items-center gap-2 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-sky-400 bg-sky-500/10 rounded-full border border-sky-500/30 backdrop-blur-md shadow-none">
                 <Sparkles className="w-3.5 h-3.5 text-sky-400" />
                 Where Code Meets Innovation
               </span>
             </div>
             <h2 className="text-4xl md:text-6xl font-extrabold text-white tracking-tight mb-6">
-              Why Join <span className={cn("text-transparent bg-clip-text bg-gradient-to-r", config.gradientText)}>CSI_SRMCEM X D&apos;CODERS?</span>
+              Why Join <span className={cn("text-transparent bg-clip-text bg-gradient-to-r", config.gradientText)}>Us?</span>
             </h2>
             <p className="text-slate-300 text-lg md:text-xl leading-relaxed mb-4 font-light">
               CSI_SRMCEM X D&apos;CODERS is more than a college club—it&apos;s a high-performance tech ecosystem built for developers, problem-solvers, and innovators. We create an environment where curiosity evolves into expertise through hands-on development, competitive coding, hackathons, technical workshops, and collaborative innovation.

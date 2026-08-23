@@ -36,17 +36,49 @@ export function HeroLogo() {
     });
   }, [scrollY]);
 
-  // Bubble Particles Configuration (Stable across renders)
+  // Bubble Particles Configuration (Stable across renders) - Wide horizontal left/right & downward radial dispersion
   const bubbleParticles = useMemo(() => {
-    return Array.from({ length: 60 }, (_, i) => ({
-      id: i,
-      size: Math.random() * 20 + 10,
-      targetX: (Math.random() - 0.5) * 1100,
-      targetY: (Math.random() - 0.5) * 1100,
-      scale: Math.random() * 2 + 1,
-      duration: 1.2 + Math.random() * 0.8,
-      delay: Math.random() * 0.1,
-    }));
+    return Array.from({ length: 320 }, (_, i) => {
+      // 360-degree radial angles with expansive left and right horizontal fan-out
+      const angle = Math.random() * Math.PI * 2;
+      const baseDistance = 220 + Math.random() * 1150;
+      
+      // Horizontal expansion factor ensuring prominent left and right scatter
+      const horizontalStretch = 1.45;
+      const targetX = Math.cos(angle) * baseDistance * horizontalStretch;
+      
+      // Gentle downward bias as user scrolls
+      const targetY = Math.sin(angle) * baseDistance + (Math.sin(angle) > 0 ? Math.random() * 220 : 0);
+
+      const size = Math.random() < 0.65 ? Math.random() * 14 + 5 : Math.random() * 26 + 14;
+      const isCyan = i % 3 === 0;
+      const isBlue = i % 3 === 1;
+
+      return {
+        id: i,
+        size,
+        targetX,
+        targetY,
+        scale: Math.random() * 1.9 + 0.8,
+        duration: 1.1 + Math.random() * 1.3,
+        delay: Math.random() * 0.22,
+        borderColor: isCyan 
+          ? "border-cyan-300/90" 
+          : isBlue 
+          ? "border-blue-400/90" 
+          : "border-sky-300/90",
+        bgColor: isCyan 
+          ? "bg-cyan-400/25" 
+          : isBlue 
+          ? "bg-blue-500/25" 
+          : "bg-sky-400/25",
+        boxShadow: isCyan
+          ? "0 0 14px rgba(6, 182, 212, 0.9), inset 0 0 10px rgba(255, 255, 255, 0.7)"
+          : isBlue
+          ? "0 0 14px rgba(59, 130, 246, 0.9), inset 0 0 10px rgba(255, 255, 255, 0.7)"
+          : "0 0 14px rgba(56, 189, 248, 0.9), inset 0 0 10px rgba(255, 255, 255, 0.7)",
+      };
+    });
   }, []);
 
   // Bubble animation variants for out animation
@@ -327,18 +359,21 @@ export function HeroLogo() {
       {/* 2. BUBBLE PARTICLES EXPLOSION BURST EFFECT (TRIGGERS ON SCROLL OUT) */}
       {/* ========================================================================= */}
       {isScrolled && (
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-50">
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-50 overflow-visible">
           {bubbleParticles.map((bubble) => (
             <motion.div
               key={`bubble-${bubble.id}`}
-              className="absolute rounded-full border-[2px] border-sky-300/80 bg-sky-400/20 backdrop-blur-sm"
+              className={cn(
+                "absolute rounded-full border-[1.5px] backdrop-blur-xs transform-gpu will-change-transform",
+                bubble.borderColor,
+                bubble.bgColor
+              )}
               style={{
                 width: bubble.size,
                 height: bubble.size,
-                boxShadow:
-                  "0 0 12px rgba(56, 189, 248, 0.85), inset 0 0 10px rgba(255, 255, 255, 0.6)",
+                boxShadow: bubble.boxShadow,
               }}
-              initial={{ x: 0, y: 0, scale: 0.5, opacity: 1 }}
+              initial={{ x: 0, y: 0, scale: 0.3, opacity: 1 }}
               animate={{
                 x: bubble.targetX,
                 y: bubble.targetY,
