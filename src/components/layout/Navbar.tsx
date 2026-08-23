@@ -45,9 +45,9 @@ export function Navbar() {
         </Link>
 
         {/* Top Middle: CSI_SRMCEM X D'CODERS */}
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 hidden sm:block pointer-events-none">
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 hidden lg:block pointer-events-none">
           <h1 className={cn(
-            "text-lg md:text-xl font-extrabold tracking-[0.2em] text-transparent bg-clip-text drop-shadow-lg bg-gradient-to-r",
+            "text-lg md:text-xl font-extrabold tracking-[0.2em] text-transparent bg-clip-text drop-shadow-lg bg-gradient-to-r whitespace-nowrap",
             config.gradientText
           )}>
             CSI_SRMCEM X D&apos;CODERS

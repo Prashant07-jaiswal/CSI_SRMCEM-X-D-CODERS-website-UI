@@ -43,24 +43,24 @@ export default function Home() {
       {/* ========================================================================= */}
       {/* 1. HERO SECTION */}
       {/* ========================================================================= */}
-      <section className="min-h-[90vh] flex items-center px-4 md:px-16 lg:px-24 relative z-10 pt-16 pb-12">
-        <div className="w-full max-w-7xl mx-auto flex flex-col-reverse md:flex-row items-center justify-between gap-12">
+      <section className="min-h-[85vh] lg:min-h-[90vh] flex items-center px-4 sm:px-8 md:px-12 lg:px-20 xl:px-24 relative z-10 pt-20 sm:pt-24 lg:pt-16 pb-12 overflow-x-hidden">
+        <div className="w-full max-w-7xl mx-auto flex flex-col-reverse lg:flex-row items-center justify-between gap-10 lg:gap-14">
           
           {/* Left Side: Text Content */}
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="flex-1 text-left"
+            className="flex-1 text-left w-full"
           >
-            <div className="inline-block mb-6">
-              <span className="inline-flex items-center gap-2 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-sky-300 bg-sky-500/10 rounded-full border border-sky-500/20 backdrop-blur-md shadow-[0_0_15px_rgba(56,189,248,0.15)]">
+            <div className="inline-block mb-4 sm:mb-6">
+              <span className="inline-flex items-center gap-2 px-3.5 sm:px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-sky-300 bg-sky-500/10 rounded-full border border-sky-500/20 backdrop-blur-md shadow-[0_0_15px_rgba(56,189,248,0.15)]">
                 <Sparkles className="w-3.5 h-3.5 text-sky-400" />
                 SRMCEM&apos;s Premier Tech Club
               </span>
             </div>
             
-            <h1 className="text-5xl sm:text-7xl lg:text-8xl font-extrabold tracking-tighter mb-5 leading-none">
+            <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-6xl xl:text-7xl 2xl:text-8xl font-extrabold tracking-tighter mb-4 sm:mb-5 leading-none">
               <span className={cn(
                 "block text-transparent bg-clip-text bg-gradient-to-r",
                 config.titlePrimaryGradient,
@@ -77,11 +77,11 @@ export default function Home() {
               </span>
             </h1>
             
-            <p className="max-w-xl text-lg md:text-xl text-slate-300 mb-8 leading-relaxed font-normal">
+            <p className="max-w-xl text-base sm:text-lg md:text-xl text-slate-300 mb-8 leading-relaxed font-normal">
               Empowering students through technology, innovation, and collaboration. We are building the future of engineering.
             </p>
             
-            <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:w-auto">
               <Link
                 href="/events"
                 className="group relative inline-flex items-center justify-center px-8 py-3.5 font-semibold text-white transition-all duration-300 bg-gradient-to-r from-sky-500 to-blue-600 rounded-full hover:scale-105 shadow-[0_0_25px_rgba(56,189,248,0.35)] overflow-hidden"
@@ -99,7 +99,7 @@ export default function Home() {
           </motion.div>
 
           {/* Right Side: Orbital Quantum Rings Animated Logo */}
-          <div className="flex-1 flex justify-center items-center relative w-full">
+          <div className="flex-1 flex justify-center items-center relative w-full shrink-0">
             <HeroLogo />
           </div>
         </div>

@@ -100,7 +100,7 @@ export function HeroLogo() {
           userSelect: "none",
           WebkitUserSelect: "none",
         }}
-        className="relative flex items-center justify-center w-[340px] h-[340px] sm:w-[460px] sm:h-[460px] md:w-[540px] md:h-[540px] lg:w-[620px] lg:h-[620px] select-none cursor-pointer transform-gpu will-change-transform"
+        className="relative flex items-center justify-center w-[270px] h-[270px] sm:w-[350px] sm:h-[350px] md:w-[420px] md:h-[420px] lg:w-[460px] lg:h-[460px] xl:w-[540px] xl:h-[540px] max-w-full select-none cursor-pointer transform-gpu will-change-transform"
       >
         {/* Ambient Volumetric Breathing Glow Dome */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none -z-10 transform-gpu">
@@ -115,7 +115,7 @@ export function HeroLogo() {
               ease: "easeInOut",
             }}
             className={cn(
-              "w-72 h-72 sm:w-[420px] sm:h-[420px] md:w-[500px] md:h-[500px] rounded-full blur-[100px] transition-colors duration-500",
+              "w-56 h-56 sm:w-72 sm:h-72 md:w-[360px] md:h-[360px] lg:w-[420px] lg:h-[420px] rounded-full blur-[80px] sm:blur-[100px] transition-colors duration-500",
               config.glowClass1
             )}
           />
