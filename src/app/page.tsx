@@ -419,40 +419,6 @@ export default function Home() {
               </div>
             </div>
           </div>
-
-          {/* Community Manifesto Callout Card */}
-          <div className="relative p-1 rounded-3xl bg-gradient-to-r from-sky-500/50 via-blue-500/50 to-indigo-600/50 shadow-[0_0_50px_rgba(56,189,248,0.25)]">
-            <div className="bg-slate-950/90 backdrop-blur-2xl rounded-[22px] p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-80 h-80 bg-sky-500/15 blur-[80px] rounded-full pointer-events-none" />
-              
-              <div className="text-left max-w-2xl">
-                <span className="px-3.5 py-1 text-xs font-extrabold uppercase tracking-widest text-sky-400 bg-sky-500/10 rounded-full border border-sky-500/30 mb-4 inline-block shadow-sm">
-                  Community Manifesto
-                </span>
-                <h3 className="text-3xl md:text-4xl font-extrabold text-white mb-3 tracking-tight">
-                  Join the Community That Ships Ideas.
-                </h3>
-                <p className="text-base md:text-lg text-transparent bg-clip-text bg-gradient-to-r from-sky-300 via-slate-200 to-blue-300 font-mono font-semibold">
-                  &gt; Compile your skills. Debug your limits. Execute your potential.
-                </p>
-              </div>
-
-              <div className="flex flex-col sm:flex-row gap-4 shrink-0">
-                <Link
-                  href="/events"
-                  className="px-8 py-3.5 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-bold rounded-full transition-all duration-300 hover:scale-105 shadow-[0_0_25px_rgba(56,189,248,0.35)] whitespace-nowrap text-center"
-                >
-                  Explore Events
-                </Link>
-                <Link
-                  href="/about"
-                  className="px-8 py-3.5 bg-white/5 hover:bg-white/10 text-slate-200 hover:text-white border border-white/10 hover:border-sky-500/30 font-bold rounded-full transition-all duration-300 text-center"
-                >
-                  About Us
-                </Link>
-              </div>
-            </div>
-          </div>
         </div>
       </section>
 
