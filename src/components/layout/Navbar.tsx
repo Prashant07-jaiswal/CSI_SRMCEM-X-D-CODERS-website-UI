@@ -29,19 +29,37 @@ export function Navbar() {
     <>
       <nav className="fixed top-0 w-full z-[110] px-4 sm:px-6 py-4 flex justify-between items-center bg-black/40 backdrop-blur-xl border-b border-white/10 transition-colors duration-300">
         
-        {/* Top Left: CSI Logo */}
-        <Link href="/" className="flex items-center gap-3 z-50 group">
+        {/* Top Left: 3 Logos (CSI - SRMCEM - D'CODERS) with no text */}
+        <Link href="/" className="flex items-center gap-2 sm:gap-2.5 z-50 group">
+          {/* 1. CSI Logo */}
           <div className="relative">
-            <div className="absolute -inset-1 rounded-full bg-sky-500/20 blur-md group-hover:bg-sky-500/40 transition-colors" />
+            <div className="absolute -inset-0.5 rounded-full bg-sky-500/20 blur-sm group-hover:bg-sky-500/40 transition-colors" />
             <img 
               src="/csi-logo.png" 
               alt="CSI Logo" 
-              className="w-10 h-10 object-contain relative drop-shadow-[0_0_10px_rgba(56,189,248,0.5)]"
+              className="w-9 h-9 sm:w-10 sm:h-10 object-contain rounded-full relative drop-shadow-[0_0_8px_rgba(56,189,248,0.5)] bg-slate-950/40 p-0.5 border border-white/10 group-hover:border-sky-400/50 transition-all"
             />
           </div>
-          <span className="font-extrabold text-sm tracking-wider text-slate-200 hidden md:inline-block">
-            CSI_SRMCEM
-          </span>
+
+          {/* 2. SRMCEM Logo */}
+          <div className="relative">
+            <div className="absolute -inset-0.5 rounded-full bg-blue-500/20 blur-sm group-hover:bg-blue-500/40 transition-colors" />
+            <img 
+              src="/srmcem-logo.png" 
+              alt="SRMCEM Logo" 
+              className="w-9 h-9 sm:w-10 sm:h-10 object-contain rounded-full relative drop-shadow-[0_0_8px_rgba(59,130,246,0.5)] bg-slate-950/40 p-0.5 border border-white/10 group-hover:border-blue-400/50 transition-all"
+            />
+          </div>
+
+          {/* 3. D'CODERS Logo */}
+          <div className="relative">
+            <div className="absolute -inset-0.5 rounded-full bg-cyan-500/20 blur-sm group-hover:bg-cyan-500/40 transition-colors" />
+            <img 
+              src="/decoders-logo.png" 
+              alt="D'CODERS Logo" 
+              className="w-9 h-9 sm:w-10 sm:h-10 object-contain rounded-full relative drop-shadow-[0_0_8px_rgba(6,182,212,0.5)] bg-slate-950/40 p-0.5 border border-white/10 group-hover:border-cyan-400/50 transition-all"
+            />
+          </div>
         </Link>
 
         {/* Top Middle: CSI_SRMCEM X D'CODERS */}
