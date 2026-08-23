@@ -38,7 +38,7 @@ export function HeroLogo() {
 
   // Bubble Particles Configuration (Stable across renders) - Wide horizontal left/right & downward radial dispersion
   const bubbleParticles = useMemo(() => {
-    return Array.from({ length: 320 }, (_, i) => {
+    return Array.from({ length: 250 }, (_, i) => {
       // 360-degree radial angles with expansive left and right horizontal fan-out
       const angle = Math.random() * Math.PI * 2;
       const baseDistance = 220 + Math.random() * 1150;
