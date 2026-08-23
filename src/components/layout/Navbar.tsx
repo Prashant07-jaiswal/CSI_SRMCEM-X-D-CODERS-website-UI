@@ -94,16 +94,16 @@ export function Navbar() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: "-100%", transition: { delay: 0.2, duration: 0.4 } }}
             transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-            className="fixed inset-0 z-[100] bg-slate-950/95 backdrop-blur-3xl flex flex-col items-center justify-center"
+            className="fixed inset-0 z-[100] bg-slate-950/95 backdrop-blur-3xl overflow-y-auto overflow-x-hidden pt-24 sm:pt-28 pb-12 px-4 sm:px-6 flex flex-col justify-start md:justify-center items-center min-h-screen"
           >
             {/* Decorative Background Elements */}
             <div className={cn("absolute top-1/4 left-1/4 w-96 h-96 blur-[150px] rounded-full pointer-events-none", config.glowClass1)} />
             <div className={cn("absolute bottom-1/4 right-1/4 w-96 h-96 blur-[150px] rounded-full pointer-events-none", config.glowClass2)} />
 
-            <div className="w-full max-w-4xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
+            <div className="w-full max-w-4xl mx-auto my-auto grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 relative z-10">
               
               {/* Left Side: Large Links */}
-              <div className="flex flex-col space-y-3">
+              <div className="flex flex-col space-y-1.5 sm:space-y-3">
                 {links.map((link, index) => {
                   const isActive = pathname === link.href;
                   return (
@@ -117,16 +117,16 @@ export function Navbar() {
                       <Link
                         href={link.href}
                         onClick={() => setIsOpen(false)}
-                        className="group flex items-center justify-between p-3.5 rounded-2xl transition-all duration-300 hover:bg-white/5"
+                        className="group flex items-center justify-between p-2.5 sm:p-3.5 rounded-2xl transition-all duration-300 hover:bg-white/5"
                       >
                         <span className={cn(
-                          "text-3xl md:text-5xl font-black tracking-tight transition-all duration-300",
+                          "text-2xl sm:text-3xl md:text-5xl font-black tracking-tight transition-all duration-300",
                           isActive ? cn("text-transparent bg-clip-text bg-gradient-to-r", config.gradientText) : "text-slate-400 group-hover:text-white"
                         )}>
                           {link.name}
                         </span>
                         <ChevronRight className={cn(
-                          "w-7 h-7 transition-all duration-300 opacity-0 -translate-x-4",
+                          "w-5 h-5 sm:w-7 sm:h-7 transition-all duration-300 opacity-0 -translate-x-4",
                           isActive ? "opacity-100 translate-x-0 text-sky-400" : "group-hover:opacity-100 group-hover:translate-x-0 text-slate-300"
                         )} />
                       </Link>

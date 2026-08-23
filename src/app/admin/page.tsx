@@ -4,7 +4,8 @@ import { useState, useEffect } from "react";
 import { 
   Lock, Trash2, Plus, Calendar as CalendarIcon, Users, Image as ImageIcon, 
   Award, LayoutDashboard, LogOut, Newspaper, BarChart3, Download, Upload, 
-  RotateCcw, Edit3, Check, X, Shield, Sparkles, ExternalLink, FileText, CheckCircle2
+  RotateCcw, Edit3, Check, X, Shield, Sparkles, ExternalLink, FileText, CheckCircle2,
+  Search, Copy, Eye, SlidersHorizontal, RefreshCw, EyeOff
 } from "lucide-react";
 import { 
   DataStore, EventItem, TeamMemberItem, LegacyHeadItem, SubTeamItem, 
@@ -19,6 +20,12 @@ export default function AdminPage() {
   const [password, setPassword] = useState("");
   const [activeTab, setActiveTab] = useState<ActiveTab>("dashboard");
   const [notification, setNotification] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Filters
+  const [eventCategoryFilter, setEventCategoryFilter] = useState<string>("all");
+  const [teamRoleFilter, setTeamRoleFilter] = useState<string>("all");
+  const [gallerySizeFilter, setGallerySizeFilter] = useState<string>("all");
 
   // Dynamic CMS States
   const [events, setEvents] = useState<EventItem[]>([]);
@@ -73,7 +80,7 @@ export default function AdminPage() {
 
   const showToast = (msg: string) => {
     setNotification(msg);
-    setTimeout(() => setNotification(null), 3000);
+    setTimeout(() => setNotification(null), 3500);
   };
 
   const handleLogin = (e: React.FormEvent) => {
@@ -82,10 +89,17 @@ export default function AdminPage() {
     if (password === storedPwd) {
       setIsAuthenticated(true);
       setPassword("");
+      showToast("Signed in to Admin CMS successfully!");
     } else {
-      alert("Invalid master password.");
+      alert("Invalid master password. Access denied.");
       setPassword("");
     }
+  };
+
+  const handleSignOut = () => {
+    setIsAuthenticated(false);
+    setPassword("");
+    showToast("Signed out.");
   };
 
   const handleChangePassword = (e: React.FormEvent) => {
@@ -94,7 +108,7 @@ export default function AdminPage() {
     DataStore.saveAdminPassword(newPassword.trim());
     setNewPassword("");
     setShowPasswordChange(false);
-    showToast("Password updated successfully!");
+    showToast("Master password updated successfully!");
   };
 
   // --- EXPORT & IMPORT BACKUP --- //
@@ -107,7 +121,7 @@ export default function AdminPage() {
     a.download = `csi_srmcem_decoders_backup_${new Date().toISOString().slice(0, 10)}.json`;
     a.click();
     URL.revokeObjectURL(url);
-    showToast("Backup exported successfully!");
+    showToast("Full backup JSON exported successfully!");
   };
 
   const handleImportBackup = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -188,6 +202,13 @@ export default function AdminPage() {
     showToast("Event saved successfully!");
   };
 
+  const handleEventCategoryChange = (id: string, newCategory: "upcoming" | "current" | "past") => {
+    const updated = events.map(ev => ev.id === id ? { ...ev, category: newCategory } : ev);
+    setEvents(updated);
+    DataStore.saveEvents(updated);
+    showToast(`Event status updated to "${newCategory}"`);
+  };
+
   const handleDeleteEvent = (id: string) => {
     if (!confirm("Are you sure you want to delete this event?")) return;
     const updated = events.filter(e => e.id !== id);
@@ -253,6 +274,18 @@ export default function AdminPage() {
     showToast("Team member saved successfully!");
   };
 
+  const handleDuplicateTeam = (item: TeamMemberItem) => {
+    const duplicated: TeamMemberItem = {
+      ...item,
+      id: `team-${Date.now()}`,
+      name: `${item.name} (Copy)`
+    };
+    const updated = [...team, duplicated];
+    setTeam(updated);
+    DataStore.saveTeam(updated);
+    showToast(`Duplicated ${item.name}`);
+  };
+
   const handleDeleteTeam = (id: string) => {
     if (!confirm("Are you sure you want to delete this team member?")) return;
     const updated = team.filter(m => m.id !== id);
@@ -261,7 +294,7 @@ export default function AdminPage() {
     showToast("Team member removed.");
   };
 
-  // --- LEGACY OF LEADERSHIP (HALL OF FAME) CRUD --- //
+  // --- LEGACY (HALL OF FAME) CRUD --- //
   const openLegacyModal = (item?: LegacyHeadItem) => {
     if (item) {
       setModalMode("edit");
@@ -294,7 +327,7 @@ export default function AdminPage() {
         name: legacyForm.name || "",
         role: legacyForm.role || "Former Head",
         tenure: legacyForm.tenure || "Leadership & Guidance",
-        placedAt: legacyForm.placedAt || "Top Tier Placement",
+        placedAt: legacyForm.placedAt || "Top Placement",
         image: legacyForm.image || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=400&h=400",
         bio: legacyForm.bio || "",
         highlight: legacyForm.highlight || "Mentorship & Leadership"
@@ -304,18 +337,18 @@ export default function AdminPage() {
     setLegacyHeads(updated);
     DataStore.saveLegacyHeads(updated);
     setModalMode(null);
-    showToast("Legacy Leader saved successfully!");
+    showToast("Hall of Fame leader saved successfully!");
   };
 
   const handleDeleteLegacy = (id: string) => {
-    if (!confirm("Are you sure you want to delete this leader?")) return;
+    if (!confirm("Are you sure you want to delete this alumni leader?")) return;
     const updated = legacyHeads.filter(l => l.id !== id);
     setLegacyHeads(updated);
     DataStore.saveLegacyHeads(updated);
-    showToast("Legacy leader removed.");
+    showToast("Alumni leader removed.");
   };
 
-  // --- SUB-TEAMS (ECOSYSTEM) CRUD --- //
+  // --- ABOUT SUB-TEAMS CRUD --- //
   const openSubTeamModal = (item?: SubTeamItem) => {
     if (item) {
       setModalMode("edit");
@@ -329,11 +362,11 @@ export default function AdminPage() {
       setEditingId(null);
       setSubTeamForm({
         title: "",
-        category: "Core Engineering",
+        category: "Domain Wing",
         color: "sky",
         frontDesc: "",
         backDesc: "",
-        pointsText: "Next.js & Cloud, AI Model Pipelines, Open Source Repositories"
+        pointsText: "Feature 1, Feature 2, Feature 3"
       });
     }
   };
@@ -341,34 +374,34 @@ export default function AdminPage() {
   const handleSaveSubTeam = (e: React.FormEvent) => {
     e.preventDefault();
     if (!subTeamForm.title || !subTeamForm.frontDesc) return;
-    const pointsArray = (subTeamForm.pointsText || "")
+    const pts = (subTeamForm.pointsText || "")
       .split(",")
       .map(p => p.trim())
       .filter(p => p !== "");
 
     let updated: SubTeamItem[];
     if (modalMode === "edit" && editingId) {
-      updated = subTeams.map(s => s.id === editingId ? {
-        ...s,
+      updated = subTeams.map(st => st.id === editingId ? {
+        ...st,
         ...subTeamForm,
-        points: pointsArray
-      } as SubTeamItem : s);
+        points: pts
+      } as SubTeamItem : st);
     } else {
       const newItem: SubTeamItem = {
-        id: `subteam-${Date.now()}`,
-        title: subTeamForm.title || "New Sub-Team",
+        id: `sub-${Date.now()}`,
+        title: subTeamForm.title || "",
         category: subTeamForm.category || "Domain Wing",
         color: (subTeamForm.color as any) || "sky",
         frontDesc: subTeamForm.frontDesc || "",
-        backDesc: subTeamForm.backDesc || subTeamForm.frontDesc || "",
-        points: pointsArray.length > 0 ? pointsArray : ["Core Focus 1", "Core Focus 2", "Core Focus 3"]
+        backDesc: subTeamForm.backDesc || "",
+        points: pts
       };
       updated = [...subTeams, newItem];
     }
     setSubTeams(updated);
     DataStore.saveSubTeams(updated);
     setModalMode(null);
-    showToast("Sub-Team domain saved successfully!");
+    showToast("Sub-Team domain saved!");
   };
 
   const handleDeleteSubTeam = (id: string) => {
@@ -376,10 +409,10 @@ export default function AdminPage() {
     const updated = subTeams.filter(s => s.id !== id);
     setSubTeams(updated);
     DataStore.saveSubTeams(updated);
-    showToast("Sub-team removed.");
+    showToast("Sub-Team removed.");
   };
 
-  // --- CORE VALUES CRUD --- //
+  // --- ABOUT CORE VALUES CRUD --- //
   const openCoreValueModal = (item?: CoreValueItem) => {
     if (item) {
       setModalMode("edit");
@@ -393,11 +426,11 @@ export default function AdminPage() {
       setEditingId(null);
       setCoreValueForm({
         title: "",
-        category: "Guiding Principle",
+        category: "Pillar",
         color: "sky",
         frontDesc: "",
         backDesc: "",
-        pointsText: "Problem Solving, Real-World Mastery, Mentorship"
+        pointsText: "Deliverable 1, Deliverable 2, Deliverable 3"
       });
     }
   };
@@ -405,45 +438,45 @@ export default function AdminPage() {
   const handleSaveCoreValue = (e: React.FormEvent) => {
     e.preventDefault();
     if (!coreValueForm.title || !coreValueForm.frontDesc) return;
-    const pointsArray = (coreValueForm.pointsText || "")
+    const pts = (coreValueForm.pointsText || "")
       .split(",")
       .map(p => p.trim())
       .filter(p => p !== "");
 
     let updated: CoreValueItem[];
     if (modalMode === "edit" && editingId) {
-      updated = coreValues.map(c => c.id === editingId ? {
-        ...c,
+      updated = coreValues.map(cv => cv.id === editingId ? {
+        ...cv,
         ...coreValueForm,
-        points: pointsArray
-      } as CoreValueItem : c);
+        points: pts
+      } as CoreValueItem : cv);
     } else {
       const newItem: CoreValueItem = {
-        id: `core-${Date.now()}`,
-        title: coreValueForm.title || "New Value Pillar",
-        category: coreValueForm.category || "Guiding Pillar",
+        id: `cv-${Date.now()}`,
+        title: coreValueForm.title || "",
+        category: coreValueForm.category || "Pillar",
         color: (coreValueForm.color as any) || "sky",
         frontDesc: coreValueForm.frontDesc || "",
-        backDesc: coreValueForm.backDesc || coreValueForm.frontDesc || "",
-        points: pointsArray.length > 0 ? pointsArray : ["Principle 1", "Principle 2", "Principle 3"]
+        backDesc: coreValueForm.backDesc || "",
+        points: pts
       };
       updated = [...coreValues, newItem];
     }
     setCoreValues(updated);
     DataStore.saveCoreValues(updated);
     setModalMode(null);
-    showToast("Core Value pillar saved successfully!");
+    showToast("Core Value pillar saved!");
   };
 
   const handleDeleteCoreValue = (id: string) => {
-    if (!confirm("Are you sure you want to delete this core value pillar?")) return;
+    if (!confirm("Are you sure you want to delete this core value?")) return;
     const updated = coreValues.filter(c => c.id !== id);
     setCoreValues(updated);
     DataStore.saveCoreValues(updated);
-    showToast("Core value pillar removed.");
+    showToast("Core Value removed.");
   };
 
-  // --- NEWS & MONTHLY GAZETTE CRUD --- //
+  // --- NEWS GAZETTE CRUD --- //
   const openNewsModal = (item?: NewsIssueItem) => {
     if (item) {
       setModalMode("edit");
@@ -456,16 +489,16 @@ export default function AdminPage() {
       setModalMode("add");
       setEditingId(null);
       setNewsForm({
-        volume: `Vol. 0${newsIssues.length + 1}`,
-        month: "November",
+        volume: "Vol. 08",
+        month: "October",
         year: "2024",
-        title: "CSI_SRMCEM X D'CODERS Monthly Gazette",
-        description: "",
+        title: "Monthly Technical Gazette",
+        description: "Official monthly technical gazette featuring project releases and spotlights.",
         coverImage: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&q=80&w=800&h=1000",
-        pdfUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
-        fileSize: "5.0 MB",
+        pdfUrl: "/documents/csi-gazette-october-2024.pdf",
+        fileSize: "5.2 MB",
         pageCount: 16,
-        topicsText: "Hackathon, AI, DSA, Workshops",
+        topicsText: "Hackathons, Next.js, Cloud, Placements",
         isCurrent: false
       });
     }
@@ -481,20 +514,13 @@ export default function AdminPage() {
 
     let updated: NewsIssueItem[];
     if (modalMode === "edit" && editingId) {
-      updated = newsIssues.map(n => {
-        if (n.id === editingId) {
-          return {
-            ...n,
-            ...newsForm,
-            topics: topicsArray
-          } as NewsIssueItem;
-        }
-        // If this one is marked current, unmark others
-        if (newsForm.isCurrent) {
-          return { ...n, isCurrent: false };
-        }
-        return n;
-      });
+      updated = newsIssues.map(n => n.id === editingId ? {
+        ...n,
+        ...newsForm,
+        pageCount: Number(newsForm.pageCount) || 16,
+        topics: topicsArray,
+        isCurrent: Boolean(newsForm.isCurrent)
+      } as NewsIssueItem : (newsForm.isCurrent ? { ...n, isCurrent: false } : n));
     } else {
       const newItem: NewsIssueItem = {
         id: `news-${Date.now()}`,
@@ -534,7 +560,7 @@ export default function AdminPage() {
   };
 
   const handleDeleteNews = (id: string) => {
-    if (!confirm("Are you sure you want to delete this issue?")) return;
+    if (!confirm("Are you sure you want to delete this edition?")) return;
     const updated = newsIssues.filter(n => n.id !== id);
     setNewsIssues(updated);
     DataStore.saveNewsIssues(updated);
@@ -586,7 +612,7 @@ export default function AdminPage() {
     const updated = gallery.filter(g => g.id !== id);
     setGallery(updated);
     DataStore.saveGallery(updated);
-    showToast("Gallery item removed.");
+    showToast("Gallery photo removed.");
   };
 
   // --- STATS UPDATE --- //
@@ -596,20 +622,75 @@ export default function AdminPage() {
     showToast("Homepage metrics saved successfully!");
   };
 
+  // --- SEARCH & FILTER LOGIC --- //
+  const filteredEvents = events.filter(e => {
+    const matchesSearch = e.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      e.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      e.description.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = eventCategoryFilter === "all" || e.category === eventCategoryFilter;
+    return matchesSearch && matchesCategory;
+  });
+
+  const filteredTeam = team.filter(m => {
+    const matchesSearch = m.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      m.position.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      m.skills.some(s => s.toLowerCase().includes(searchQuery.toLowerCase()));
+    const isExecutive = m.position.toUpperCase().includes("CEO") || 
+      m.position.toUpperCase().includes("COO") || 
+      m.position.toUpperCase().includes("FOUNDER") ||
+      m.position.toUpperCase().includes("PRESIDENT");
+    const matchesRole = teamRoleFilter === "all" || 
+      (teamRoleFilter === "executive" && isExecutive) ||
+      (teamRoleFilter === "core" && !isExecutive);
+    return matchesSearch && matchesRole;
+  });
+
+  const filteredLegacy = legacyHeads.filter(l => 
+    l.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    l.role.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (l.placedAt && l.placedAt.toLowerCase().includes(searchQuery.toLowerCase()))
+  );
+
+  const filteredSubTeams = subTeams.filter(s => 
+    s.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    s.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    s.frontDesc.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const filteredCoreValues = coreValues.filter(c => 
+    c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    c.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    c.frontDesc.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const filteredNews = newsIssues.filter(n => 
+    n.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    n.volume.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    n.month.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    n.year.includes(searchQuery)
+  );
+
+  const filteredGallery = gallery.filter(g => {
+    const matchesSearch = g.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      g.detail.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSize = gallerySizeFilter === "all" || g.size === gallerySizeFilter;
+    return matchesSearch && matchesSize;
+  });
+
   // --- LOGIN VIEW --- //
   if (!isAuthenticated) {
     return (
-      <div className="min-h-[75vh] flex items-center justify-center px-4 relative overflow-hidden">
+      <div className="min-h-[80vh] flex items-center justify-center px-4 relative overflow-hidden">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-sky-500/15 blur-[160px] rounded-full -z-10" />
-        <div className="bg-slate-900/80 backdrop-blur-2xl border border-slate-800 p-10 rounded-3xl w-full max-w-md shadow-2xl relative">
-          <div className="flex justify-center mb-8">
+        <div className="bg-slate-900/90 backdrop-blur-2xl border border-slate-800 p-8 sm:p-10 rounded-3xl w-full max-w-md shadow-2xl relative">
+          <div className="flex justify-center mb-6">
             <div className="p-4 bg-sky-500/10 rounded-2xl border border-sky-500/30 text-sky-400 shadow-[0_0_20px_rgba(56,189,248,0.2)]">
               <Shield className="w-10 h-10" />
             </div>
           </div>
-          <h2 className="text-3xl font-extrabold text-white text-center mb-2 tracking-tight">Admin Portal</h2>
-          <p className="text-slate-400 text-sm text-center mb-8">
-            CSI_SRMCEM X D&apos;CODERS Content Management
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-white text-center mb-1 tracking-tight">Admin CMS Portal</h2>
+          <p className="text-slate-400 text-xs sm:text-sm text-center mb-8">
+            CSI_SRMCEM X D&apos;CODERS Content Management System
           </p>
           <form onSubmit={handleLogin} className="space-y-5">
             <div>
@@ -620,7 +701,7 @@ export default function AdminPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 autoComplete="current-password"
-                className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3.5 text-white focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-all text-sm font-mono"
+                className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3.5 text-white focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-all text-sm font-mono tracking-wider"
               />
             </div>
             <button 
@@ -638,7 +719,7 @@ export default function AdminPage() {
   // Helper Sidebar Tab button
   const SidebarTab = ({ id, label, icon: Icon, count }: { id: ActiveTab; label: string; icon: any; count?: number }) => (
     <button 
-      onClick={() => { setActiveTab(id); setModalMode(null); }}
+      onClick={() => { setActiveTab(id); setModalMode(null); setSearchQuery(""); }}
       className={cn(
         "w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all font-medium text-sm text-left group",
         activeTab === id 
@@ -662,11 +743,11 @@ export default function AdminPage() {
   );
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       {/* Top Floating Toast Notification */}
       {notification && (
-        <div className="fixed top-20 right-8 z-50 bg-sky-500 text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-2 text-sm font-semibold animate-in fade-in slide-in-from-top-4">
-          <CheckCircle2 className="w-4 h-4" />
+        <div className="fixed top-20 right-4 sm:right-8 z-[200] bg-sky-500 text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-2.5 text-sm font-semibold animate-in fade-in slide-in-from-top-4 border border-sky-400/50">
+          <CheckCircle2 className="w-5 h-5 shrink-0" />
           <span>{notification}</span>
         </div>
       )}
@@ -706,10 +787,7 @@ export default function AdminPage() {
               <span>Change Password</span>
             </button>
             <button 
-              onClick={() => {
-                setIsAuthenticated(false);
-                setPassword("");
-              }} 
+              onClick={handleSignOut} 
               className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-rose-400 hover:bg-rose-500/10 rounded-xl transition-all font-semibold"
             >
               <LogOut className="w-3.5 h-3.5" />
@@ -722,14 +800,14 @@ export default function AdminPage() {
             <form onSubmit={handleChangePassword} className="mt-3 p-3 bg-slate-950 rounded-xl border border-slate-800 space-y-2">
               <input
                 type="password"
-                placeholder="New Password"
+                placeholder="New Master Password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-xs text-white"
                 required
               />
-              <button type="submit" className="w-full py-1.5 bg-sky-500 text-white rounded-lg text-xs font-bold">
-                Update
+              <button type="submit" className="w-full py-1.5 bg-sky-500 text-white rounded-lg text-xs font-bold hover:bg-sky-400">
+                Update Password
               </button>
             </form>
           )}
@@ -744,7 +822,7 @@ export default function AdminPage() {
           {activeTab === "dashboard" && (
             <div className="space-y-8">
               <div>
-                <span className="text-xs font-mono uppercase tracking-widest text-sky-400 font-bold">System Status: Active</span>
+                <span className="text-xs font-mono uppercase tracking-widest text-sky-400 font-bold">System Status: Live &amp; Synced</span>
                 <h1 className="text-3xl font-extrabold text-white mt-1">Dashboard Overview</h1>
                 <p className="text-slate-400 text-sm mt-1">
                   Manage all live content for CSI_SRMCEM X D&apos;CODERS. Changes save immediately to the live site.
@@ -752,38 +830,38 @@ export default function AdminPage() {
               </div>
 
               {/* Counters Grid */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div onClick={() => setActiveTab("events")} className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-sky-500/50 cursor-pointer transition-all">
+              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                <div onClick={() => setActiveTab("events")} className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-sky-500/50 cursor-pointer transition-all hover:scale-[1.02]">
                   <div className="text-3xl font-black text-sky-400 mb-1">{events.length}</div>
                   <div className="text-xs font-bold uppercase text-slate-400">Total Events</div>
                 </div>
-                <div onClick={() => setActiveTab("team")} className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-blue-500/50 cursor-pointer transition-all">
+                <div onClick={() => setActiveTab("team")} className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-blue-500/50 cursor-pointer transition-all hover:scale-[1.02]">
                   <div className="text-3xl font-black text-blue-400 mb-1">{team.length}</div>
                   <div className="text-xs font-bold uppercase text-slate-400">Team Members</div>
                 </div>
-                <div onClick={() => { setActiveTab("about"); setAboutSubTab("subteams"); }} className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-purple-500/50 cursor-pointer transition-all">
+                <div onClick={() => { setActiveTab("about"); setAboutSubTab("subteams"); }} className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-purple-500/50 cursor-pointer transition-all hover:scale-[1.02]">
                   <div className="text-3xl font-black text-purple-400 mb-1">{subTeams.length}</div>
                   <div className="text-xs font-bold uppercase text-slate-400">Sub-Teams</div>
                 </div>
-                <div onClick={() => { setActiveTab("about"); setAboutSubTab("corevalues"); }} className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-cyan-500/50 cursor-pointer transition-all">
+                <div onClick={() => { setActiveTab("about"); setAboutSubTab("corevalues"); }} className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-cyan-500/50 cursor-pointer transition-all hover:scale-[1.02]">
                   <div className="text-3xl font-black text-cyan-400 mb-1">{coreValues.length}</div>
                   <div className="text-xs font-bold uppercase text-slate-400">Core Values</div>
                 </div>
-                <div onClick={() => setActiveTab("legacy")} className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-indigo-500/50 cursor-pointer transition-all">
+                <div onClick={() => setActiveTab("legacy")} className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-indigo-500/50 cursor-pointer transition-all hover:scale-[1.02]">
                   <div className="text-3xl font-black text-indigo-400 mb-1">{legacyHeads.length}</div>
                   <div className="text-xs font-bold uppercase text-slate-400">Hall of Fame</div>
                 </div>
-                <div onClick={() => setActiveTab("news")} className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-sky-500/50 cursor-pointer transition-all">
+                <div onClick={() => setActiveTab("news")} className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-sky-500/50 cursor-pointer transition-all hover:scale-[1.02]">
                   <div className="text-3xl font-black text-sky-400 mb-1">{newsIssues.length}</div>
                   <div className="text-xs font-bold uppercase text-slate-400">News Editions</div>
                 </div>
-                <div onClick={() => setActiveTab("gallery")} className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-pink-500/50 cursor-pointer transition-all">
+                <div onClick={() => setActiveTab("gallery")} className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-pink-500/50 cursor-pointer transition-all hover:scale-[1.02]">
                   <div className="text-3xl font-black text-pink-400 mb-1">{gallery.length}</div>
                   <div className="text-xs font-bold uppercase text-slate-400">Gallery Photos</div>
                 </div>
-                <div onClick={() => setActiveTab("stats")} className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-emerald-500/50 cursor-pointer transition-all">
+                <div onClick={() => setActiveTab("stats")} className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-emerald-500/50 cursor-pointer transition-all hover:scale-[1.02]">
                   <div className="text-3xl font-black text-emerald-400 mb-1">{stats.placementRate}</div>
-                  <div className="text-xs font-bold uppercase text-slate-400">Placement Record</div>
+                  <div className="text-xs font-bold uppercase text-slate-400">Placement Rate</div>
                 </div>
               </div>
 
@@ -814,7 +892,7 @@ export default function AdminPage() {
 
                   <button
                     onClick={handleResetDefaults}
-                    className="flex items-center gap-2 px-4 py-2.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 rounded-xl text-xs font-bold transition-all ml-auto"
+                    className="flex items-center gap-2 px-4 py-2.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 rounded-xl text-xs font-bold transition-all sm:ml-auto"
                   >
                     <RotateCcw className="w-4 h-4" />
                     <span>Reset to Defaults</span>
@@ -827,51 +905,91 @@ export default function AdminPage() {
           {/* 2. EVENTS MANAGER */}
           {activeTab === "events" && (
             <div className="space-y-6">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                   <h2 className="text-2xl font-extrabold text-white">Events &amp; Workshops Manager</h2>
                   <p className="text-xs text-slate-400 mt-0.5">Add, edit, or delete flagship hackathons, bootcamps, and workshops.</p>
                 </div>
                 <button
                   onClick={() => openEventModal()}
-                  className="flex items-center gap-2 px-4 py-2 bg-sky-500 hover:bg-sky-400 text-white rounded-xl text-xs font-bold transition-all shadow-md"
+                  className="flex items-center justify-center gap-2 px-4 py-2.5 bg-sky-500 hover:bg-sky-400 text-white rounded-xl text-xs font-bold transition-all shadow-md shrink-0"
                 >
                   <Plus className="w-4 h-4" />
                   <span>Add New Event</span>
                 </button>
               </div>
 
+              {/* Search & Category Filter Bar */}
+              <div className="flex flex-col sm:flex-row gap-3">
+                <div className="relative flex-1">
+                  <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
+                  <input
+                    type="text"
+                    placeholder="Search events by title, location, description..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full pl-9 pr-4 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-sky-500"
+                  />
+                </div>
+                <div className="flex items-center gap-1.5 bg-slate-950 p-1 rounded-xl border border-slate-800 shrink-0">
+                  {["all", "upcoming", "current", "past"].map((cat) => (
+                    <button
+                      key={cat}
+                      onClick={() => setEventCategoryFilter(cat)}
+                      className={cn(
+                        "px-3 py-1 rounded-lg text-xs font-bold capitalize transition-all",
+                        eventCategoryFilter === cat ? "bg-sky-500 text-white" : "text-slate-400 hover:text-white"
+                      )}
+                    >
+                      {cat === "all" ? "All Events" : cat}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <div className="space-y-3">
-                {events.map((ev) => (
-                  <div key={ev.id} className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div className="flex items-center gap-4">
-                      <img src={ev.image} alt={ev.title} className="w-16 h-16 rounded-xl object-cover border border-slate-700" />
-                      <div>
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className={cn(
-                            "px-2 py-0.5 text-[10px] font-bold uppercase rounded-md border",
-                            ev.category === "upcoming" ? "bg-sky-500/20 text-sky-300 border-sky-500/30" :
-                            ev.category === "current" ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30 animate-pulse" :
-                            "bg-slate-800 text-slate-400 border-slate-700"
-                          )}>
-                            {ev.category}
-                          </span>
-                          <span className="text-xs text-slate-400 font-mono">{ev.date} • {ev.time}</span>
+                {filteredEvents.length === 0 ? (
+                  <div className="text-center py-12 text-slate-500 text-sm">No events found matching your criteria.</div>
+                ) : (
+                  filteredEvents.map((ev) => (
+                    <div key={ev.id} className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-slate-700 transition-all">
+                      <div className="flex items-center gap-4">
+                        <img src={ev.image} alt={ev.title} className="w-16 h-16 rounded-xl object-cover border border-slate-700 shrink-0" />
+                        <div>
+                          <div className="flex flex-wrap items-center gap-2 mb-1">
+                            {/* 1-Click Status Dropdown */}
+                            <select
+                              value={ev.category}
+                              onChange={(e) => handleEventCategoryChange(ev.id, e.target.value as any)}
+                              className={cn(
+                                "px-2 py-0.5 text-[10px] font-bold uppercase rounded-md border bg-transparent cursor-pointer focus:outline-none",
+                                ev.category === "upcoming" ? "bg-sky-500/20 text-sky-300 border-sky-500/30" :
+                                ev.category === "current" ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30" :
+                                "bg-slate-800 text-slate-400 border-slate-700"
+                              )}
+                            >
+                              <option value="upcoming" className="bg-slate-900 text-sky-300">Upcoming</option>
+                              <option value="current" className="bg-slate-900 text-emerald-300">Current / Live</option>
+                              <option value="past" className="bg-slate-900 text-slate-400">Past</option>
+                            </select>
+                            <span className="text-xs text-slate-400 font-mono">{ev.date} • {ev.time}</span>
+                            <span className="text-xs text-slate-500">• {ev.location}</span>
+                          </div>
+                          <h4 className="text-base font-bold text-white">{ev.title}</h4>
+                          <p className="text-xs text-slate-400 line-clamp-1">{ev.description}</p>
                         </div>
-                        <h4 className="text-base font-bold text-white">{ev.title}</h4>
-                        <p className="text-xs text-slate-400 line-clamp-1">{ev.description}</p>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0 self-end md:self-center">
+                        <button onClick={() => openEventModal(ev)} className="p-2 hover:bg-slate-800 text-slate-300 hover:text-sky-400 rounded-lg transition-colors" title="Edit">
+                          <Edit3 className="w-4 h-4" />
+                        </button>
+                        <button onClick={() => handleDeleteEvent(ev.id)} className="p-2 hover:bg-rose-500/10 text-slate-400 hover:text-rose-400 rounded-lg transition-colors" title="Delete">
+                          <Trash2 className="w-4 h-4" />
+                        </button>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                      <button onClick={() => openEventModal(ev)} className="p-2 hover:bg-slate-800 text-slate-300 hover:text-sky-400 rounded-lg transition-colors">
-                        <Edit3 className="w-4 h-4" />
-                      </button>
-                      <button onClick={() => handleDeleteEvent(ev.id)} className="p-2 hover:bg-rose-500/10 text-slate-400 hover:text-rose-400 rounded-lg transition-colors">
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </div>
           )}
@@ -879,46 +997,90 @@ export default function AdminPage() {
           {/* 3. TEAM MEMBERS MANAGER */}
           {activeTab === "team" && (
             <div className="space-y-6">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                   <h2 className="text-2xl font-extrabold text-white">Team Members Manager</h2>
                   <p className="text-xs text-slate-400 mt-0.5">Manage Executive Board and Core Committee members.</p>
                 </div>
                 <button
                   onClick={() => openTeamModal()}
-                  className="flex items-center gap-2 px-4 py-2 bg-sky-500 hover:bg-sky-400 text-white rounded-xl text-xs font-bold transition-all shadow-md"
+                  className="flex items-center justify-center gap-2 px-4 py-2.5 bg-sky-500 hover:bg-sky-400 text-white rounded-xl text-xs font-bold transition-all shadow-md shrink-0"
                 >
                   <Plus className="w-4 h-4" />
                   <span>Add Member</span>
                 </button>
               </div>
 
+              {/* Search & Role Filter Bar */}
+              <div className="flex flex-col sm:flex-row gap-3">
+                <div className="relative flex-1">
+                  <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
+                  <input
+                    type="text"
+                    placeholder="Search members by name, role, skills..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full pl-9 pr-4 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-sky-500"
+                  />
+                </div>
+                <div className="flex items-center gap-1.5 bg-slate-950 p-1 rounded-xl border border-slate-800 shrink-0">
+                  {[
+                    { id: "all", label: "All Members" },
+                    { id: "executive", label: "Executive Board" },
+                    { id: "core", label: "Core Committee" }
+                  ].map((filter) => (
+                    <button
+                      key={filter.id}
+                      onClick={() => setTeamRoleFilter(filter.id)}
+                      className={cn(
+                        "px-3 py-1 rounded-lg text-xs font-bold transition-all",
+                        teamRoleFilter === filter.id ? "bg-sky-500 text-white" : "text-slate-400 hover:text-white"
+                      )}
+                    >
+                      {filter.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {team.map((member) => (
-                  <div key={member.id} className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 flex items-start justify-between gap-4">
-                    <div className="flex items-center gap-3">
-                      <img src={member.image} alt={member.name} className="w-14 h-14 rounded-2xl object-cover border border-slate-700" />
-                      <div>
-                        <span className="text-[10px] font-mono uppercase text-sky-400 font-bold">{member.position}</span>
-                        <h4 className="text-base font-bold text-white">{member.name}</h4>
-                        <p className="text-xs text-slate-400 line-clamp-1">{member.bio}</p>
+                {filteredTeam.length === 0 ? (
+                  <div className="col-span-2 text-center py-12 text-slate-500 text-sm">No team members found matching your search.</div>
+                ) : (
+                  filteredTeam.map((member) => (
+                    <div key={member.id} className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 flex items-start justify-between gap-4 hover:border-slate-700 transition-all">
+                      <div className="flex items-center gap-3">
+                        <img src={member.image} alt={member.name} className="w-14 h-14 rounded-2xl object-cover border border-slate-700 shrink-0" />
+                        <div>
+                          <span className="text-[10px] font-mono uppercase text-sky-400 font-bold">{member.position}</span>
+                          <h4 className="text-base font-bold text-white">{member.name}</h4>
+                          <p className="text-xs text-slate-400 line-clamp-1">{member.bio || "Active contributor"}</p>
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            {member.skills.slice(0, 3).map((s, i) => (
+                              <span key={i} className="text-[9px] px-1.5 py-0.2 rounded bg-slate-800 text-slate-300 border border-slate-700">{s}</span>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1 shrink-0">
+                        <button onClick={() => handleDuplicateTeam(member)} className="p-2 hover:bg-slate-800 text-slate-400 hover:text-blue-400 rounded-lg transition-colors" title="Duplicate">
+                          <Copy className="w-3.5 h-3.5" />
+                        </button>
+                        <button onClick={() => openTeamModal(member)} className="p-2 hover:bg-slate-800 text-slate-300 hover:text-sky-400 rounded-lg transition-colors" title="Edit">
+                          <Edit3 className="w-3.5 h-3.5" />
+                        </button>
+                        <button onClick={() => handleDeleteTeam(member.id)} className="p-2 hover:bg-rose-500/10 text-slate-400 hover:text-rose-400 rounded-lg transition-colors" title="Delete">
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
                       </div>
                     </div>
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      <button onClick={() => openTeamModal(member)} className="p-2 hover:bg-slate-800 text-slate-300 hover:text-sky-400 rounded-lg transition-colors">
-                        <Edit3 className="w-4 h-4" />
-                      </button>
-                      <button onClick={() => handleDeleteTeam(member.id)} className="p-2 hover:bg-rose-500/10 text-slate-400 hover:text-rose-400 rounded-lg transition-colors">
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </div>
           )}
 
-          {/* 4. ABOUT & ECOSYSTEM MANAGER (SUB-TEAMS & CORE VALUES) */}
+          {/* 4. ABOUT & ECOSYSTEM MANAGER */}
           {activeTab === "about" && (
             <div className="space-y-6">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -929,7 +1091,7 @@ export default function AdminPage() {
                 <div className="flex items-center gap-2">
                   <div className="bg-slate-950 p-1 rounded-xl border border-slate-800 flex gap-1">
                     <button
-                      onClick={() => setAboutSubTab("subteams")}
+                      onClick={() => { setAboutSubTab("subteams"); setSearchQuery(""); }}
                       className={cn(
                         "px-3 py-1.5 rounded-lg text-xs font-bold transition-all",
                         aboutSubTab === "subteams" ? "bg-sky-500 text-white shadow-sm" : "text-slate-400 hover:text-white"
@@ -938,7 +1100,7 @@ export default function AdminPage() {
                       Sub-Teams ({subTeams.length})
                     </button>
                     <button
-                      onClick={() => setAboutSubTab("corevalues")}
+                      onClick={() => { setAboutSubTab("corevalues"); setSearchQuery(""); }}
                       className={cn(
                         "px-3 py-1.5 rounded-lg text-xs font-bold transition-all",
                         aboutSubTab === "corevalues" ? "bg-sky-500 text-white shadow-sm" : "text-slate-400 hover:text-white"
@@ -949,41 +1111,45 @@ export default function AdminPage() {
                   </div>
                   <button
                     onClick={() => aboutSubTab === "subteams" ? openSubTeamModal() : openCoreValueModal()}
-                    className="flex items-center gap-2 px-3.5 py-2 bg-sky-500 hover:bg-sky-400 text-white rounded-xl text-xs font-bold transition-all shadow-md"
+                    className="flex items-center gap-1.5 px-3 py-2 bg-sky-500 hover:bg-sky-400 text-white rounded-xl text-xs font-bold transition-all shadow-md shrink-0"
                   >
-                    <Plus className="w-4 h-4" />
-                    <span>Add {aboutSubTab === "subteams" ? "Sub-Team" : "Value"}</span>
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Add {aboutSubTab === "subteams" ? "Sub-Team" : "Core Value"}</span>
                   </button>
                 </div>
               </div>
 
-              {/* Sub-Teams Sub-Tab */}
+              {/* Sub-Teams View */}
               {aboutSubTab === "subteams" && (
-                <div className="space-y-4">
-                  {subTeams.map((st) => (
-                    <div key={st.id} className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                      <div className="max-w-2xl">
-                        <div className="flex items-center gap-2 mb-1.5">
-                          <span className="px-2.5 py-0.5 text-[10px] font-mono font-bold uppercase rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/30">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {filteredSubTeams.map((st) => (
+                    <div key={st.id} className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 flex flex-col justify-between gap-3 hover:border-slate-700 transition-all">
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded-md bg-sky-500/10 text-sky-400 border border-sky-500/30">
                             {st.category}
                           </span>
-                          <span className="text-xs text-slate-400 font-mono">Theme: {st.color}</span>
+                          <span className="text-xs font-mono text-slate-500">Theme: {st.color}</span>
                         </div>
-                        <h4 className="text-lg font-bold text-white mb-1">{st.title}</h4>
-                        <p className="text-slate-300 text-xs leading-relaxed mb-2">{st.frontDesc}</p>
-                        <div className="flex flex-wrap gap-1.5">
-                          {st.points.map((pt, idx) => (
-                            <span key={idx} className="text-[10px] font-mono bg-slate-950 text-slate-300 px-2 py-0.5 rounded border border-slate-800">
+                        <h4 className="text-lg font-bold text-white">{st.title}</h4>
+                        <p className="text-xs text-slate-300 mt-1">{st.frontDesc}</p>
+                        <p className="text-xs text-slate-400 mt-2 bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80">
+                          <span className="text-slate-500 font-bold block mb-0.5">Flip Back Description:</span>
+                          {st.backDesc}
+                        </p>
+                        <div className="flex flex-wrap gap-1.5 mt-3">
+                          {st.points.map((pt, i) => (
+                            <span key={i} className="text-[10px] px-2 py-0.5 rounded-full bg-slate-800/80 text-slate-300 border border-slate-700">
                               ✓ {pt}
                             </span>
                           ))}
                         </div>
                       </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <button onClick={() => openSubTeamModal(st)} className="p-2.5 hover:bg-slate-800 text-slate-300 hover:text-sky-400 rounded-xl transition-colors">
+                      <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-800/80">
+                        <button onClick={() => openSubTeamModal(st)} className="p-2 hover:bg-slate-800 text-slate-300 hover:text-sky-400 rounded-lg transition-colors">
                           <Edit3 className="w-4 h-4" />
                         </button>
-                        <button onClick={() => handleDeleteSubTeam(st.id)} className="p-2.5 hover:bg-rose-500/10 text-slate-400 hover:text-rose-400 rounded-xl transition-colors">
+                        <button onClick={() => handleDeleteSubTeam(st.id)} className="p-2 hover:bg-rose-500/10 text-slate-400 hover:text-rose-400 rounded-lg transition-colors">
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
@@ -992,33 +1158,37 @@ export default function AdminPage() {
                 </div>
               )}
 
-              {/* Core Values Sub-Tab */}
+              {/* Core Values View */}
               {aboutSubTab === "corevalues" && (
-                <div className="space-y-4">
-                  {coreValues.map((cv) => (
-                    <div key={cv.id} className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                      <div className="max-w-2xl">
-                        <div className="flex items-center gap-2 mb-1.5">
-                          <span className="px-2.5 py-0.5 text-[10px] font-mono font-bold uppercase rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {filteredCoreValues.map((cv) => (
+                    <div key={cv.id} className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 flex flex-col justify-between gap-3 hover:border-slate-700 transition-all">
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded-md bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">
                             {cv.category}
                           </span>
-                          <span className="text-xs text-slate-400 font-mono">Theme: {cv.color}</span>
+                          <span className="text-xs font-mono text-slate-500">Theme: {cv.color}</span>
                         </div>
-                        <h4 className="text-lg font-bold text-white mb-1">{cv.title}</h4>
-                        <p className="text-slate-300 text-xs leading-relaxed mb-2">{cv.frontDesc}</p>
-                        <div className="flex flex-wrap gap-1.5">
-                          {cv.points.map((pt, idx) => (
-                            <span key={idx} className="text-[10px] font-mono bg-slate-950 text-slate-300 px-2 py-0.5 rounded border border-slate-800">
+                        <h4 className="text-lg font-bold text-white">{cv.title}</h4>
+                        <p className="text-xs text-slate-300 mt-1">{cv.frontDesc}</p>
+                        <p className="text-xs text-slate-400 mt-2 bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80">
+                          <span className="text-slate-500 font-bold block mb-0.5">Flip Back Principle:</span>
+                          {cv.backDesc}
+                        </p>
+                        <div className="flex flex-wrap gap-1.5 mt-3">
+                          {cv.points.map((pt, i) => (
+                            <span key={i} className="text-[10px] px-2 py-0.5 rounded-full bg-slate-800/80 text-slate-300 border border-slate-700">
                               ✓ {pt}
                             </span>
                           ))}
                         </div>
                       </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <button onClick={() => openCoreValueModal(cv)} className="p-2.5 hover:bg-slate-800 text-slate-300 hover:text-sky-400 rounded-xl transition-colors">
+                      <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-800/80">
+                        <button onClick={() => openCoreValueModal(cv)} className="p-2 hover:bg-slate-800 text-slate-300 hover:text-sky-400 rounded-lg transition-colors">
                           <Edit3 className="w-4 h-4" />
                         </button>
-                        <button onClick={() => handleDeleteCoreValue(cv.id)} className="p-2.5 hover:bg-rose-500/10 text-slate-400 hover:text-rose-400 rounded-xl transition-colors">
+                        <button onClick={() => handleDeleteCoreValue(cv.id)} className="p-2 hover:bg-rose-500/10 text-slate-400 hover:text-rose-400 rounded-lg transition-colors">
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
@@ -1029,54 +1199,57 @@ export default function AdminPage() {
             </div>
           )}
 
-          {/* 5. LEGACY OF LEADERSHIP & HALL OF FAME MANAGER */}
+          {/* 5. HALL OF FAME & ALUMNI LEADERS */}
           {activeTab === "legacy" && (
             <div className="space-y-6">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                   <h2 className="text-2xl font-extrabold text-white">Hall of Fame &amp; Alumni Leaders</h2>
-                  <p className="text-xs text-slate-400 mt-0.5">Manage alumni leaders, placements (Google, Microsoft, etc.), and tenures.</p>
+                  <p className="text-xs text-slate-400 mt-0.5">Manage alumni leaders, their companies (Google, Microsoft, etc.), and career paths.</p>
                 </div>
                 <button
                   onClick={() => openLegacyModal()}
-                  className="flex items-center gap-2 px-4 py-2 bg-sky-500 hover:bg-sky-400 text-white rounded-xl text-xs font-bold transition-all shadow-md"
+                  className="flex items-center justify-center gap-2 px-4 py-2.5 bg-sky-500 hover:bg-sky-400 text-white rounded-xl text-xs font-bold transition-all shadow-md shrink-0"
                 >
                   <Plus className="w-4 h-4" />
-                  <span>Add Hall of Fame Leader</span>
+                  <span>Add Alumni Leader</span>
                 </button>
               </div>
 
-              <div className="space-y-4">
-                {legacyHeads.map((leader) => (
-                  <div key={leader.id} className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div className="flex items-start gap-4 max-w-2xl">
-                      {leader.image && (
-                        <img src={leader.image} alt={leader.name} className="w-16 h-16 rounded-2xl object-cover border border-slate-700 shrink-0" />
-                      )}
+              {/* Search */}
+              <div className="relative">
+                <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
+                <input
+                  type="text"
+                  placeholder="Search alumni by name, tenure, placement company..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-9 pr-4 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-sky-500"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {filteredLegacy.map((leader) => (
+                  <div key={leader.id} className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 flex items-start justify-between gap-4 hover:border-slate-700 transition-all">
+                    <div className="flex items-center gap-4">
+                      <img src={leader.image} alt={leader.name} className="w-16 h-16 rounded-2xl object-cover border border-slate-700 shrink-0" />
                       <div>
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="px-2 py-0.5 text-[10px] font-mono font-bold uppercase rounded bg-sky-500/20 text-sky-300 border border-sky-500/30">
-                            {leader.role}
+                        <div className="flex flex-wrap items-center gap-2 mb-1">
+                          <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 font-bold">
+                            Placed @ {leader.placedAt || "Alumni"}
                           </span>
-                          {leader.placedAt && (
-                            <span className="px-2 py-0.5 text-[10px] font-mono font-bold uppercase rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                              Placed @ {leader.placedAt}
-                            </span>
-                          )}
-                          <span className="text-xs text-slate-400 font-mono">• {leader.tenure}</span>
+                          <span className="text-xs text-slate-400 font-mono">{leader.tenure}</span>
                         </div>
-                        <h4 className="text-lg font-extrabold text-white mb-1">{leader.name}</h4>
-                        <p className="text-slate-300 text-xs leading-relaxed mb-2">{leader.bio}</p>
-                        <span className="text-[11px] font-mono text-sky-400 bg-slate-950 px-2.5 py-1 rounded-md border border-slate-800">
-                          {leader.highlight}
-                        </span>
+                        <h4 className="text-base font-bold text-white">{leader.name}</h4>
+                        <span className="text-xs text-sky-400 block">{leader.role}</span>
+                        <p className="text-xs text-slate-400 mt-1 line-clamp-2">{leader.bio}</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                      <button onClick={() => openLegacyModal(leader)} className="p-2.5 hover:bg-slate-800 text-slate-300 hover:text-sky-400 rounded-xl transition-colors">
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <button onClick={() => openLegacyModal(leader)} className="p-2 hover:bg-slate-800 text-slate-300 hover:text-sky-400 rounded-lg transition-colors">
                         <Edit3 className="w-4 h-4" />
                       </button>
-                      <button onClick={() => handleDeleteLegacy(leader.id)} className="p-2.5 hover:bg-rose-500/10 text-slate-400 hover:text-rose-400 rounded-xl transition-colors">
+                      <button onClick={() => handleDeleteLegacy(leader.id)} className="p-2 hover:bg-rose-500/10 text-slate-400 hover:text-rose-400 rounded-lg transition-colors">
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
@@ -1086,59 +1259,61 @@ export default function AdminPage() {
             </div>
           )}
 
-          {/* 5. NEWS & MONTHLY PDF GAZETTE MANAGER */}
+          {/* 6. NEWS GAZETTE ISSUES */}
           {activeTab === "news" && (
             <div className="space-y-6">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <h2 className="text-2xl font-extrabold text-white">News &amp; Monthly Gazette Manager</h2>
-                  <p className="text-xs text-slate-400 mt-0.5">Manage monthly publications, in-browser PDF reader edition, and archives.</p>
+                  <h2 className="text-2xl font-extrabold text-white">News Gazette &amp; PDF Manager</h2>
+                  <p className="text-xs text-slate-400 mt-0.5">Upload and manage monthly PDF publications and feature editions.</p>
                 </div>
                 <button
                   onClick={() => openNewsModal()}
-                  className="flex items-center gap-2 px-4 py-2 bg-sky-500 hover:bg-sky-400 text-white rounded-xl text-xs font-bold transition-all shadow-md"
+                  className="flex items-center justify-center gap-2 px-4 py-2.5 bg-sky-500 hover:bg-sky-400 text-white rounded-xl text-xs font-bold transition-all shadow-md shrink-0"
                 >
                   <Plus className="w-4 h-4" />
-                  <span>Publish New Issue</span>
+                  <span>Add Gazette Edition</span>
                 </button>
               </div>
 
-              <div className="space-y-4">
-                {newsIssues.map((issue) => (
+              <div className="space-y-3">
+                {filteredNews.map((issue) => (
                   <div key={issue.id} className={cn(
-                    "p-5 rounded-2xl border transition-all flex flex-col md:flex-row md:items-center justify-between gap-4",
+                    "p-5 rounded-2xl border flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all",
                     issue.isCurrent ? "bg-sky-950/20 border-sky-500/50 shadow-[0_0_20px_rgba(56,189,248,0.15)]" : "bg-slate-900/80 border-slate-800"
                   )}>
-                    <div className="flex items-start gap-4">
-                      <img src={issue.coverImage} alt={issue.title} className="w-16 h-20 rounded-xl object-cover border border-slate-700 shrink-0" />
+                    <div className="flex items-center gap-4">
+                      <img src={issue.coverImage} alt={issue.title} className="w-16 h-20 rounded-xl object-cover border border-slate-700 shrink-0 shadow-md" />
                       <div>
-                        <div className="flex items-center gap-2 mb-1">
+                        <div className="flex flex-wrap items-center gap-2 mb-1">
+                          <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-slate-800 text-sky-400 border border-slate-700 font-bold">
+                            {issue.volume} • {issue.month} {issue.year}
+                          </span>
                           {issue.isCurrent && (
-                            <span className="px-2 py-0.5 text-[10px] font-bold uppercase rounded bg-sky-500 text-white flex items-center gap-1">
-                              <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 animate-pulse">
                               Active Live Edition
                             </span>
                           )}
-                          <span className="text-xs font-mono font-bold text-slate-300 bg-slate-800 px-2 py-0.5 rounded">
-                            {issue.month} {issue.year} // {issue.volume}
-                          </span>
-                          <span className="text-xs text-slate-400 font-mono">• {issue.fileSize} • {issue.pageCount} Pages</span>
+                          <span className="text-xs text-slate-400 font-mono">{issue.fileSize} • {issue.pageCount} Pages</span>
                         </div>
                         <h4 className="text-base font-bold text-white">{issue.title}</h4>
-                        <p className="text-xs text-slate-400 line-clamp-1 mt-0.5">{issue.description}</p>
-                        <a href={issue.pdfUrl} target="_blank" rel="noreferrer" className="text-xs text-sky-400 hover:underline flex items-center gap-1 mt-1 font-mono">
-                          <FileText className="w-3.5 h-3.5" /> View PDF Link
-                        </a>
+                        <p className="text-xs text-slate-400 line-clamp-1">{issue.description}</p>
+                        <div className="flex flex-wrap gap-1 mt-1.5">
+                          {issue.topics.map((tp, idx) => (
+                            <span key={idx} className="text-[9px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">
+                              #{tp}
+                            </span>
+                          ))}
+                        </div>
                       </div>
                     </div>
-
-                    <div className="flex items-center gap-2 shrink-0">
+                    <div className="flex items-center gap-2 shrink-0 self-end md:self-center">
                       {!issue.isCurrent && (
                         <button
                           onClick={() => handleSetCurrentNews(issue.id)}
-                          className="px-3 py-1.5 bg-slate-800 hover:bg-sky-500 hover:text-white text-slate-300 text-xs font-bold rounded-lg transition-colors"
+                          className="px-3 py-1.5 bg-slate-800 hover:bg-sky-500 hover:text-white text-slate-300 rounded-lg text-xs font-bold transition-all border border-slate-700"
                         >
-                          Set as Live Issue
+                          Set as Live
                         </button>
                       )}
                       <button onClick={() => openNewsModal(issue)} className="p-2 hover:bg-slate-800 text-slate-300 hover:text-sky-400 rounded-lg transition-colors">
@@ -1154,37 +1329,69 @@ export default function AdminPage() {
             </div>
           )}
 
-          {/* 6. GALLERY MANAGER */}
+          {/* 7. GALLERY MOMENTS */}
           {activeTab === "gallery" && (
             <div className="space-y-6">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                   <h2 className="text-2xl font-extrabold text-white">Gallery Moments Manager</h2>
-                  <p className="text-xs text-slate-400 mt-0.5">Manage event photo highlights and display grids.</p>
+                  <p className="text-xs text-slate-400 mt-0.5">Manage photo memories, hackathon photos, and event captures.</p>
                 </div>
                 <button
                   onClick={() => openGalleryModal()}
-                  className="flex items-center gap-2 px-4 py-2 bg-sky-500 hover:bg-sky-400 text-white rounded-xl text-xs font-bold transition-all shadow-md"
+                  className="flex items-center justify-center gap-2 px-4 py-2.5 bg-sky-500 hover:bg-sky-400 text-white rounded-xl text-xs font-bold transition-all shadow-md shrink-0"
                 >
                   <Plus className="w-4 h-4" />
                   <span>Add Photo</span>
                 </button>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                {gallery.map((item) => (
-                  <div key={item.id} className="p-3 rounded-2xl bg-slate-900/80 border border-slate-800 relative group overflow-hidden">
-                    <img src={item.image} alt={item.title} className="w-full h-36 object-cover rounded-xl mb-3" />
-                    <span className="text-[10px] font-mono uppercase bg-slate-950 px-2 py-0.5 rounded text-slate-400 border border-slate-800">
-                      Grid Layout: {item.size}
-                    </span>
-                    <h4 className="text-sm font-bold text-white mt-1">{item.title}</h4>
-                    <p className="text-xs text-slate-400 line-clamp-1">{item.detail}</p>
-                    <div className="flex items-center justify-end gap-1 mt-3">
-                      <button onClick={() => openGalleryModal(item)} className="p-1.5 hover:bg-slate-800 text-slate-300 hover:text-sky-400 rounded-lg">
+              {/* Search & Filter */}
+              <div className="flex flex-col sm:flex-row gap-3">
+                <div className="relative flex-1">
+                  <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
+                  <input
+                    type="text"
+                    placeholder="Search photos by title, caption..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full pl-9 pr-4 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-sky-500"
+                  />
+                </div>
+                <div className="flex items-center gap-1.5 bg-slate-950 p-1 rounded-xl border border-slate-800 shrink-0">
+                  {["all", "small", "large", "wide", "tall"].map((sz) => (
+                    <button
+                      key={sz}
+                      onClick={() => setGallerySizeFilter(sz)}
+                      className={cn(
+                        "px-3 py-1 rounded-lg text-xs font-bold capitalize transition-all",
+                        gallerySizeFilter === sz ? "bg-sky-500 text-white" : "text-slate-400 hover:text-white"
+                      )}
+                    >
+                      {sz}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                {filteredGallery.map((photo) => (
+                  <div key={photo.id} className="group relative rounded-2xl overflow-hidden border border-slate-800 bg-slate-900/80 shadow-md">
+                    <img src={photo.image} alt={photo.title} className="w-full h-36 object-cover group-hover:scale-105 transition-transform duration-300" />
+                    <div className="p-3">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-[9px] font-mono uppercase px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">
+                          {photo.size}
+                        </span>
+                      </div>
+                      <h5 className="text-xs font-bold text-white truncate">{photo.title}</h5>
+                      <p className="text-[10px] text-slate-400 truncate">{photo.detail || "Moment capture"}</p>
+                    </div>
+                    <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-black/70 p-1 rounded-lg backdrop-blur-sm">
+                      <button onClick={() => openGalleryModal(photo)} className="p-1 text-slate-300 hover:text-sky-400">
                         <Edit3 className="w-3.5 h-3.5" />
                       </button>
-                      <button onClick={() => handleDeleteGallery(item.id)} className="p-1.5 hover:bg-rose-500/10 text-slate-400 hover:text-rose-400 rounded-lg">
+                      <button onClick={() => handleDeleteGallery(photo.id)} className="p-1 text-slate-300 hover:text-rose-400">
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </div>
@@ -1194,59 +1401,57 @@ export default function AdminPage() {
             </div>
           )}
 
-          {/* 7. HOMEPAGE STATS MANAGER */}
+          {/* 8. HOMEPAGE STATS */}
           {activeTab === "stats" && (
-            <div className="space-y-6 max-w-2xl">
+            <div className="space-y-6">
               <div>
-                <h2 className="text-2xl font-extrabold text-white">Homepage Metrics &amp; Key Stats</h2>
-                <p className="text-xs text-slate-400 mt-0.5">Customize the key stats displayed across the homepage.</p>
+                <h2 className="text-2xl font-extrabold text-white">Homepage Metrics &amp; Achievements</h2>
+                <p className="text-xs text-slate-400 mt-0.5">Edit high-level statistics shown in the homepage metrics grid.</p>
               </div>
 
-              <form onSubmit={handleSaveStats} className="space-y-5 bg-slate-950/60 p-6 rounded-3xl border border-slate-800">
-                <div>
-                  <label className="block text-xs font-mono uppercase text-slate-400 mb-1.5">Events Hosted Counter</label>
-                  <input
-                    type="text"
-                    value={stats.eventsHosted}
-                    onChange={(e) => setStats({ ...stats, eventsHosted: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white font-mono"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-mono uppercase text-slate-400 mb-1.5">Active Members Counter</label>
-                  <input
-                    type="text"
-                    value={stats.activeMembers}
-                    onChange={(e) => setStats({ ...stats, activeMembers: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white font-mono"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-mono uppercase text-slate-400 mb-1.5">Live Projects Counter</label>
-                  <input
-                    type="text"
-                    value={stats.liveProjects}
-                    onChange={(e) => setStats({ ...stats, liveProjects: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white font-mono"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-mono uppercase text-slate-400 mb-1.5">Placement Record Percentage</label>
-                  <input
-                    type="text"
-                    value={stats.placementRate}
-                    onChange={(e) => setStats({ ...stats, placementRate: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white font-mono"
-                    required
-                  />
+              <form onSubmit={handleSaveStats} className="space-y-4 max-w-xl">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Events Hosted</label>
+                    <input
+                      type="text"
+                      value={stats.eventsHosted}
+                      onChange={(e) => setStats({ ...stats, eventsHosted: e.target.value })}
+                      className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Active Members</label>
+                    <input
+                      type="text"
+                      value={stats.activeMembers}
+                      onChange={(e) => setStats({ ...stats, activeMembers: e.target.value })}
+                      className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Live Projects</label>
+                    <input
+                      type="text"
+                      value={stats.liveProjects}
+                      onChange={(e) => setStats({ ...stats, liveProjects: e.target.value })}
+                      className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Placement Record</label>
+                    <input
+                      type="text"
+                      value={stats.placementRate}
+                      onChange={(e) => setStats({ ...stats, placementRate: e.target.value })}
+                      className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm"
+                    />
+                  </div>
                 </div>
 
                 <button
                   type="submit"
-                  className="px-6 py-3 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-bold rounded-xl text-sm transition-all shadow-md"
+                  className="px-6 py-3 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-bold rounded-xl text-sm transition-all shadow-lg"
                 >
                   Save Metrics Changes
                 </button>
@@ -1258,27 +1463,126 @@ export default function AdminPage() {
       </div>
 
       {/* ========================================================================= */}
-      {/* UNIVERSAL MODAL POPUP FOR ADD / EDIT */}
+      {/* UNIVERSAL RESPONSIVE MODAL POPUP FOR ADD / EDIT */}
       {/* ========================================================================= */}
       {modalMode && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 md:p-8 max-w-xl w-full max-h-[90vh] overflow-y-auto shadow-2xl relative">
-            <button 
-              onClick={() => setModalMode(null)} 
-              className="absolute top-6 right-6 p-2 rounded-full hover:bg-slate-800 text-slate-400 hover:text-white"
-            >
-              <X className="w-5 h-5" />
-            </button>
+        <div className="fixed inset-0 z-[150] bg-black/85 backdrop-blur-md overflow-y-auto overflow-x-hidden pt-20 sm:pt-24 pb-12 px-4 flex flex-col justify-start sm:justify-center items-center min-h-screen">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 max-w-xl w-full my-auto max-h-[85vh] overflow-y-auto shadow-2xl relative">
+            
+            {/* Sticky Header with Title and Close Button */}
+            <div className="flex items-center justify-between pb-4 mb-6 border-b border-slate-800/80 sticky top-0 bg-slate-900 z-20 -mx-6 sm:-mx-8 px-6 sm:px-8 -mt-2 pt-2">
+              <h3 className="text-lg sm:text-xl font-bold text-white pr-2 truncate">
+                {modalMode === "add" ? "Add New" : "Edit"} {
+                  activeTab === "events" ? "Event" :
+                  activeTab === "team" ? "Team Member" :
+                  activeTab === "about" ? (aboutSubTab === "subteams" ? "Sub-Team Domain Wing" : "Core Value Pillar") :
+                  activeTab === "legacy" ? "Hall of Fame Leader" :
+                  activeTab === "news" ? "News Gazette Edition" : "Gallery Photo"
+                }
+              </h3>
+              <button 
+                type="button"
+                onClick={() => setModalMode(null)} 
+                className="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white transition-all shrink-0 border border-slate-700/50"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
 
-            <h3 className="text-xl font-bold text-white mb-6">
-              {modalMode === "add" ? "Add New" : "Edit"} {
-                activeTab === "events" ? "Event" :
-                activeTab === "team" ? "Team Member" :
-                activeTab === "about" ? (aboutSubTab === "subteams" ? "Sub-Team Domain Wing" : "Core Value Pillar") :
-                activeTab === "legacy" ? "Hall of Fame Leader" :
-                activeTab === "news" ? "News Gazette Edition" : "Gallery Photo"
-              }
-            </h3>
+            {/* EVENT FORM */}
+            {activeTab === "events" && (
+              <form onSubmit={handleSaveEvent} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Event Title</label>
+                  <input type="text" required placeholder="e.g. Hackathon Decoded 2024" value={eventForm.title || ""} onChange={(e) => setEventForm({ ...eventForm, title: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Date</label>
+                    <input type="text" placeholder="e.g. October 15, 2024" required value={eventForm.date || ""} onChange={(e) => setEventForm({ ...eventForm, date: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Time / Duration</label>
+                    <input type="text" placeholder="e.g. 10:00 AM (48 Hrs)" value={eventForm.time || ""} onChange={(e) => setEventForm({ ...eventForm, time: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Category</label>
+                    <select value={eventForm.category || "upcoming"} onChange={(e) => setEventForm({ ...eventForm, category: e.target.value as any })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm">
+                      <option value="upcoming">Upcoming</option>
+                      <option value="current">Current / Live</option>
+                      <option value="past">Past</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Location</label>
+                    <input type="text" placeholder="e.g. Main Auditorium / Lab 3" value={eventForm.location || ""} onChange={(e) => setEventForm({ ...eventForm, location: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Banner Image URL</label>
+                  <input type="text" placeholder="e.g. /images/... or https://..." value={eventForm.image || ""} onChange={(e) => setEventForm({ ...eventForm, image: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
+                  {eventForm.image && (
+                    <div className="mt-2 rounded-xl overflow-hidden border border-slate-800 h-24 bg-black">
+                      <img src={eventForm.image} alt="Preview" className="w-full h-full object-cover" onError={(e) => { (e.target as any).style.display = 'none'; }} />
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Registration Link (Optional)</label>
+                  <input type="text" placeholder="https://forms.google.com/... or /events/..." value={eventForm.registrationUrl || ""} onChange={(e) => setEventForm({ ...eventForm, registrationUrl: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
+                </div>
+                <div>
+                  <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Description</label>
+                  <textarea rows={3} placeholder="Event overview, agenda, and guidelines" value={eventForm.description || ""} onChange={(e) => setEventForm({ ...eventForm, description: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
+                </div>
+                <button type="submit" className="w-full py-3 bg-sky-500 hover:bg-sky-400 text-white font-bold rounded-xl text-sm transition-all shadow-md">Save Event</button>
+              </form>
+            )}
+
+            {/* TEAM FORM */}
+            {activeTab === "team" && (
+              <form onSubmit={handleSaveTeam} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Full Name</label>
+                  <input type="text" required placeholder="e.g. John Doe" value={teamForm.name || ""} onChange={(e) => setTeamForm({ ...teamForm, name: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
+                </div>
+                <div>
+                  <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Position / Role</label>
+                  <input type="text" placeholder="e.g. FOUNDER & CEO or CORE COMMITTEE MEMBER" required value={teamForm.position || ""} onChange={(e) => setTeamForm({ ...teamForm, position: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
+                </div>
+                <div>
+                  <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Profile Photo URL</label>
+                  <input type="text" placeholder="e.g. /images/... or https://..." value={teamForm.image || ""} onChange={(e) => setTeamForm({ ...teamForm, image: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
+                  {teamForm.image && (
+                    <div className="mt-2 flex items-center gap-3 p-2 bg-slate-950 rounded-xl border border-slate-800">
+                      <img src={teamForm.image} alt="Preview" className="w-10 h-10 rounded-full object-cover border border-slate-700" onError={(e) => { (e.target as any).style.display = 'none'; }} />
+                      <span className="text-xs text-slate-400 font-mono truncate">Preview Thumbnail</span>
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Skills (Comma-separated)</label>
+                  <input type="text" placeholder="e.g. Full-Stack, Cloud, DSA" value={teamForm.skillsText || ""} onChange={(e) => setTeamForm({ ...teamForm, skillsText: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
+                </div>
+                <div>
+                  <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Bio / Role Description</label>
+                  <textarea rows={2} placeholder="Brief summary of member's responsibilities" value={teamForm.bio || ""} onChange={(e) => setTeamForm({ ...teamForm, bio: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-mono uppercase text-slate-400 mb-1">LinkedIn URL</label>
+                    <input type="text" placeholder="https://linkedin.com/in/..." value={teamForm.socials?.linkedin || ""} onChange={(e) => setTeamForm({ ...teamForm, socials: { ...teamForm.socials, linkedin: e.target.value } })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-mono uppercase text-slate-400 mb-1">GitHub URL</label>
+                    <input type="text" placeholder="https://github.com/..." value={teamForm.socials?.github || ""} onChange={(e) => setTeamForm({ ...teamForm, socials: { ...teamForm.socials, github: e.target.value } })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
+                  </div>
+                </div>
+                <button type="submit" className="w-full py-3 bg-sky-500 hover:bg-sky-400 text-white font-bold rounded-xl text-sm transition-all shadow-md">Save Member</button>
+              </form>
+            )}
 
             {/* ABOUT SUB-TEAM FORM */}
             {activeTab === "about" && aboutSubTab === "subteams" && (
@@ -1315,7 +1619,7 @@ export default function AdminPage() {
                   <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Key Focus Points (Comma-separated)</label>
                   <input type="text" placeholder="e.g. Next.js & Cloud, AI Pipelines, Open Source" value={subTeamForm.pointsText || ""} onChange={(e) => setSubTeamForm({ ...subTeamForm, pointsText: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
                 </div>
-                <button type="submit" className="w-full py-3 bg-sky-500 text-white font-bold rounded-xl text-sm">Save Sub-Team</button>
+                <button type="submit" className="w-full py-3 bg-sky-500 hover:bg-sky-400 text-white font-bold rounded-xl text-sm transition-all shadow-md">Save Sub-Team</button>
               </form>
             )}
 
@@ -1354,7 +1658,7 @@ export default function AdminPage() {
                   <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Pillar Deliverables (Comma-separated)</label>
                   <input type="text" placeholder="e.g. 24-48h Sprints, Industry Speakers, Tech Workshops" value={coreValueForm.pointsText || ""} onChange={(e) => setCoreValueForm({ ...coreValueForm, pointsText: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
                 </div>
-                <button type="submit" className="w-full py-3 bg-sky-500 text-white font-bold rounded-xl text-sm">Save Core Value</button>
+                <button type="submit" className="w-full py-3 bg-sky-500 hover:bg-sky-400 text-white font-bold rounded-xl text-sm transition-all shadow-md">Save Core Value</button>
               </form>
             )}
 
@@ -1381,19 +1685,25 @@ export default function AdminPage() {
                     <input type="text" placeholder="e.g. 2022-2023" value={legacyForm.tenure || ""} onChange={(e) => setLegacyForm({ ...legacyForm, tenure: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
                   </div>
                   <div>
-                    <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Photo URL</label>
-                    <input type="text" placeholder="e.g. /images/... or https://..." value={legacyForm.image || ""} onChange={(e) => setLegacyForm({ ...legacyForm, image: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
+                    <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Highlight Tag</label>
+                    <input type="text" placeholder="e.g. SDE @ Google • 10+ Hackathons" value={legacyForm.highlight || ""} onChange={(e) => setLegacyForm({ ...legacyForm, highlight: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Highlight Badge Tag</label>
-                  <input type="text" placeholder="e.g. SDE @ Google • 10+ Hackathons" value={legacyForm.highlight || ""} onChange={(e) => setLegacyForm({ ...legacyForm, highlight: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
+                  <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Photo URL</label>
+                  <input type="text" placeholder="e.g. /images/... or https://..." value={legacyForm.image || ""} onChange={(e) => setLegacyForm({ ...legacyForm, image: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
+                  {legacyForm.image && (
+                    <div className="mt-2 flex items-center gap-3 p-2 bg-slate-950 rounded-xl border border-slate-800">
+                      <img src={legacyForm.image} alt="Preview" className="w-10 h-10 rounded-full object-cover border border-slate-700" onError={(e) => { (e.target as any).style.display = 'none'; }} />
+                      <span className="text-xs text-slate-400 font-mono truncate">Photo Preview</span>
+                    </div>
+                  )}
                 </div>
                 <div>
                   <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Contribution Story / Bio</label>
                   <textarea rows={3} required value={legacyForm.bio || ""} onChange={(e) => setLegacyForm({ ...legacyForm, bio: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
                 </div>
-                <button type="submit" className="w-full py-3 bg-sky-500 text-white font-bold rounded-xl text-sm">Save Hall of Fame Leader</button>
+                <button type="submit" className="w-full py-3 bg-sky-500 hover:bg-sky-400 text-white font-bold rounded-xl text-sm transition-all shadow-md">Save Hall of Fame Leader</button>
               </form>
             )}
 
@@ -1419,12 +1729,18 @@ export default function AdminPage() {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Direct PDF URL / Local Document Path</label>
+                  <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Direct PDF URL / Document Path</label>
                   <input type="text" required placeholder="e.g. /documents/gazette.pdf or https://example.com/gazette.pdf" value={newsForm.pdfUrl || ""} onChange={(e) => setNewsForm({ ...newsForm, pdfUrl: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm font-mono" />
                 </div>
                 <div>
                   <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Cover Thumbnail URL</label>
                   <input type="text" placeholder="e.g. /images/... or https://..." value={newsForm.coverImage || ""} onChange={(e) => setNewsForm({ ...newsForm, coverImage: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
+                  {newsForm.coverImage && (
+                    <div className="mt-2 flex items-center gap-3 p-2 bg-slate-950 rounded-xl border border-slate-800">
+                      <img src={newsForm.coverImage} alt="Preview" className="w-12 h-16 rounded object-cover border border-slate-700" onError={(e) => { (e.target as any).style.display = 'none'; }} />
+                      <span className="text-xs text-slate-400 font-mono truncate">Cover Thumbnail Preview</span>
+                    </div>
+                  )}
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
@@ -1444,11 +1760,11 @@ export default function AdminPage() {
                   <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Summary / Highlights</label>
                   <textarea rows={2} value={newsForm.description || ""} onChange={(e) => setNewsForm({ ...newsForm, description: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
                 </div>
-                <div className="flex items-center gap-2">
-                  <input type="checkbox" id="isCurrent" checked={Boolean(newsForm.isCurrent)} onChange={(e) => setNewsForm({ ...newsForm, isCurrent: e.target.checked })} className="rounded text-sky-500 focus:ring-sky-500" />
-                  <label htmlFor="isCurrent" className="text-xs text-white font-medium">Set as Current Active Live Edition (Embedded in browser reader)</label>
+                <div className="flex items-center gap-2 pt-1">
+                  <input type="checkbox" id="isCurrent" checked={Boolean(newsForm.isCurrent)} onChange={(e) => setNewsForm({ ...newsForm, isCurrent: e.target.checked })} className="rounded text-sky-500 focus:ring-sky-500 cursor-pointer" />
+                  <label htmlFor="isCurrent" className="text-xs text-white font-medium cursor-pointer">Set as Current Active Live Edition (Embedded in browser reader)</label>
                 </div>
-                <button type="submit" className="w-full py-3 bg-sky-500 text-white font-bold rounded-xl text-sm">Save Gazette Edition</button>
+                <button type="submit" className="w-full py-3 bg-sky-500 hover:bg-sky-400 text-white font-bold rounded-xl text-sm transition-all shadow-md">Save Gazette Edition</button>
               </form>
             )}
 
@@ -1462,6 +1778,11 @@ export default function AdminPage() {
                 <div>
                   <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Image URL</label>
                   <input type="text" required placeholder="e.g. /images/... or https://..." value={galleryForm.image || ""} onChange={(e) => setGalleryForm({ ...galleryForm, image: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
+                  {galleryForm.image && (
+                    <div className="mt-2 rounded-xl overflow-hidden border border-slate-800 h-28 bg-black">
+                      <img src={galleryForm.image} alt="Preview" className="w-full h-full object-cover" onError={(e) => { (e.target as any).style.display = 'none'; }} />
+                    </div>
+                  )}
                 </div>
                 <div>
                   <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Grid Layout Span</label>
@@ -1476,7 +1797,7 @@ export default function AdminPage() {
                   <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Caption Details</label>
                   <textarea rows={2} value={galleryForm.detail || ""} onChange={(e) => setGalleryForm({ ...galleryForm, detail: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
                 </div>
-                <button type="submit" className="w-full py-3 bg-sky-500 text-white font-bold rounded-xl text-sm">Save Photo</button>
+                <button type="submit" className="w-full py-3 bg-sky-500 hover:bg-sky-400 text-white font-bold rounded-xl text-sm transition-all shadow-md">Save Photo</button>
               </form>
             )}
 
