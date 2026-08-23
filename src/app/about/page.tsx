@@ -325,7 +325,7 @@ export default function AboutPage() {
           <h1 className="text-5xl md:text-7xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-white via-slate-200 to-sky-300 mb-6 drop-shadow-lg">
             About Us
           </h1>
-          <div className="w-24 h-1 bg-gradient-to-r from-sky-400 to-blue-600 mx-auto rounded-full mb-10" />
+          <div className={cn("w-24 h-1 mx-auto rounded-full bg-gradient-to-r mb-10", config.gradientText)} />
 
           <div className="bg-slate-900/60 border border-slate-800 backdrop-blur-xl p-8 md:p-12 rounded-3xl text-left shadow-2xl relative overflow-hidden group">
             <div className="absolute top-0 left-0 w-2 h-full bg-gradient-to-b from-sky-500 to-blue-600" />

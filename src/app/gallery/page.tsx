@@ -55,7 +55,7 @@ export default function GalleryPage() {
           <h1 className="text-5xl md:text-7xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-white via-slate-200 to-sky-300 mb-6 drop-shadow-lg">
             Our Gallery &amp; Events
           </h1>
-          <div className="w-24 h-1 bg-gradient-to-r from-sky-400 to-blue-600 mx-auto rounded-full mb-6" />
+          <div className={cn("w-24 h-1 mx-auto rounded-full bg-gradient-to-r mb-6", config.gradientText)} />
           <p className="max-w-2xl mx-auto text-lg text-slate-300 font-light leading-relaxed">
             A glimpse into the energy, passion, and innovation that drives CSI_SRMCEM X D&apos;CODERS at SRMCEM.
           </p>
@@ -119,7 +119,7 @@ export default function GalleryPage() {
                   </h3>
 
                   {/* Gradient Underline Divider */}
-                  <div className="w-12 h-1 bg-gradient-to-r from-blue-500 via-sky-400 to-purple-500 mx-auto rounded-full mb-4 shadow-[0_0_10px_rgba(56,189,248,0.5)]" />
+                  <div className={cn("w-12 h-1 mx-auto rounded-full bg-gradient-to-r mb-4 shadow-[0_0_10px_rgba(56,189,248,0.3)]", config.gradientText)} />
 
                   {/* Event Detail Description */}
                   <p className="text-slate-200 text-xs sm:text-sm leading-relaxed max-w-xs font-light">

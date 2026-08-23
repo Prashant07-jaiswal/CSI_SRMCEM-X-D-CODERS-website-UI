@@ -113,15 +113,13 @@ export default function Home() {
       {/* ========================================================================= */}
       {/* 2. WHAT WE DO SECTION (ORIGINAL 3 FLIP CARDS RESTORED PER REFERENCE) */}
       {/* ========================================================================= */}
-      <section className="py-24 px-4 md:px-16 lg:px-24 relative overflow-hidden bg-slate-950/40 border-t border-slate-800/80">
-        <div className={cn("absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-4xl h-[400px] blur-[150px] pointer-events-none -z-10", config.glowClass1)} />
-        
+      <section className="py-24 px-4 md:px-16 lg:px-24 relative overflow-hidden border-t border-slate-800/80">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-6xl font-extrabold text-white mb-4">
               What We Do
             </h2>
-            <div className="w-24 h-1 bg-gradient-to-r from-purple-500 via-blue-500 to-indigo-500 mx-auto rounded-full" />
+            <div className={cn("w-24 h-1 mx-auto rounded-full bg-gradient-to-r", config.gradientText)} />
           </div>
           
           <div className="grid md:grid-cols-3 gap-8">
@@ -289,7 +287,7 @@ export default function Home() {
       {/* ========================================================================= */}
       {/* 4. WHY JOIN CSI_SRMCEM X D'CODERS & UNMATCHED PLACEMENT SUCCESS */}
       {/* ========================================================================= */}
-      <section className="py-24 px-4 md:px-16 lg:px-24 relative overflow-hidden bg-slate-950/40 border-t border-slate-800/80">
+      <section className="py-24 px-4 md:px-16 lg:px-24 relative overflow-hidden border-t border-slate-800/80">
         <div className={cn("absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-4xl h-[400px] blur-[140px] pointer-events-none -z-10", config.glowClass1)} />
         
         <div className="max-w-7xl mx-auto">

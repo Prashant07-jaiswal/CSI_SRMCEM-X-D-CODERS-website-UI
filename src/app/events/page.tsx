@@ -69,7 +69,7 @@ export default function EventsPage() {
           <h1 className="text-5xl md:text-7xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-white via-slate-200 to-sky-300 mb-6 drop-shadow-lg">
             Events &amp; Workshops
           </h1>
-          <div className="w-24 h-1 bg-gradient-to-r from-sky-400 to-blue-600 mx-auto rounded-full mb-6" />
+          <div className={cn("w-24 h-1 mx-auto rounded-full bg-gradient-to-r mb-6", config.gradientText)} />
           <p className="max-w-2xl mx-auto text-lg text-slate-300 font-light leading-relaxed">
             From intense 48-hour hackathons to deep-dive technical workshops, discover what&apos;s happening at CSI_SRMCEM X D&apos;CODERS.
           </p>
