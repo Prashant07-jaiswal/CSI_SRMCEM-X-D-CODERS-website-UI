@@ -1,0 +1,162 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
+import { Menu, X, ChevronRight } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { ThemeSwitcher } from "@/components/ui/ThemeSwitcher";
+import { useTheme } from "@/lib/themeContext";
+
+const links = [
+  { name: "Home", href: "/" },
+  { name: "About", href: "/about" },
+  { name: "Team", href: "/team" },
+  { name: "Events", href: "/events" },
+  { name: "Gallery", href: "/gallery" },
+  { name: "News", href: "/news" },
+];
+
+export function Navbar() {
+  const [isOpen, setIsOpen] = useState(false);
+  const pathname = usePathname();
+  const { config } = useTheme();
+
+  const toggleMenu = () => setIsOpen(!isOpen);
+
+  return (
+    <>
+      <nav className="fixed top-0 w-full z-[110] px-4 sm:px-6 py-4 flex justify-between items-center bg-black/40 backdrop-blur-xl border-b border-white/10 transition-colors duration-300">
+        
+        {/* Top Left: CSI Logo */}
+        <Link href="/" className="flex items-center gap-3 z-50 group">
+          <div className="relative">
+            <div className="absolute -inset-1 rounded-full bg-sky-500/20 blur-md group-hover:bg-sky-500/40 transition-colors" />
+            <img 
+              src="/csi-logo.png" 
+              alt="CSI Logo" 
+              className="w-10 h-10 object-contain relative drop-shadow-[0_0_10px_rgba(56,189,248,0.5)]"
+            />
+          </div>
+          <span className="font-extrabold text-sm tracking-wider text-slate-200 hidden md:inline-block">
+            CSI_SRMCEM
+          </span>
+        </Link>
+
+        {/* Top Middle: CSI_SRMCEM X D'CODERS */}
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 hidden sm:block pointer-events-none">
+          <h1 className={cn(
+            "text-lg md:text-xl font-extrabold tracking-[0.2em] text-transparent bg-clip-text drop-shadow-lg bg-gradient-to-r",
+            config.gradientText
+          )}>
+            CSI_SRMCEM X D&apos;CODERS
+          </h1>
+        </div>
+        
+        {/* Top Right: Theme Switcher + Hamburger Menu */}
+        <div className="flex items-center gap-3 z-50">
+          <ThemeSwitcher />
+
+          <button 
+            onClick={toggleMenu}
+            aria-label="Toggle Menu"
+            className="w-11 h-11 bg-white/5 backdrop-blur-xl border border-white/10 hover:border-sky-500/40 rounded-full flex items-center justify-center text-white hover:bg-white/10 hover:scale-105 transition-all duration-300 shadow-[0_0_15px_rgba(56,189,248,0.15)]"
+          >
+            {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
+        </div>
+      </nav>
+
+      {/* Fancy Animated Full-Width Dropdown Menu */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: "-100%" }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: "-100%", transition: { delay: 0.2, duration: 0.4 } }}
+            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            className="fixed inset-0 z-[100] bg-slate-950/95 backdrop-blur-3xl flex flex-col items-center justify-center"
+          >
+            {/* Decorative Background Elements */}
+            <div className={cn("absolute top-1/4 left-1/4 w-96 h-96 blur-[150px] rounded-full pointer-events-none", config.glowClass1)} />
+            <div className={cn("absolute bottom-1/4 right-1/4 w-96 h-96 blur-[150px] rounded-full pointer-events-none", config.glowClass2)} />
+
+            <div className="w-full max-w-4xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
+              
+              {/* Left Side: Large Links */}
+              <div className="flex flex-col space-y-3">
+                {links.map((link, index) => {
+                  const isActive = pathname === link.href;
+                  return (
+                    <motion.div
+                      key={link.name}
+                      initial={{ opacity: 0, x: -40 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -40 }}
+                      transition={{ delay: index * 0.08, duration: 0.4, ease: "easeOut" }}
+                    >
+                      <Link
+                        href={link.href}
+                        onClick={() => setIsOpen(false)}
+                        className="group flex items-center justify-between p-3.5 rounded-2xl transition-all duration-300 hover:bg-white/5"
+                      >
+                        <span className={cn(
+                          "text-3xl md:text-5xl font-black tracking-tight transition-all duration-300",
+                          isActive ? cn("text-transparent bg-clip-text bg-gradient-to-r", config.gradientText) : "text-slate-400 group-hover:text-white"
+                        )}>
+                          {link.name}
+                        </span>
+                        <ChevronRight className={cn(
+                          "w-7 h-7 transition-all duration-300 opacity-0 -translate-x-4",
+                          isActive ? "opacity-100 translate-x-0 text-sky-400" : "group-hover:opacity-100 group-hover:translate-x-0 text-slate-300"
+                        )} />
+                      </Link>
+                    </motion.div>
+                  );
+                })}
+              </div>
+
+              {/* Right Side: Featured Cards inside Menu */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ delay: 0.3, duration: 0.5 }}
+                className="hidden md:flex flex-col justify-center space-y-4"
+              >
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-white font-bold text-lg">Featured Highlights</span>
+                </div>
+                
+                {/* Event 1 */}
+                <Link href="/events" onClick={() => setIsOpen(false)} className="bg-slate-900/80 border border-slate-800 p-5 rounded-2xl shadow-xl relative overflow-hidden group cursor-pointer hover:border-sky-500/50 transition-all duration-300 block">
+                  <div className="absolute inset-0 bg-sky-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <span className="px-2.5 py-0.5 bg-sky-500/20 text-sky-400 text-[10px] font-bold rounded-full uppercase tracking-wider mb-2 inline-block border border-sky-500/30">Upcoming</span>
+                  <h3 className="text-lg font-bold text-white mb-1">Hackathon Decoded</h3>
+                  <p className="text-slate-400 text-xs mb-3">Registrations are open for our 48-hour flagship coding marathon.</p>
+                  <span className="text-xs font-semibold text-sky-400 group-hover:text-sky-300 transition-colors">
+                    Explore Details &rarr;
+                  </span>
+                </Link>
+
+                {/* Event 2 */}
+                <Link href="/events" onClick={() => setIsOpen(false)} className="bg-slate-900/80 border border-slate-800 p-5 rounded-2xl shadow-xl relative overflow-hidden group cursor-pointer hover:border-blue-500/50 transition-all duration-300 block">
+                  <div className="absolute inset-0 bg-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <span className="px-2.5 py-0.5 bg-blue-500/20 text-blue-400 text-[10px] font-bold rounded-full uppercase tracking-wider mb-2 inline-block border border-blue-500/30">Workshop</span>
+                  <h3 className="text-lg font-bold text-white mb-1">AI & Web3 Bootcamp</h3>
+                  <p className="text-slate-400 text-xs mb-3">Hands-on architecture, neural networks, and modern cloud deployment.</p>
+                  <span className="text-xs font-semibold text-blue-400 group-hover:text-blue-300 transition-colors">
+                    Learn More &rarr;
+                  </span>
+                </Link>
+
+              </motion.div>
+
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
+  );
+}
