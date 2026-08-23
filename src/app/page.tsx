@@ -40,7 +40,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="relative overflow-hidden transition-colors duration-300">
+    <div className="relative overflow-x-clip transition-colors duration-300">
       {/* Background ambient glows */}
       <div className={cn("absolute top-1/4 left-0 w-[500px] h-[500px] rounded-full blur-[150px] pointer-events-none transition-colors duration-500", config.glowClass1)} />
       <div className={cn("absolute top-1/4 right-0 w-[500px] h-[500px] rounded-full blur-[150px] pointer-events-none transition-colors duration-500", config.glowClass2)} />
@@ -48,7 +48,7 @@ export default function Home() {
       {/* ========================================================================= */}
       {/* 1. HERO SECTION */}
       {/* ========================================================================= */}
-      <section className="min-h-[85vh] lg:min-h-[90vh] flex items-center px-4 sm:px-8 md:px-12 lg:px-20 xl:px-24 relative z-10 pt-20 sm:pt-24 lg:pt-16 pb-12 overflow-x-hidden">
+      <section className="min-h-[85vh] lg:min-h-[90vh] flex items-center px-4 sm:px-8 md:px-12 lg:px-20 xl:px-24 relative z-10 pt-20 sm:pt-24 lg:pt-16 pb-12">
         <div className="w-full max-w-7xl mx-auto flex flex-col-reverse lg:flex-row items-center justify-between gap-10 lg:gap-14">
           
           {/* Left Side: Text Content */}
@@ -113,7 +113,9 @@ export default function Home() {
       {/* ========================================================================= */}
       {/* 2. WHAT WE DO SECTION (ORIGINAL 3 FLIP CARDS RESTORED PER REFERENCE) */}
       {/* ========================================================================= */}
-      <section className="py-24 px-4 md:px-16 lg:px-24 bg-black/40 border-t border-white/5 relative">
+      <section className="py-24 px-4 md:px-16 lg:px-24 relative overflow-hidden bg-slate-950/40 border-t border-slate-800/80">
+        <div className={cn("absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-4xl h-[400px] blur-[150px] pointer-events-none -z-10", config.glowClass1)} />
+        
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-6xl font-extrabold text-white mb-4">
@@ -152,7 +154,7 @@ export default function Home() {
                 </div>
 
                 {/* Back Side */}
-                <div className="absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)] bg-gradient-to-br from-purple-950/90 via-slate-900 to-black border border-purple-500/50 rounded-3xl p-8 flex flex-col items-start justify-center shadow-[0_0_30px_rgba(168,85,247,0.3)]">
+                <div className="absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)] bg-gradient-to-br from-purple-950/80 via-slate-900 to-slate-950/90 border border-purple-500/50 rounded-3xl p-8 flex flex-col items-start justify-center shadow-[0_0_30px_rgba(168,85,247,0.3)]">
                   <span className="px-3 py-1 bg-purple-500/20 text-purple-300 text-[10px] font-mono font-bold rounded-full uppercase tracking-wider mb-3 border border-purple-500/30">
                     Competitions
                   </span>
@@ -193,7 +195,7 @@ export default function Home() {
                 </div>
 
                 {/* Back Side */}
-                <div className="absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)] bg-gradient-to-br from-blue-950/90 via-slate-900 to-black border border-blue-500/50 rounded-3xl p-8 flex flex-col items-start justify-center shadow-[0_0_30px_rgba(59,130,246,0.3)]">
+                <div className="absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)] bg-gradient-to-br from-blue-950/80 via-slate-900 to-slate-950/90 border border-blue-500/50 rounded-3xl p-8 flex flex-col items-start justify-center shadow-[0_0_30px_rgba(59,130,246,0.3)]">
                   <span className="px-3 py-1 bg-blue-500/20 text-blue-300 text-[10px] font-mono font-bold rounded-full uppercase tracking-wider mb-3 border border-blue-500/30">
                     Masterclasses
                   </span>
@@ -234,7 +236,7 @@ export default function Home() {
                 </div>
 
                 {/* Back Side */}
-                <div className="absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)] bg-gradient-to-br from-orange-950/90 via-slate-900 to-black border border-orange-500/50 rounded-3xl p-8 flex flex-col items-start justify-center shadow-[0_0_30px_rgba(249,115,22,0.3)]">
+                <div className="absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)] bg-gradient-to-br from-orange-950/80 via-slate-900 to-slate-950/90 border border-orange-500/50 rounded-3xl p-8 flex flex-col items-start justify-center shadow-[0_0_30px_rgba(249,115,22,0.3)]">
                   <span className="px-3 py-1 bg-orange-500/20 text-orange-300 text-[10px] font-mono font-bold rounded-full uppercase tracking-wider mb-3 border border-orange-500/30">
                     Collaboration
                   </span>
