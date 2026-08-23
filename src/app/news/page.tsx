@@ -80,7 +80,7 @@ export default function NewsPage() {
             Official Publications &amp; Monthly Gazette
           </span>
           <h1 className="text-5xl md:text-7xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-white via-slate-200 to-sky-300 mb-6 drop-shadow-lg">
-            CSI_SRMCEM X D&apos;CODERS <span className={cn("text-transparent bg-clip-text bg-gradient-to-r", config.gradientText)}>News</span>
+            News &amp; Gazette
           </h1>
           <div className="w-24 h-1 bg-gradient-to-r from-sky-400 to-blue-600 mx-auto rounded-full mb-6" />
           <p className="max-w-2xl mx-auto text-lg text-slate-300 font-light leading-relaxed">

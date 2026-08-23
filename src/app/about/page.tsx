@@ -197,10 +197,11 @@ export default function AboutPage() {
           className="text-center mb-16"
         >
           <span className="px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-sky-400 bg-sky-500/10 rounded-full border border-sky-500/30 inline-block mb-6 shadow-[0_0_15px_rgba(56,189,248,0.2)]">
-            About Us
+            <Sparkles className="w-3.5 h-3.5 inline mr-1 text-sky-400" />
+            Our Journey &amp; Vision
           </span>
           <h1 className="text-5xl md:text-7xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-white via-slate-200 to-sky-300 mb-6 drop-shadow-lg">
-            CSI_SRMCEM X D&apos;CODERS
+            About Us
           </h1>
           <div className="w-24 h-1 bg-gradient-to-r from-sky-400 to-blue-600 mx-auto rounded-full mb-10" />
 
