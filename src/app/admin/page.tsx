@@ -7,12 +7,12 @@ import {
   RotateCcw, Edit3, Check, X, Shield, Sparkles, ExternalLink, FileText, CheckCircle2
 } from "lucide-react";
 import { 
-  DataStore, EventItem, TeamMemberItem, LegacyHeadItem, NewsIssueItem, 
-  GalleryItem, ClubStats 
+  DataStore, EventItem, TeamMemberItem, LegacyHeadItem, SubTeamItem, 
+  CoreValueItem, NewsIssueItem, GalleryItem, ClubStats 
 } from "@/lib/dataStore";
 import { cn } from "@/lib/utils";
 
-type ActiveTab = "dashboard" | "events" | "team" | "legacy" | "news" | "gallery" | "stats";
+type ActiveTab = "dashboard" | "events" | "team" | "about" | "legacy" | "news" | "gallery" | "stats";
 
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -24,6 +24,8 @@ export default function AdminPage() {
   const [events, setEvents] = useState<EventItem[]>([]);
   const [team, setTeam] = useState<TeamMemberItem[]>([]);
   const [legacyHeads, setLegacyHeads] = useState<LegacyHeadItem[]>([]);
+  const [subTeams, setSubTeams] = useState<SubTeamItem[]>([]);
+  const [coreValues, setCoreValues] = useState<CoreValueItem[]>([]);
   const [newsIssues, setNewsIssues] = useState<NewsIssueItem[]>([]);
   const [gallery, setGallery] = useState<GalleryItem[]>([]);
   const [stats, setStats] = useState<ClubStats>({
@@ -36,11 +38,14 @@ export default function AdminPage() {
   // Modal / Form States
   const [modalMode, setModalMode] = useState<"add" | "edit" | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [aboutSubTab, setAboutSubTab] = useState<"subteams" | "corevalues">("subteams");
 
   // Item Specific Form States
   const [eventForm, setEventForm] = useState<Partial<EventItem>>({});
   const [teamForm, setTeamForm] = useState<Partial<TeamMemberItem> & { skillsText?: string }>({});
   const [legacyForm, setLegacyForm] = useState<Partial<LegacyHeadItem>>({});
+  const [subTeamForm, setSubTeamForm] = useState<Partial<SubTeamItem> & { pointsText?: string }>({});
+  const [coreValueForm, setCoreValueForm] = useState<Partial<CoreValueItem> & { pointsText?: string }>({});
   const [newsForm, setNewsForm] = useState<Partial<NewsIssueItem> & { topicsText?: string }>({});
   const [galleryForm, setGalleryForm] = useState<Partial<GalleryItem>>({});
   
@@ -53,6 +58,8 @@ export default function AdminPage() {
     setEvents(DataStore.getEvents());
     setTeam(DataStore.getTeam());
     setLegacyHeads(DataStore.getLegacyHeads());
+    setSubTeams(DataStore.getSubTeams());
+    setCoreValues(DataStore.getCoreValues());
     setNewsIssues(DataStore.getNewsIssues());
     setGallery(DataStore.getGallery());
     setStats(DataStore.getStats());
@@ -254,7 +261,7 @@ export default function AdminPage() {
     showToast("Team member removed.");
   };
 
-  // --- LEGACY OF LEADERSHIP CRUD --- //
+  // --- LEGACY OF LEADERSHIP (HALL OF FAME) CRUD --- //
   const openLegacyModal = (item?: LegacyHeadItem) => {
     if (item) {
       setModalMode("edit");
@@ -265,10 +272,12 @@ export default function AdminPage() {
       setEditingId(null);
       setLegacyForm({
         name: "",
-        role: "Former Head",
-        tenure: "Leadership & Guidance",
+        role: "President (2022-2023)",
+        tenure: "2022-2023",
+        placedAt: "Google",
+        image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=400&h=400",
         bio: "",
-        highlight: "Mentorship & Technical Excellence"
+        highlight: "SDE @ Google • National Hackathons"
       });
     }
   };
@@ -285,6 +294,8 @@ export default function AdminPage() {
         name: legacyForm.name || "",
         role: legacyForm.role || "Former Head",
         tenure: legacyForm.tenure || "Leadership & Guidance",
+        placedAt: legacyForm.placedAt || "Top Tier Placement",
+        image: legacyForm.image || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=400&h=400",
         bio: legacyForm.bio || "",
         highlight: legacyForm.highlight || "Mentorship & Leadership"
       };
@@ -302,6 +313,134 @@ export default function AdminPage() {
     setLegacyHeads(updated);
     DataStore.saveLegacyHeads(updated);
     showToast("Legacy leader removed.");
+  };
+
+  // --- SUB-TEAMS (ECOSYSTEM) CRUD --- //
+  const openSubTeamModal = (item?: SubTeamItem) => {
+    if (item) {
+      setModalMode("edit");
+      setEditingId(item.id);
+      setSubTeamForm({
+        ...item,
+        pointsText: item.points.join(", ")
+      });
+    } else {
+      setModalMode("add");
+      setEditingId(null);
+      setSubTeamForm({
+        title: "",
+        category: "Core Engineering",
+        color: "sky",
+        frontDesc: "",
+        backDesc: "",
+        pointsText: "Next.js & Cloud, AI Model Pipelines, Open Source Repositories"
+      });
+    }
+  };
+
+  const handleSaveSubTeam = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!subTeamForm.title || !subTeamForm.frontDesc) return;
+    const pointsArray = (subTeamForm.pointsText || "")
+      .split(",")
+      .map(p => p.trim())
+      .filter(p => p !== "");
+
+    let updated: SubTeamItem[];
+    if (modalMode === "edit" && editingId) {
+      updated = subTeams.map(s => s.id === editingId ? {
+        ...s,
+        ...subTeamForm,
+        points: pointsArray
+      } as SubTeamItem : s);
+    } else {
+      const newItem: SubTeamItem = {
+        id: `subteam-${Date.now()}`,
+        title: subTeamForm.title || "New Sub-Team",
+        category: subTeamForm.category || "Domain Wing",
+        color: (subTeamForm.color as any) || "sky",
+        frontDesc: subTeamForm.frontDesc || "",
+        backDesc: subTeamForm.backDesc || subTeamForm.frontDesc || "",
+        points: pointsArray.length > 0 ? pointsArray : ["Core Focus 1", "Core Focus 2", "Core Focus 3"]
+      };
+      updated = [...subTeams, newItem];
+    }
+    setSubTeams(updated);
+    DataStore.saveSubTeams(updated);
+    setModalMode(null);
+    showToast("Sub-Team domain saved successfully!");
+  };
+
+  const handleDeleteSubTeam = (id: string) => {
+    if (!confirm("Are you sure you want to delete this sub-team?")) return;
+    const updated = subTeams.filter(s => s.id !== id);
+    setSubTeams(updated);
+    DataStore.saveSubTeams(updated);
+    showToast("Sub-team removed.");
+  };
+
+  // --- CORE VALUES CRUD --- //
+  const openCoreValueModal = (item?: CoreValueItem) => {
+    if (item) {
+      setModalMode("edit");
+      setEditingId(item.id);
+      setCoreValueForm({
+        ...item,
+        pointsText: item.points.join(", ")
+      });
+    } else {
+      setModalMode("add");
+      setEditingId(null);
+      setCoreValueForm({
+        title: "",
+        category: "Guiding Principle",
+        color: "sky",
+        frontDesc: "",
+        backDesc: "",
+        pointsText: "Problem Solving, Real-World Mastery, Mentorship"
+      });
+    }
+  };
+
+  const handleSaveCoreValue = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!coreValueForm.title || !coreValueForm.frontDesc) return;
+    const pointsArray = (coreValueForm.pointsText || "")
+      .split(",")
+      .map(p => p.trim())
+      .filter(p => p !== "");
+
+    let updated: CoreValueItem[];
+    if (modalMode === "edit" && editingId) {
+      updated = coreValues.map(c => c.id === editingId ? {
+        ...c,
+        ...coreValueForm,
+        points: pointsArray
+      } as CoreValueItem : c);
+    } else {
+      const newItem: CoreValueItem = {
+        id: `core-${Date.now()}`,
+        title: coreValueForm.title || "New Value Pillar",
+        category: coreValueForm.category || "Guiding Pillar",
+        color: (coreValueForm.color as any) || "sky",
+        frontDesc: coreValueForm.frontDesc || "",
+        backDesc: coreValueForm.backDesc || coreValueForm.frontDesc || "",
+        points: pointsArray.length > 0 ? pointsArray : ["Principle 1", "Principle 2", "Principle 3"]
+      };
+      updated = [...coreValues, newItem];
+    }
+    setCoreValues(updated);
+    DataStore.saveCoreValues(updated);
+    setModalMode(null);
+    showToast("Core Value pillar saved successfully!");
+  };
+
+  const handleDeleteCoreValue = (id: string) => {
+    if (!confirm("Are you sure you want to delete this core value pillar?")) return;
+    const updated = coreValues.filter(c => c.id !== id);
+    setCoreValues(updated);
+    DataStore.saveCoreValues(updated);
+    showToast("Core value pillar removed.");
   };
 
   // --- NEWS & MONTHLY GAZETTE CRUD --- //
@@ -551,7 +690,8 @@ export default function AdminPage() {
             <SidebarTab id="dashboard" label="Overview" icon={LayoutDashboard} />
             <SidebarTab id="events" label="Events & Workshops" icon={CalendarIcon} count={events.length} />
             <SidebarTab id="team" label="Team Members" icon={Users} count={team.length} />
-            <SidebarTab id="legacy" label="Legacy of Leadership" icon={Award} count={legacyHeads.length} />
+            <SidebarTab id="about" label="About & Ecosystem" icon={Sparkles} count={subTeams.length + coreValues.length} />
+            <SidebarTab id="legacy" label="Hall of Fame & Alumni" icon={Award} count={legacyHeads.length} />
             <SidebarTab id="news" label="News & PDF Gazette" icon={Newspaper} count={newsIssues.length} />
             <SidebarTab id="gallery" label="Gallery Moments" icon={ImageIcon} count={gallery.length} />
             <SidebarTab id="stats" label="Homepage Stats" icon={BarChart3} />
@@ -612,7 +752,7 @@ export default function AdminPage() {
               </div>
 
               {/* Counters Grid */}
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div onClick={() => setActiveTab("events")} className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-sky-500/50 cursor-pointer transition-all">
                   <div className="text-3xl font-black text-sky-400 mb-1">{events.length}</div>
                   <div className="text-xs font-bold uppercase text-slate-400">Total Events</div>
@@ -621,16 +761,24 @@ export default function AdminPage() {
                   <div className="text-3xl font-black text-blue-400 mb-1">{team.length}</div>
                   <div className="text-xs font-bold uppercase text-slate-400">Team Members</div>
                 </div>
-                <div onClick={() => setActiveTab("legacy")} className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-cyan-500/50 cursor-pointer transition-all">
-                  <div className="text-3xl font-black text-cyan-400 mb-1">{legacyHeads.length}</div>
-                  <div className="text-xs font-bold uppercase text-slate-400">Legacy Leaders</div>
+                <div onClick={() => { setActiveTab("about"); setAboutSubTab("subteams"); }} className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-purple-500/50 cursor-pointer transition-all">
+                  <div className="text-3xl font-black text-purple-400 mb-1">{subTeams.length}</div>
+                  <div className="text-xs font-bold uppercase text-slate-400">Sub-Teams</div>
                 </div>
-                <div onClick={() => setActiveTab("news")} className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-indigo-500/50 cursor-pointer transition-all">
-                  <div className="text-3xl font-black text-indigo-400 mb-1">{newsIssues.length}</div>
+                <div onClick={() => { setActiveTab("about"); setAboutSubTab("corevalues"); }} className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-cyan-500/50 cursor-pointer transition-all">
+                  <div className="text-3xl font-black text-cyan-400 mb-1">{coreValues.length}</div>
+                  <div className="text-xs font-bold uppercase text-slate-400">Core Values</div>
+                </div>
+                <div onClick={() => setActiveTab("legacy")} className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-indigo-500/50 cursor-pointer transition-all">
+                  <div className="text-3xl font-black text-indigo-400 mb-1">{legacyHeads.length}</div>
+                  <div className="text-xs font-bold uppercase text-slate-400">Hall of Fame</div>
+                </div>
+                <div onClick={() => setActiveTab("news")} className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-sky-500/50 cursor-pointer transition-all">
+                  <div className="text-3xl font-black text-sky-400 mb-1">{newsIssues.length}</div>
                   <div className="text-xs font-bold uppercase text-slate-400">News Editions</div>
                 </div>
-                <div onClick={() => setActiveTab("gallery")} className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-sky-500/50 cursor-pointer transition-all">
-                  <div className="text-3xl font-black text-sky-400 mb-1">{gallery.length}</div>
+                <div onClick={() => setActiveTab("gallery")} className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-pink-500/50 cursor-pointer transition-all">
+                  <div className="text-3xl font-black text-pink-400 mb-1">{gallery.length}</div>
                   <div className="text-xs font-bold uppercase text-slate-400">Gallery Photos</div>
                 </div>
                 <div onClick={() => setActiveTab("stats")} className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-emerald-500/50 cursor-pointer transition-all">
@@ -770,38 +918,159 @@ export default function AdminPage() {
             </div>
           )}
 
-          {/* 4. LEGACY OF LEADERSHIP (FORMER HEADS) MANAGER */}
+          {/* 4. ABOUT & ECOSYSTEM MANAGER (SUB-TEAMS & CORE VALUES) */}
+          {activeTab === "about" && (
+            <div className="space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <h2 className="text-2xl font-extrabold text-white">About &amp; Ecosystem Manager</h2>
+                  <p className="text-xs text-slate-400 mt-0.5">Manage the 5 Sub-Teams domain wings and 4 Foundational Core Values.</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="bg-slate-950 p-1 rounded-xl border border-slate-800 flex gap-1">
+                    <button
+                      onClick={() => setAboutSubTab("subteams")}
+                      className={cn(
+                        "px-3 py-1.5 rounded-lg text-xs font-bold transition-all",
+                        aboutSubTab === "subteams" ? "bg-sky-500 text-white shadow-sm" : "text-slate-400 hover:text-white"
+                      )}
+                    >
+                      Sub-Teams ({subTeams.length})
+                    </button>
+                    <button
+                      onClick={() => setAboutSubTab("corevalues")}
+                      className={cn(
+                        "px-3 py-1.5 rounded-lg text-xs font-bold transition-all",
+                        aboutSubTab === "corevalues" ? "bg-sky-500 text-white shadow-sm" : "text-slate-400 hover:text-white"
+                      )}
+                    >
+                      Core Values ({coreValues.length})
+                    </button>
+                  </div>
+                  <button
+                    onClick={() => aboutSubTab === "subteams" ? openSubTeamModal() : openCoreValueModal()}
+                    className="flex items-center gap-2 px-3.5 py-2 bg-sky-500 hover:bg-sky-400 text-white rounded-xl text-xs font-bold transition-all shadow-md"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>Add {aboutSubTab === "subteams" ? "Sub-Team" : "Value"}</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Sub-Teams Sub-Tab */}
+              {aboutSubTab === "subteams" && (
+                <div className="space-y-4">
+                  {subTeams.map((st) => (
+                    <div key={st.id} className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                      <div className="max-w-2xl">
+                        <div className="flex items-center gap-2 mb-1.5">
+                          <span className="px-2.5 py-0.5 text-[10px] font-mono font-bold uppercase rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/30">
+                            {st.category}
+                          </span>
+                          <span className="text-xs text-slate-400 font-mono">Theme: {st.color}</span>
+                        </div>
+                        <h4 className="text-lg font-bold text-white mb-1">{st.title}</h4>
+                        <p className="text-slate-300 text-xs leading-relaxed mb-2">{st.frontDesc}</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {st.points.map((pt, idx) => (
+                            <span key={idx} className="text-[10px] font-mono bg-slate-950 text-slate-300 px-2 py-0.5 rounded border border-slate-800">
+                              ✓ {pt}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <button onClick={() => openSubTeamModal(st)} className="p-2.5 hover:bg-slate-800 text-slate-300 hover:text-sky-400 rounded-xl transition-colors">
+                          <Edit3 className="w-4 h-4" />
+                        </button>
+                        <button onClick={() => handleDeleteSubTeam(st.id)} className="p-2.5 hover:bg-rose-500/10 text-slate-400 hover:text-rose-400 rounded-xl transition-colors">
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Core Values Sub-Tab */}
+              {aboutSubTab === "corevalues" && (
+                <div className="space-y-4">
+                  {coreValues.map((cv) => (
+                    <div key={cv.id} className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                      <div className="max-w-2xl">
+                        <div className="flex items-center gap-2 mb-1.5">
+                          <span className="px-2.5 py-0.5 text-[10px] font-mono font-bold uppercase rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+                            {cv.category}
+                          </span>
+                          <span className="text-xs text-slate-400 font-mono">Theme: {cv.color}</span>
+                        </div>
+                        <h4 className="text-lg font-bold text-white mb-1">{cv.title}</h4>
+                        <p className="text-slate-300 text-xs leading-relaxed mb-2">{cv.frontDesc}</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {cv.points.map((pt, idx) => (
+                            <span key={idx} className="text-[10px] font-mono bg-slate-950 text-slate-300 px-2 py-0.5 rounded border border-slate-800">
+                              ✓ {pt}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <button onClick={() => openCoreValueModal(cv)} className="p-2.5 hover:bg-slate-800 text-slate-300 hover:text-sky-400 rounded-xl transition-colors">
+                          <Edit3 className="w-4 h-4" />
+                        </button>
+                        <button onClick={() => handleDeleteCoreValue(cv.id)} className="p-2.5 hover:bg-rose-500/10 text-slate-400 hover:text-rose-400 rounded-xl transition-colors">
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* 5. LEGACY OF LEADERSHIP & HALL OF FAME MANAGER */}
           {activeTab === "legacy" && (
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-2xl font-extrabold text-white">The Legacy of Leadership Manager</h2>
-                  <p className="text-xs text-slate-400 mt-0.5">Manage former heads (Astha Prakash Ma&apos;am, Shraddha Singh, etc.).</p>
+                  <h2 className="text-2xl font-extrabold text-white">Hall of Fame &amp; Alumni Leaders</h2>
+                  <p className="text-xs text-slate-400 mt-0.5">Manage alumni leaders, placements (Google, Microsoft, etc.), and tenures.</p>
                 </div>
                 <button
                   onClick={() => openLegacyModal()}
                   className="flex items-center gap-2 px-4 py-2 bg-sky-500 hover:bg-sky-400 text-white rounded-xl text-xs font-bold transition-all shadow-md"
                 >
                   <Plus className="w-4 h-4" />
-                  <span>Add Legacy Head</span>
+                  <span>Add Hall of Fame Leader</span>
                 </button>
               </div>
 
               <div className="space-y-4">
                 {legacyHeads.map((leader) => (
-                  <div key={leader.id} className="p-6 rounded-2xl bg-slate-900/80 border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div className="max-w-2xl">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="px-2 py-0.5 text-[10px] font-mono font-bold uppercase rounded bg-sky-500/20 text-sky-300 border border-sky-500/30">
-                          {leader.role}
+                  <div key={leader.id} className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div className="flex items-start gap-4 max-w-2xl">
+                      {leader.image && (
+                        <img src={leader.image} alt={leader.name} className="w-16 h-16 rounded-2xl object-cover border border-slate-700 shrink-0" />
+                      )}
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="px-2 py-0.5 text-[10px] font-mono font-bold uppercase rounded bg-sky-500/20 text-sky-300 border border-sky-500/30">
+                            {leader.role}
+                          </span>
+                          {leader.placedAt && (
+                            <span className="px-2 py-0.5 text-[10px] font-mono font-bold uppercase rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                              Placed @ {leader.placedAt}
+                            </span>
+                          )}
+                          <span className="text-xs text-slate-400 font-mono">• {leader.tenure}</span>
+                        </div>
+                        <h4 className="text-lg font-extrabold text-white mb-1">{leader.name}</h4>
+                        <p className="text-slate-300 text-xs leading-relaxed mb-2">{leader.bio}</p>
+                        <span className="text-[11px] font-mono text-sky-400 bg-slate-950 px-2.5 py-1 rounded-md border border-slate-800">
+                          {leader.highlight}
                         </span>
-                        <span className="text-xs text-slate-400 font-mono">• {leader.tenure}</span>
                       </div>
-                      <h4 className="text-xl font-extrabold text-white mb-2">{leader.name}</h4>
-                      <p className="text-slate-300 text-xs leading-relaxed mb-3">{leader.bio}</p>
-                      <span className="text-[11px] font-mono text-sky-400 bg-slate-950 px-2.5 py-1 rounded-md border border-slate-800">
-                        {leader.highlight}
-                      </span>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
                       <button onClick={() => openLegacyModal(leader)} className="p-2.5 hover:bg-slate-800 text-slate-300 hover:text-sky-400 rounded-xl transition-colors">
@@ -1005,92 +1274,87 @@ export default function AdminPage() {
               {modalMode === "add" ? "Add New" : "Edit"} {
                 activeTab === "events" ? "Event" :
                 activeTab === "team" ? "Team Member" :
-                activeTab === "legacy" ? "Legacy Leader" :
+                activeTab === "about" ? (aboutSubTab === "subteams" ? "Sub-Team Domain Wing" : "Core Value Pillar") :
+                activeTab === "legacy" ? "Hall of Fame Leader" :
                 activeTab === "news" ? "News Gazette Edition" : "Gallery Photo"
               }
             </h3>
 
-            {/* EVENT FORM */}
-            {activeTab === "events" && (
-              <form onSubmit={handleSaveEvent} className="space-y-4">
+            {/* ABOUT SUB-TEAM FORM */}
+            {activeTab === "about" && aboutSubTab === "subteams" && (
+              <form onSubmit={handleSaveSubTeam} className="space-y-4">
                 <div>
-                  <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Event Title</label>
-                  <input type="text" required value={eventForm.title || ""} onChange={(e) => setEventForm({ ...eventForm, title: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
+                  <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Sub-Team Title</label>
+                  <input type="text" required placeholder="e.g. Technical Team" value={subTeamForm.title || ""} onChange={(e) => setSubTeamForm({ ...subTeamForm, title: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Date</label>
-                    <input type="text" placeholder="e.g. October 15, 2024" required value={eventForm.date || ""} onChange={(e) => setEventForm({ ...eventForm, date: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
+                    <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Domain Category</label>
+                    <input type="text" placeholder="e.g. Core Engineering" value={subTeamForm.category || ""} onChange={(e) => setSubTeamForm({ ...subTeamForm, category: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
                   </div>
                   <div>
-                    <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Time / Duration</label>
-                    <input type="text" placeholder="e.g. 10:00 AM (48 Hrs)" value={eventForm.time || ""} onChange={(e) => setEventForm({ ...eventForm, time: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Category</label>
-                    <select value={eventForm.category || "upcoming"} onChange={(e) => setEventForm({ ...eventForm, category: e.target.value as any })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm">
-                      <option value="upcoming">Upcoming</option>
-                      <option value="current">Current / Live</option>
-                      <option value="past">Past</option>
+                    <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Accent Theme</label>
+                    <select value={subTeamForm.color || "sky"} onChange={(e) => setSubTeamForm({ ...subTeamForm, color: e.target.value as any })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm">
+                      <option value="sky">Sky Blue</option>
+                      <option value="purple">Purple</option>
+                      <option value="blue">Royal Blue</option>
+                      <option value="cyan">Electric Cyan</option>
+                      <option value="indigo">Indigo</option>
                     </select>
                   </div>
-                  <div>
-                    <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Location</label>
-                    <input type="text" value={eventForm.location || ""} onChange={(e) => setEventForm({ ...eventForm, location: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
-                  </div>
                 </div>
                 <div>
-                  <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Banner Image URL</label>
-                  <input type="text" placeholder="e.g. /images/... or https://..." value={eventForm.image || ""} onChange={(e) => setEventForm({ ...eventForm, image: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
+                  <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Front Short Description</label>
+                  <input type="text" required placeholder="Short summary displayed on front of card" value={subTeamForm.frontDesc || ""} onChange={(e) => setSubTeamForm({ ...subTeamForm, frontDesc: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
                 </div>
                 <div>
-                  <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Registration Link (Optional)</label>
-                  <input type="text" placeholder="https://forms.google.com/... or /events/..." value={eventForm.registrationUrl || ""} onChange={(e) => setEventForm({ ...eventForm, registrationUrl: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
+                  <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Back Full Description</label>
+                  <textarea rows={3} placeholder="Detailed role description on flip back" value={subTeamForm.backDesc || ""} onChange={(e) => setSubTeamForm({ ...subTeamForm, backDesc: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
                 </div>
                 <div>
-                  <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Description</label>
-                  <textarea rows={3} value={eventForm.description || ""} onChange={(e) => setEventForm({ ...eventForm, description: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
+                  <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Key Focus Points (Comma-separated)</label>
+                  <input type="text" placeholder="e.g. Next.js & Cloud, AI Pipelines, Open Source" value={subTeamForm.pointsText || ""} onChange={(e) => setSubTeamForm({ ...subTeamForm, pointsText: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
                 </div>
-                <button type="submit" className="w-full py-3 bg-sky-500 text-white font-bold rounded-xl text-sm">Save Event</button>
+                <button type="submit" className="w-full py-3 bg-sky-500 text-white font-bold rounded-xl text-sm">Save Sub-Team</button>
               </form>
             )}
 
-            {/* TEAM FORM */}
-            {activeTab === "team" && (
-              <form onSubmit={handleSaveTeam} className="space-y-4">
+            {/* ABOUT CORE VALUE FORM */}
+            {activeTab === "about" && aboutSubTab === "corevalues" && (
+              <form onSubmit={handleSaveCoreValue} className="space-y-4">
                 <div>
-                  <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Full Name</label>
-                  <input type="text" required value={teamForm.name || ""} onChange={(e) => setTeamForm({ ...teamForm, name: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
-                </div>
-                <div>
-                  <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Position / Role</label>
-                  <input type="text" placeholder="e.g. FOUNDER & CEO or CORE MEMBER" required value={teamForm.position || ""} onChange={(e) => setTeamForm({ ...teamForm, position: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
-                </div>
-                <div>
-                  <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Profile Photo URL</label>
-                  <input type="text" placeholder="e.g. /images/... or https://..." value={teamForm.image || ""} onChange={(e) => setTeamForm({ ...teamForm, image: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
-                </div>
-                <div>
-                  <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Skills (Comma-separated)</label>
-                  <input type="text" placeholder="e.g. Full-Stack, Cloud, DSA" value={teamForm.skillsText || ""} onChange={(e) => setTeamForm({ ...teamForm, skillsText: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
-                </div>
-                <div>
-                  <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Bio / Role Description</label>
-                  <textarea rows={2} value={teamForm.bio || ""} onChange={(e) => setTeamForm({ ...teamForm, bio: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
+                  <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Pillar Title</label>
+                  <input type="text" required placeholder="e.g. Hackathons & Tech Talks" value={coreValueForm.title || ""} onChange={(e) => setCoreValueForm({ ...coreValueForm, title: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-mono uppercase text-slate-400 mb-1">LinkedIn URL</label>
-                    <input type="text" placeholder="https://linkedin.com/in/..." value={teamForm.socials?.linkedin || ""} onChange={(e) => setTeamForm({ ...teamForm, socials: { ...teamForm.socials, linkedin: e.target.value } })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
+                    <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Pillar Category</label>
+                    <input type="text" placeholder="e.g. Innovation & Build" value={coreValueForm.category || ""} onChange={(e) => setCoreValueForm({ ...coreValueForm, category: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
                   </div>
                   <div>
-                    <label className="block text-xs font-mono uppercase text-slate-400 mb-1">GitHub URL</label>
-                    <input type="text" placeholder="https://github.com/..." value={teamForm.socials?.github || ""} onChange={(e) => setTeamForm({ ...teamForm, socials: { ...teamForm.socials, github: e.target.value } })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
+                    <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Accent Theme</label>
+                    <select value={coreValueForm.color || "sky"} onChange={(e) => setCoreValueForm({ ...coreValueForm, color: e.target.value as any })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm">
+                      <option value="sky">Sky Blue</option>
+                      <option value="blue">Royal Blue</option>
+                      <option value="cyan">Electric Cyan</option>
+                      <option value="indigo">Indigo</option>
+                      <option value="purple">Purple</option>
+                    </select>
                   </div>
                 </div>
-                <button type="submit" className="w-full py-3 bg-sky-500 text-white font-bold rounded-xl text-sm">Save Member</button>
+                <div>
+                  <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Front Short Description</label>
+                  <input type="text" required placeholder="Short summary displayed on front of card" value={coreValueForm.frontDesc || ""} onChange={(e) => setCoreValueForm({ ...coreValueForm, frontDesc: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
+                </div>
+                <div>
+                  <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Back Full Description</label>
+                  <textarea rows={3} placeholder="Detailed principle description on flip back" value={coreValueForm.backDesc || ""} onChange={(e) => setCoreValueForm({ ...coreValueForm, backDesc: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
+                </div>
+                <div>
+                  <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Pillar Deliverables (Comma-separated)</label>
+                  <input type="text" placeholder="e.g. 24-48h Sprints, Industry Speakers, Tech Workshops" value={coreValueForm.pointsText || ""} onChange={(e) => setCoreValueForm({ ...coreValueForm, pointsText: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
+                </div>
+                <button type="submit" className="w-full py-3 bg-sky-500 text-white font-bold rounded-xl text-sm">Save Core Value</button>
               </form>
             )}
 
@@ -1099,27 +1363,37 @@ export default function AdminPage() {
               <form onSubmit={handleSaveLegacy} className="space-y-4">
                 <div>
                   <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Leader Name</label>
-                  <input type="text" placeholder="e.g. Astha Prakash Ma’am" required value={legacyForm.name || ""} onChange={(e) => setLegacyForm({ ...legacyForm, name: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
+                  <input type="text" placeholder="e.g. Rahul Sharma" required value={legacyForm.name || ""} onChange={(e) => setLegacyForm({ ...legacyForm, name: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Role Title</label>
-                    <input type="text" placeholder="e.g. Former Head" value={legacyForm.role || ""} onChange={(e) => setLegacyForm({ ...legacyForm, role: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
+                    <input type="text" placeholder="e.g. President (2022-2023)" value={legacyForm.role || ""} onChange={(e) => setLegacyForm({ ...legacyForm, role: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
                   </div>
                   <div>
-                    <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Tenure / Focus</label>
-                    <input type="text" placeholder="e.g. Foundational Leadership" value={legacyForm.tenure || ""} onChange={(e) => setLegacyForm({ ...legacyForm, tenure: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
+                    <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Placed At Company</label>
+                    <input type="text" placeholder="e.g. Google, Microsoft, Amazon" value={legacyForm.placedAt || ""} onChange={(e) => setLegacyForm({ ...legacyForm, placedAt: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Tenure Period</label>
+                    <input type="text" placeholder="e.g. 2022-2023" value={legacyForm.tenure || ""} onChange={(e) => setLegacyForm({ ...legacyForm, tenure: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Photo URL</label>
+                    <input type="text" placeholder="e.g. /images/... or https://..." value={legacyForm.image || ""} onChange={(e) => setLegacyForm({ ...legacyForm, image: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
                   </div>
                 </div>
                 <div>
                   <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Highlight Badge Tag</label>
-                  <input type="text" placeholder="e.g. Foundational Leadership & Mentorship" value={legacyForm.highlight || ""} onChange={(e) => setLegacyForm({ ...legacyForm, highlight: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
+                  <input type="text" placeholder="e.g. SDE @ Google • 10+ Hackathons" value={legacyForm.highlight || ""} onChange={(e) => setLegacyForm({ ...legacyForm, highlight: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
                 </div>
                 <div>
                   <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Contribution Story / Bio</label>
-                  <textarea rows={4} required value={legacyForm.bio || ""} onChange={(e) => setLegacyForm({ ...legacyForm, bio: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
+                  <textarea rows={3} required value={legacyForm.bio || ""} onChange={(e) => setLegacyForm({ ...legacyForm, bio: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
                 </div>
-                <button type="submit" className="w-full py-3 bg-sky-500 text-white font-bold rounded-xl text-sm">Save Legacy Leader</button>
+                <button type="submit" className="w-full py-3 bg-sky-500 text-white font-bold rounded-xl text-sm">Save Hall of Fame Leader</button>
               </form>
             )}
 

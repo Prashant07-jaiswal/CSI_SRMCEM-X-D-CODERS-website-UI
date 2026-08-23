@@ -36,9 +36,30 @@ export interface LegacyHeadItem {
   name: string;
   role: string;
   tenure: string;
+  placedAt?: string;
   bio: string;
   highlight: string;
   image?: string;
+}
+
+export interface SubTeamItem {
+  id: string;
+  title: string;
+  category: string;
+  color: "sky" | "purple" | "blue" | "indigo" | "cyan";
+  frontDesc: string;
+  backDesc: string;
+  points: string[];
+}
+
+export interface CoreValueItem {
+  id: string;
+  title: string;
+  category: string;
+  color: "sky" | "blue" | "cyan" | "indigo" | "purple";
+  frontDesc: string;
+  backDesc: string;
+  points: string[];
 }
 
 export interface NewsIssueItem {
@@ -77,6 +98,8 @@ export interface WebsiteDataBackup {
   events: EventItem[];
   team: TeamMemberItem[];
   legacyHeads: LegacyHeadItem[];
+  subTeams?: SubTeamItem[];
+  coreValues?: CoreValueItem[];
   newsIssues: NewsIssueItem[];
   gallery: GalleryItem[];
   stats: ClubStats;
@@ -179,19 +202,130 @@ export const defaultTeam: TeamMemberItem[] = [
 export const defaultLegacyHeads: LegacyHeadItem[] = [
   {
     id: "legacy-1",
-    name: "Astha Prakash Ma’am",
-    role: "Former Head",
-    tenure: "Foundational Leadership",
-    bio: "As one of the former heads of CSI SRMCEM, Astha Prakash Ma’am played an important role in guiding the club and laying a strong foundation for its activities. Her leadership contributed to creating an environment where students could explore technology, collaborate with one another, and actively participate in the club's initiatives.",
-    highlight: "Foundational Leadership & Mentorship"
+    name: "Rahul Sharma",
+    role: "President (2022-2023)",
+    tenure: "2022-2023",
+    placedAt: "Google",
+    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=400&h=400",
+    bio: "Led the chapter to 10+ major hackathons and technical symposiums. Currently a Software Development Engineer focusing on cloud infrastructure.",
+    highlight: "SDE @ Google • 10+ National Hackathons"
   },
   {
     id: "legacy-2",
-    name: "Shraddha Singh",
-    role: "Former Head",
-    tenure: "Growth & Technical Initiatives",
-    bio: "Following Astha Prakash Ma’am, Shraddha Singh carried the responsibility of leading CSI SRMCEM forward. Her tenure added another chapter to the club's journey, encouraging students to take initiative, participate in technical activities, and contribute to the growth of the community.",
-    highlight: "Community Growth & Technical Expansion"
+    name: "Sneha Patel",
+    role: "Vice President (2021-2022)",
+    tenure: "2021-2022",
+    placedAt: "Microsoft",
+    image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=400&h=400",
+    bio: "Pioneered UI/UX design masterclasses and frontend architecture bootcamps. Currently a Product Designer crafting global enterprise software.",
+    highlight: "Product Designer @ Microsoft • Design Sprints"
+  },
+  {
+    id: "legacy-3",
+    name: "Aman Gupta",
+    role: "President (2020-2021)",
+    tenure: "2020-2021",
+    placedAt: "Amazon",
+    image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=400&h=400",
+    bio: "Steered the community through virtual hackathons and online coding initiatives. Now an AWS Cloud Solutions Architect.",
+    highlight: "Cloud Architect @ Amazon • AWS Certified"
+  },
+  {
+    id: "legacy-4",
+    name: "Priya Singh",
+    role: "President (2019-2020)",
+    tenure: "2019-2020",
+    placedAt: "Atlassian",
+    image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=400&h=400",
+    bio: "Built the foundation of our open-source and competitive programming culture. Working as a Backend Systems Engineer.",
+    highlight: "Backend Engineer @ Atlassian • Open Source"
+  }
+];
+
+export const defaultSubTeams: SubTeamItem[] = [
+  {
+    id: "subteam-1",
+    title: "Technical Team",
+    category: "Core Engineering",
+    color: "sky",
+    frontDesc: "Full-stack development, AI/ML, and open-source software.",
+    backDesc: "Our core engineering wing powering club web platforms, competitive tools, AI workflows, and automated judge systems.",
+    points: ["Next.js & Cloud Deployments", "AI/ML Model Pipelines", "Open Source Repositories"]
+  },
+  {
+    id: "subteam-2",
+    title: "Design & Media",
+    category: "UI/UX & Branding",
+    color: "purple",
+    frontDesc: "Visual aesthetics, interactive design & creative direction.",
+    backDesc: "From Figma wireframes to sleek 3D motion graphics and brand identity, we ensure every digital asset touches a world-class standard.",
+    points: ["Figma UI/UX & Prototypes", "3D Graphics & Animations", "Visual Brand Identity"]
+  },
+  {
+    id: "subteam-3",
+    title: "Event Management",
+    category: "Logistics & Hackathons",
+    color: "blue",
+    frontDesc: "Managing 48h hackathons, workshops & speaker logistics.",
+    backDesc: "We oversee end-to-end event execution, speaker hosting, platform judging setups, and physical venue coordination for 500+ attendees.",
+    points: ["48h Hackathon Operations", "Speaker Accommodations", "Live Bootcamp Coordination"]
+  },
+  {
+    id: "subteam-4",
+    title: "PR & Outreach",
+    category: "Sponsorships & Connect",
+    color: "indigo",
+    frontDesc: "Handling sponsorships, institutional partnerships & reach.",
+    backDesc: "We are the public ambassadors of the chapter. We secure corporate sponsorships, collaborate with top tech communities, and expand alumni networks.",
+    points: ["Corporate Sponsorships", "Inter-College Outreach", "Alumni Career Guidance"]
+  },
+  {
+    id: "subteam-5",
+    title: "Photography & Socials",
+    category: "Media & Social Channels",
+    color: "cyan",
+    frontDesc: "Capturing moments & managing our digital social presence.",
+    backDesc: "We capture high-octane moments from our tech events, produce cinematic recaps, and manage high-engagement channels on LinkedIn, Instagram & YouTube.",
+    points: ["Cinematic Event Shoots", "Social Media Campaigns", "Post-Event Video Recaps"]
+  }
+];
+
+export const defaultCoreValues: CoreValueItem[] = [
+  {
+    id: "core-1",
+    title: "Hackathons & Tech Talks",
+    category: "Innovation & Build",
+    color: "sky",
+    frontDesc: "Workshops, Speaker Sessions & 48h Hackathons exploring cutting-edge technology.",
+    backDesc: "We regularly organize 24-48 hour Hackathons and Tech Talks where students interact with experienced industry speakers, gain valuable real-world insights, and convert ambitious ideas into production-ready software.",
+    points: ["24-48 Hour Code Sprints", "Industry Expert Speakers", "Hands-on Tech Workshops"]
+  },
+  {
+    id: "core-2",
+    title: "Daily DSA & Contests",
+    category: "Algorithmic Excellence",
+    color: "blue",
+    frontDesc: "Daily Algorithm Practice & Live Coding Contests to sharpen problem solving under pressure.",
+    backDesc: "Focusing heavily on coding excellence through Daily DSA sessions with guided explanations, discussions, and practice. Regular contests challenge students to improve their algorithmic reasoning in a healthy, competitive environment.",
+    points: ["Daily Problem Practice", "Live Coding Contests", "Placement Interview Prep"]
+  },
+  {
+    id: "core-3",
+    title: "Real-World Projects",
+    category: "Full-Stack & Systems",
+    color: "cyan",
+    frontDesc: "Hands-on Development & Industry Stacks across Web, AI/ML, Cloud & Cybersecurity.",
+    backDesc: "Collaborative software development bridging the gap between classroom theory and production engineering. Students build scalable web platforms, machine learning models, and open-source tooling with senior mentorship.",
+    points: ["Production-Grade Apps", "Open-Source Collaboration", "Mentorship from Seniors"]
+  },
+  {
+    id: "core-4",
+    title: "Leadership & Community",
+    category: "Team & Growth",
+    color: "indigo",
+    frontDesc: "Teamwork, Content Creation & Growth cultivating the next generation of tech leaders.",
+    backDesc: "Beyond technical learning, we promote teamwork, technical content creation, and community engagement, ensuring every member gets opportunities to lead initiatives, collaborate, and build enduring networks.",
+    points: ["Peer Mentorship Network", "Technical Leadership Roles", "Alumni Career Guidance"]
   }
 ];
 
@@ -314,6 +448,8 @@ const STORAGE_KEYS = {
   EVENTS: "csi_cms_events_v2",
   TEAM: "csi_cms_team_v2",
   LEGACY: "csi_cms_legacy_v2",
+  SUBTEAMS: "csi_cms_subteams_v2",
+  COREVALUES: "csi_cms_corevalues_v2",
   NEWS: "csi_cms_news_v2",
   GALLERY: "csi_cms_gallery_v2",
   STATS: "csi_cms_stats_v2",
@@ -357,6 +493,14 @@ export const DataStore = {
   getLegacyHeads: (): LegacyHeadItem[] => getItem(STORAGE_KEYS.LEGACY, defaultLegacyHeads),
   saveLegacyHeads: (data: LegacyHeadItem[]) => setItem(STORAGE_KEYS.LEGACY, data),
 
+  // Sub-Teams
+  getSubTeams: (): SubTeamItem[] => getItem(STORAGE_KEYS.SUBTEAMS, defaultSubTeams),
+  saveSubTeams: (data: SubTeamItem[]) => setItem(STORAGE_KEYS.SUBTEAMS, data),
+
+  // Core Values
+  getCoreValues: (): CoreValueItem[] => getItem(STORAGE_KEYS.COREVALUES, defaultCoreValues),
+  saveCoreValues: (data: CoreValueItem[]) => setItem(STORAGE_KEYS.COREVALUES, data),
+
   // News Issues
   getNewsIssues: (): NewsIssueItem[] => {
     const issues = getItem(STORAGE_KEYS.NEWS, defaultNewsIssues);
@@ -392,6 +536,8 @@ export const DataStore = {
     events: DataStore.getEvents(),
     team: DataStore.getTeam(),
     legacyHeads: DataStore.getLegacyHeads(),
+    subTeams: DataStore.getSubTeams(),
+    coreValues: DataStore.getCoreValues(),
     newsIssues: DataStore.getNewsIssues(),
     gallery: DataStore.getGallery(),
     stats: DataStore.getStats(),
@@ -403,6 +549,8 @@ export const DataStore = {
       if (backup.events) DataStore.saveEvents(backup.events);
       if (backup.team) DataStore.saveTeam(backup.team);
       if (backup.legacyHeads) DataStore.saveLegacyHeads(backup.legacyHeads);
+      if (backup.subTeams) DataStore.saveSubTeams(backup.subTeams);
+      if (backup.coreValues) DataStore.saveCoreValues(backup.coreValues);
       if (backup.newsIssues) DataStore.saveNewsIssues(backup.newsIssues);
       if (backup.gallery) DataStore.saveGallery(backup.gallery);
       if (backup.stats) DataStore.saveStats(backup.stats);
@@ -418,6 +566,8 @@ export const DataStore = {
     DataStore.saveEvents(defaultEvents);
     DataStore.saveTeam(defaultTeam);
     DataStore.saveLegacyHeads(defaultLegacyHeads);
+    DataStore.saveSubTeams(defaultSubTeams);
+    DataStore.saveCoreValues(defaultCoreValues);
     DataStore.saveNewsIssues(defaultNewsIssues);
     DataStore.saveGallery(defaultGallery);
     DataStore.saveStats(defaultStats);

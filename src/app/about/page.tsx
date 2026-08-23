@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, type Variants } from "framer-motion";
 import { 
   Code, Users, Cpu, Terminal, Sparkles, ChevronDown, CheckCircle2, Flame, 
@@ -9,6 +9,26 @@ import {
 import { FaLinkedin } from "react-icons/fa";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/lib/themeContext";
+import { DataStore } from "@/lib/dataStore";
+
+const getSubTeamIcon = (title: string) => {
+  const t = title.toLowerCase();
+  if (t.includes("tech") || t.includes("code") || t.includes("dev")) return Code;
+  if (t.includes("design") || t.includes("media") || t.includes("ui")) return PenTool;
+  if (t.includes("event") || t.includes("hack") || t.includes("manage")) return Calendar;
+  if (t.includes("pr") || t.includes("outreach") || t.includes("sponsor")) return Users;
+  if (t.includes("photo") || t.includes("social") || t.includes("camera")) return Camera;
+  return Layers;
+};
+
+const getCoreValueIcon = (title: string) => {
+  const t = title.toLowerCase();
+  if (t.includes("hack") || t.includes("talk") || t.includes("workshop")) return Terminal;
+  if (t.includes("dsa") || t.includes("contest") || t.includes("algo")) return Flame;
+  if (t.includes("project") || t.includes("stack") || t.includes("dev")) return Cpu;
+  if (t.includes("leader") || t.includes("community") || t.includes("team")) return Users;
+  return Lightbulb;
+};
 
 // --- 1. INTERNAL SUB-TEAMS (ORIGINAL 5 DOMAINS ECOSYSTEM) --- //
 const subTeams = [
@@ -181,13 +201,13 @@ const milestones = [
   },
   {
     year: "2020",
-    title: "Virtual Transition",
-    description: "Successfully migrated all club activities online during the pandemic, reaching 1000+ members."
+    title: "Pan-India Expansion",
+    description: "Conducted virtual national bootcamps reaching over 2,000+ passionate engineers."
   },
   {
     year: "2024",
-    title: "100% Placement Milestone",
-    description: "Achieved a 100% placement record for all active CSI members."
+    title: "The Next Era",
+    description: "Pioneering AI systems, production full-stack apps, and open source development."
   }
 ];
 
@@ -234,6 +254,43 @@ export default function AboutPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [flippedCards, setFlippedCards] = useState<Record<string, boolean>>({});
   const { config } = useTheme();
+
+  const [subTeamsList, setSubTeamsList] = useState(subTeams);
+  const [coreValuesList, setCoreValuesList] = useState(coreValues);
+  const [legacyList, setLegacyList] = useState(pastHeads);
+
+  useEffect(() => {
+    const loadData = () => {
+      const storedSubTeams = DataStore.getSubTeams();
+      if (storedSubTeams && storedSubTeams.length > 0) {
+        setSubTeamsList(storedSubTeams.map(s => ({
+          ...s,
+          icon: getSubTeamIcon(s.title)
+        })));
+      }
+      const storedCoreValues = DataStore.getCoreValues();
+      if (storedCoreValues && storedCoreValues.length > 0) {
+        setCoreValuesList(storedCoreValues.map(c => ({
+          ...c,
+          icon: getCoreValueIcon(c.title)
+        })));
+      }
+      const storedLegacy = DataStore.getLegacyHeads();
+      if (storedLegacy && storedLegacy.length > 0) {
+        setLegacyList(storedLegacy.map(l => ({
+          name: l.name,
+          role: l.role,
+          image: l.image || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=400&h=400",
+          placedAt: l.placedAt || "Top Tech Tier",
+          backBio: l.bio
+        })));
+      }
+    };
+
+    loadData();
+    window.addEventListener("csi_data_updated", loadData);
+    return () => window.removeEventListener("csi_data_updated", loadData);
+  }, []);
 
   const toggleCardFlip = (key: string) => {
     setFlippedCards(prev => ({ ...prev, [key]: !prev[key] }));
@@ -310,12 +367,12 @@ export default function AboutPage() {
 
         {/* 5 Interactive Sub-Teams Domain Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
-          {subTeams.map((item, i) => {
+          {subTeamsList.map((item, i) => {
             const style = ecosystemStyles[item.color] || ecosystemStyles.sky;
-            const Icon = item.icon;
+            const Icon = item.icon || Layers;
             return (
               <motion.div
-                key={item.title}
+                key={item.title + i}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -342,7 +399,7 @@ export default function AboutPage() {
                       <span className={cn("px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider mb-2 inline-block border", style.badgeBg, style.badgeText, style.badgeBorder)}>
                         {item.category}
                       </span>
-                      <h3 className="text-lg font-extrabold text-white mb-2 tracking-tight">{item.title}</h3>
+                      <h3 className="text-xl font-bold text-white mb-2">{item.title}</h3>
                       <p className="text-slate-400 text-xs leading-relaxed">{item.frontDesc}</p>
                     </div>
                   </div>
@@ -353,8 +410,8 @@ export default function AboutPage() {
                     style.backBg
                   )}>
                     <div>
-                      <div className="flex items-center gap-2 mb-2.5">
-                        <Icon className={cn("w-4 h-4", style.iconColor)} />
+                      <div className="flex items-center gap-2 mb-2">
+                        <Icon className={cn("w-5 h-5", style.iconColor)} />
                         <h4 className="text-sm font-bold text-white tracking-wide">{item.title}</h4>
                       </div>
                       <p className="text-xs text-slate-300 leading-relaxed font-light mb-3">
@@ -363,8 +420,8 @@ export default function AboutPage() {
 
                       <div className="space-y-1.5">
                         {item.points.map((pt, idx) => (
-                          <div key={idx} className="flex items-center gap-1.5 text-[11px] text-slate-200">
-                            <CheckCircle2 className={cn("w-3 h-3 shrink-0", style.iconColor)} />
+                          <div key={idx} className="flex items-center gap-2 text-xs text-slate-300 font-mono">
+                            <CheckCircle2 className={cn("w-3.5 h-3.5 shrink-0", style.iconColor)} />
                             <span className="line-clamp-1">{pt}</span>
                           </div>
                         ))}
@@ -408,12 +465,12 @@ export default function AboutPage() {
 
         {/* 4 Interactive Core Values Domain Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {coreValues.map((item, i) => {
+          {coreValuesList.map((item, i) => {
             const style = ecosystemStyles[item.color] || ecosystemStyles.sky;
-            const Icon = item.icon;
+            const Icon = item.icon || Lightbulb;
             return (
               <motion.div
-                key={item.title}
+                key={item.title + i}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -635,9 +692,9 @@ export default function AboutPage() {
         </motion.div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {pastHeads.map((head, i) => (
+          {legacyList.map((head, i) => (
             <motion.div
-              key={head.name}
+              key={head.name + i}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
