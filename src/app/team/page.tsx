@@ -3,10 +3,9 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaLinkedin, FaGithub, FaInstagram } from "react-icons/fa";
-import { Sparkles, Award, Compass, HeartHandshake } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { useTheme } from "@/lib/themeContext";
 import { cn } from "@/lib/utils";
-import { DataStore, LegacyHeadItem } from "@/lib/dataStore";
 
 const defaultTeam = [
   // L1
@@ -381,7 +380,6 @@ const TeamBranch = ({ title, members, hoveredId, setHoveredId, cardDirection = "
 
 export default function TeamPage() {
   const [teamData, setTeamData] = useState<any[]>([]);
-  const [legacyHeads, setLegacyHeads] = useState<LegacyHeadItem[]>([]);
   const [isMounted, setIsMounted] = useState(false);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const { config } = useTheme();
@@ -389,10 +387,6 @@ export default function TeamPage() {
   useEffect(() => {
     setIsMounted(true);
     setTeamData(defaultTeam);
-    setLegacyHeads(DataStore.getLegacyHeads());
-    const handleUpdate = () => setLegacyHeads(DataStore.getLegacyHeads());
-    window.addEventListener("csi_data_updated", handleUpdate);
-    return () => window.removeEventListener("csi_data_updated", handleUpdate);
   }, []);
 
   if (!isMounted) return null;
@@ -523,93 +517,6 @@ export default function TeamPage() {
         </div>
 
       </div>
-
-      {/* ========================================================================= */}
-      {/* 4. THE LEGACY OF LEADERSHIP SECTION */}
-      {/* ========================================================================= */}
-      <section className="pt-16 border-t border-slate-800/80 max-w-7xl mx-auto px-4 md:px-16 lg:px-24">
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <div className="inline-block mb-4">
-            <span className="inline-flex items-center gap-2 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-sky-400 bg-sky-500/10 rounded-full border border-sky-500/30 shadow-[0_0_15px_rgba(56,189,248,0.2)]">
-              <Sparkles className="w-3.5 h-3.5 text-sky-400" />
-              Honoring Our Roots
-            </span>
-          </div>
-          <h2 className="text-4xl md:text-5xl font-extrabold text-white tracking-tight mb-6">
-            The Legacy of <span className={cn("text-transparent bg-clip-text bg-gradient-to-r", config.gradientText)}>Leadership</span>
-          </h2>
-          <p className="text-slate-300 text-lg leading-relaxed mb-4 font-light">
-            Every successful student organization is built not only by its present team, but also by the leaders who shaped its journey before them.
-          </p>
-          <p className="text-slate-400 text-base leading-relaxed">
-            At <strong className="text-sky-300 font-semibold">CSI SRMCEM</strong>, the legacy of the club has been strengthened by the dedication, vision, and leadership of its former heads.
-          </p>
-        </div>
-
-        {/* Former Heads Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto mb-12">
-          {legacyHeads.map((leader, index) => (
-            <motion.div
-              key={leader.id}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: index * 0.15 }}
-              className="p-8 md:p-10 rounded-3xl bg-slate-900/60 border border-slate-800 hover:border-sky-500/50 transition-all duration-300 backdrop-blur-xl shadow-2xl relative overflow-hidden group flex flex-col justify-between"
-            >
-              <div className="absolute top-0 right-0 w-48 h-48 bg-sky-500/10 blur-[60px] rounded-full pointer-events-none group-hover:bg-sky-500/20 transition-colors" />
-              <div>
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-12 h-12 rounded-2xl bg-sky-500/10 border border-sky-500/30 flex items-center justify-center text-sky-400 shadow-sm">
-                    {index % 2 === 0 ? <Award className="w-6 h-6" /> : <HeartHandshake className="w-6 h-6" />}
-                  </div>
-                  <div>
-                    <span className="text-[11px] font-mono font-bold uppercase tracking-widest text-sky-400">
-                      {leader.role} • {leader.tenure}
-                    </span>
-                    <h3 className="text-2xl font-extrabold text-white">{leader.name}</h3>
-                  </div>
-                </div>
-                <p className="text-slate-300 text-base leading-relaxed font-light">
-                  {leader.bio}
-                </p>
-              </div>
-              <div className="mt-8 pt-4 border-t border-slate-800/80 flex items-center gap-2 text-xs text-slate-400 font-mono">
-                <Compass className="w-4 h-4 text-sky-400" />
-                <span>{leader.highlight}</span>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-
-        {/* Continuing the Journey Card */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="max-w-5xl mx-auto relative p-1 rounded-3xl bg-gradient-to-r from-sky-500/40 via-blue-500/40 to-indigo-600/40 shadow-[0_0_50px_rgba(56,189,248,0.2)]"
-        >
-          <div className="bg-slate-950/90 backdrop-blur-2xl rounded-[22px] p-8 md:p-12 text-center relative overflow-hidden">
-            <div className="max-w-3xl mx-auto">
-              <span className="px-3.5 py-1 text-xs font-bold uppercase tracking-widest text-sky-400 bg-sky-500/10 rounded-full border border-sky-500/30 mb-4 inline-block shadow-sm">
-                Continuing the Journey
-              </span>
-              <h3 className="text-2xl md:text-3xl font-extrabold text-white mb-4 tracking-tight">
-                Building the Future on Strong Foundations
-              </h3>
-              <p className="text-slate-300 text-base md:text-lg leading-relaxed mb-6 font-light">
-                Their contributions remain a part of the story of <strong className="text-white font-medium">CSI SRMCEM</strong>. The current team continues to build upon the foundation created by the leaders who came before them, while working toward creating more opportunities for <strong className="text-sky-300 font-medium">technical learning, innovation, collaboration, and professional growth</strong>.
-              </p>
-              <div className="pt-6 border-t border-slate-800/80">
-                <p className="text-lg md:text-xl font-semibold italic text-transparent bg-clip-text bg-gradient-to-r from-sky-300 via-white to-blue-300">
-                  &ldquo;Their leadership may belong to the past, but their legacy continues to inspire the future of CSI SRMCEM.&rdquo;
-                </p>
-              </div>
-            </div>
-          </div>
-        </motion.div>
-      </section>
 
     </div>
   );
