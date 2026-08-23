@@ -4,14 +4,63 @@ import { useState } from "react";
 import { motion, type Variants } from "framer-motion";
 import { 
   Code, Users, Cpu, Terminal, Sparkles, ChevronDown, CheckCircle2, Flame, 
-  Award, Mail, ExternalLink 
+  Award, Mail, ExternalLink, PenTool, Calendar, Camera, Layers, Lightbulb
 } from "lucide-react";
 import { FaLinkedin } from "react-icons/fa";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/lib/themeContext";
 
-// --- ECOSYSTEM DOMAIN CARDS (DETAILED FOR ABOUT PAGE) --- //
-const ecosystemDomains = [
+// --- 1. INTERNAL SUB-TEAMS (ORIGINAL 5 DOMAINS ECOSYSTEM) --- //
+const subTeams = [
+  {
+    title: "Technical Team",
+    category: "Full-Stack & AI",
+    icon: Code,
+    color: "sky",
+    frontDesc: "Core developers building real-world projects & scalable tools.",
+    backDesc: "We focus on production engineering, algorithmic mastery, and building award-winning hackathon products across modern full-stack, Web3, and AI architectures.",
+    points: ["Full-Stack & Web3 Development", "AI / ML & Cloud Infrastructure", "Open-Source Tooling & PRs"]
+  },
+  {
+    title: "Design & Media",
+    category: "UI/UX & 3D Motion",
+    icon: PenTool,
+    color: "purple",
+    frontDesc: "The creative minds behind aesthetics, 3D graphics & UI/UX.",
+    backDesc: "From Figma wireframes to sleek 3D motion graphics and brand identity, we ensure every digital asset touches a world-class standard.",
+    points: ["Figma UI/UX & Prototypes", "3D Graphics & Animations", "Visual Brand Identity"]
+  },
+  {
+    title: "Event Management",
+    category: "Logistics & Hackathons",
+    icon: Calendar,
+    color: "blue",
+    frontDesc: "Managing 48h hackathons, workshops & speaker logistics.",
+    backDesc: "We oversee end-to-end event execution, speaker hosting, platform judging setups, and physical venue coordination for 500+ attendees.",
+    points: ["48h Hackathon Operations", "Speaker Accommodations", "Live Bootcamp Coordination"]
+  },
+  {
+    title: "PR & Outreach",
+    category: "Sponsorships & Connect",
+    icon: Users,
+    color: "indigo",
+    frontDesc: "Handling sponsorships, institutional partnerships & reach.",
+    backDesc: "We are the public ambassadors of the chapter. We secure corporate sponsorships, collaborate with top tech communities, and expand alumni networks.",
+    points: ["Corporate Sponsorships", "Inter-College Outreach", "Alumni Career Guidance"]
+  },
+  {
+    title: "Photography & Socials",
+    category: "Media & Social Channels",
+    icon: Camera,
+    color: "cyan",
+    frontDesc: "Capturing moments & managing our digital social presence.",
+    backDesc: "We capture high-octane moments from our tech events, produce cinematic recaps, and manage high-engagement channels on LinkedIn, Instagram & YouTube.",
+    points: ["Cinematic Event Shoots", "Social Media Campaigns", "Post-Event Video Recaps"]
+  }
+];
+
+// --- 2. CORE VALUES PILLARS (4 DOMAINS) --- //
+const coreValues = [
   {
     title: "Hackathons & Tech Talks",
     category: "Innovation & Build",
@@ -82,6 +131,17 @@ const ecosystemStyles: Record<string, {
     badgeBg: "bg-blue-500/20",
     badgeText: "text-blue-300",
     badgeBorder: "border-blue-500/30",
+  },
+  purple: {
+    border: "border-slate-800",
+    hoverBorder: "group-hover:border-purple-500/60",
+    frontGlow: "group-hover:shadow-[0_0_30px_rgba(168,85,247,0.25)]",
+    iconBg: "bg-purple-500/10",
+    iconColor: "text-purple-400",
+    backBg: "bg-gradient-to-br from-slate-900 via-purple-950/60 to-slate-950 border-purple-500/60 shadow-[0_0_30px_rgba(168,85,247,0.3)]",
+    badgeBg: "bg-purple-500/20",
+    badgeText: "text-purple-300",
+    badgeBorder: "border-purple-500/30",
   },
   cyan: {
     border: "border-slate-800",
@@ -255,9 +315,107 @@ export default function AboutPage() {
           </div>
         </motion.div>
 
-        {/* 4 Interactive Ecosystem Domain Cards */}
+        {/* 5 Interactive Sub-Teams Domain Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+          {subTeams.map((item, i) => {
+            const style = ecosystemStyles[item.color] || ecosystemStyles.sky;
+            const Icon = item.icon;
+            return (
+              <motion.div
+                key={item.title}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.08 }}
+                className="group h-[380px] [perspective:1000px]"
+              >
+                <div className="relative w-full h-full transition-transform duration-700 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]">
+                  
+                  {/* Front Side */}
+                  <div className={cn(
+                    "absolute inset-0 [backface-visibility:hidden] bg-slate-900/70 border rounded-3xl p-6 flex flex-col justify-between shadow-xl transition-all duration-300 backdrop-blur-xl",
+                    style.border,
+                    style.hoverBorder,
+                    style.frontGlow
+                  )}>
+                    <div>
+                      <div className={cn("w-12 h-12 rounded-2xl mb-4 border border-white/5 flex items-center justify-center shadow-sm", style.iconBg)}>
+                        <Icon className={cn("w-6 h-6", style.iconColor)} />
+                      </div>
+                      <span className={cn("px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider mb-2 inline-block border", style.badgeBg, style.badgeText, style.badgeBorder)}>
+                        {item.category}
+                      </span>
+                      <h3 className="text-lg font-extrabold text-white mb-2 tracking-tight">{item.title}</h3>
+                      <p className="text-slate-400 text-xs leading-relaxed">{item.frontDesc}</p>
+                    </div>
+                    
+                    <div className="flex items-center justify-between pt-3 border-t border-slate-800/80 text-[11px] font-mono text-slate-500">
+                      <span>Hover to flip ↻</span>
+                    </div>
+                  </div>
+
+                  {/* Back Side */}
+                  <div className={cn(
+                    "absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)] border rounded-3xl p-6 flex flex-col justify-between overflow-hidden transition-all duration-300",
+                    style.backBg
+                  )}>
+                    <div>
+                      <div className="flex items-center gap-2 mb-2.5">
+                        <Icon className={cn("w-4 h-4", style.iconColor)} />
+                        <h4 className="text-sm font-bold text-white tracking-wide">{item.title}</h4>
+                      </div>
+                      <p className="text-xs text-slate-300 leading-relaxed font-light mb-3">
+                        {item.backDesc}
+                      </p>
+
+                      <div className="space-y-1.5">
+                        {item.points.map((pt, idx) => (
+                          <div key={idx} className="flex items-center gap-1.5 text-[11px] text-slate-200">
+                            <CheckCircle2 className={cn("w-3 h-3 shrink-0", style.iconColor)} />
+                            <span className="line-clamp-1">{pt}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <div className="w-8 h-0.5 rounded-full bg-white/20 mt-1" />
+                  </div>
+
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* ========================================================================= */}
+      {/* 3. CORE VALUES (THE 4 FOUNDATIONAL PILLARS) */}
+      {/* ========================================================================= */}
+      <section className="py-24 px-4 md:px-16 lg:px-24 max-w-7xl mx-auto relative border-t border-slate-800/80">
+        <div className={cn("absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-4xl h-[400px] blur-[150px] pointer-events-none -z-10", config.glowClass2)} />
+
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={fadeUp}
+          className="text-center max-w-4xl mx-auto mb-16"
+        >
+          <span className="px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-sky-400 bg-sky-500/10 rounded-full border border-sky-500/30 inline-block mb-4 shadow-[0_0_15px_rgba(56,189,248,0.2)]">
+            <Sparkles className="w-3.5 h-3.5 inline mr-1 text-sky-400" />
+            Guiding Principles
+          </span>
+          <h2 className="text-4xl md:text-6xl font-extrabold text-white mb-4 tracking-tight">
+            Core <span className={cn("text-transparent bg-clip-text bg-gradient-to-r", config.gradientText)}>Values</span>
+          </h2>
+          <p className="text-slate-400 max-w-2xl mx-auto text-base md:text-lg">
+            The foundational pillars that guide our members towards engineering mastery, collaborative innovation, and leadership.
+          </p>
+        </motion.div>
+
+        {/* 4 Interactive Core Values Domain Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {ecosystemDomains.map((item, i) => {
+          {coreValues.map((item, i) => {
             const style = ecosystemStyles[item.color] || ecosystemStyles.sky;
             const Icon = item.icon;
             return (
