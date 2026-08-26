@@ -2,13 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { 
-  Lock, Trash2, Plus, Calendar as CalendarIcon, Users, Image as ImageIcon, 
+  Trash2, Plus, Calendar as CalendarIcon, Users, Image as ImageIcon, 
   Award, LayoutDashboard, LogOut, Newspaper, BarChart3, Download, Upload, 
   RotateCcw, Edit3, Check, X, Shield, Sparkles, ExternalLink, FileText, CheckCircle2,
   Search, Copy, Eye, SlidersHorizontal, RefreshCw, EyeOff
 } from "lucide-react";
 import { 
-  DataStore, EventItem, TeamMemberItem, LegacyHeadItem, SubTeamItem, 
+  DataStore, AdminAuth, EventItem, TeamMemberItem, LegacyHeadItem, SubTeamItem, 
   CoreValueItem, NewsIssueItem, GalleryItem, ClubStats 
 } from "@/lib/dataStore";
 import { cn } from "@/lib/utils";
@@ -17,7 +17,10 @@ type ActiveTab = "dashboard" | "events" | "team" | "about" | "legacy" | "news" |
 
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [checkingSession, setCheckingSession] = useState(true);
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loginError, setLoginError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<ActiveTab>("dashboard");
   const [notification, setNotification] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -56,21 +59,40 @@ export default function AdminPage() {
   const [newsForm, setNewsForm] = useState<Partial<NewsIssueItem> & { topicsText?: string }>({});
   const [galleryForm, setGalleryForm] = useState<Partial<GalleryItem>>({});
   
-  // Password change state
-  const [newPassword, setNewPassword] = useState("");
-  const [showPasswordChange, setShowPasswordChange] = useState(false);
-
-  // Load from DataStore
-  const reloadData = () => {
-    setEvents(DataStore.getEvents());
-    setTeam(DataStore.getTeam());
-    setLegacyHeads(DataStore.getLegacyHeads());
-    setSubTeams(DataStore.getSubTeams());
-    setCoreValues(DataStore.getCoreValues());
-    setNewsIssues(DataStore.getNewsIssues());
-    setGallery(DataStore.getGallery());
-    setStats(DataStore.getStats());
+  // Load from DataStore (now async -- data comes from Supabase)
+  const reloadData = async () => {
+    const [events, team, legacyHeads, subTeams, coreValues, newsIssues, gallery, stats] = await Promise.all([
+      DataStore.getEvents(),
+      DataStore.getTeam(),
+      DataStore.getLegacyHeads(),
+      DataStore.getSubTeams(),
+      DataStore.getCoreValues(),
+      DataStore.getNewsIssues(),
+      DataStore.getGallery(),
+      DataStore.getStats(),
+    ]);
+    setEvents(events);
+    setTeam(team);
+    setLegacyHeads(legacyHeads);
+    setSubTeams(subTeams);
+    setCoreValues(coreValues);
+    setNewsIssues(newsIssues);
+    setGallery(gallery);
+    setStats(stats);
   };
+
+  // On mount: check if there's already a logged-in Supabase session
+  // (e.g. the admin refreshed the page) so they don't get logged out.
+  useEffect(() => {
+    AdminAuth.getSession().then((session) => {
+      setIsAuthenticated(!!session);
+      setCheckingSession(false);
+    });
+    const subscription = AdminAuth.onAuthStateChange((isLoggedIn) => {
+      setIsAuthenticated(isLoggedIn);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -83,37 +105,30 @@ export default function AdminPage() {
     setTimeout(() => setNotification(null), 3500);
   };
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    const storedPwd = DataStore.getAdminPassword();
-    if (password === storedPwd) {
-      setIsAuthenticated(true);
+    setLoginError(null);
+    const { error } = await AdminAuth.login(email, password);
+    if (error) {
+      setLoginError(error);
+      setPassword("");
+    } else {
       setPassword("");
       showToast("Signed in to Admin CMS successfully!");
-    } else {
-      alert("Invalid master password. Access denied.");
-      setPassword("");
+      // onAuthStateChange above will flip isAuthenticated to true
     }
   };
 
-  const handleSignOut = () => {
-    setIsAuthenticated(false);
+  const handleSignOut = async () => {
+    await AdminAuth.logout();
+    setEmail("");
     setPassword("");
     showToast("Signed out.");
   };
 
-  const handleChangePassword = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newPassword.trim()) return;
-    DataStore.saveAdminPassword(newPassword.trim());
-    setNewPassword("");
-    setShowPasswordChange(false);
-    showToast("Master password updated successfully!");
-  };
-
   // --- EXPORT & IMPORT BACKUP --- //
-  const handleExportBackup = () => {
-    const backup = DataStore.exportBackup();
+  const handleExportBackup = async () => {
+    const backup = await DataStore.exportBackup();
     const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -128,10 +143,10 @@ export default function AdminPage() {
     const file = e.target.files?.[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = (evt) => {
+    reader.onload = async (evt) => {
       try {
         const parsed = JSON.parse(evt.target?.result as string);
-        if (DataStore.importBackup(parsed)) {
+        if (await DataStore.importBackup(parsed)) {
           reloadData();
           showToast("Data backup restored successfully!");
         } else {
@@ -144,9 +159,9 @@ export default function AdminPage() {
     reader.readAsText(file);
   };
 
-  const handleResetDefaults = () => {
+  const handleResetDefaults = async () => {
     if (confirm("Are you sure you want to reset all data to official defaults? This will erase custom additions.")) {
-      DataStore.resetToDefaults();
+      await DataStore.resetToDefaults();
       reloadData();
       showToast("Reset to official defaults complete!");
     }
@@ -678,6 +693,14 @@ export default function AdminPage() {
   });
 
   // --- LOGIN VIEW --- //
+  if (checkingSession) {
+    return (
+      <div className="min-h-[80vh] flex items-center justify-center px-4">
+        <RefreshCw className="w-6 h-6 text-sky-400 animate-spin" />
+      </div>
+    );
+  }
+
   if (!isAuthenticated) {
     return (
       <div className="min-h-[80vh] flex items-center justify-center px-4 relative overflow-hidden">
@@ -694,16 +717,30 @@ export default function AdminPage() {
           </p>
           <form onSubmit={handleLogin} className="space-y-5">
             <div>
-              <label className="block text-xs font-mono uppercase text-slate-400 mb-2">Master Password</label>
+              <label className="block text-xs font-mono uppercase text-slate-400 mb-2">Email</label>
+              <input 
+                type="email" 
+                placeholder="admin@example.com" 
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                autoComplete="username"
+                className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3.5 text-white focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-all text-sm font-mono tracking-wider"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-mono uppercase text-slate-400 mb-2">Password</label>
               <input 
                 type="password" 
-                placeholder="Enter master password" 
+                placeholder="Enter password" 
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 autoComplete="current-password"
                 className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3.5 text-white focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-all text-sm font-mono tracking-wider"
               />
             </div>
+            {loginError && (
+              <p className="text-rose-400 text-xs font-mono">{loginError}</p>
+            )}
             <button 
               type="submit" 
               className="w-full bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-bold py-3.5 rounded-xl transition-all shadow-[0_0_25px_rgba(56,189,248,0.3)] hover:scale-[1.02]"
@@ -780,13 +817,6 @@ export default function AdminPage() {
 
           <div className="mt-8 pt-4 border-t border-slate-800 space-y-2">
             <button 
-              onClick={() => setShowPasswordChange(!showPasswordChange)}
-              className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-slate-400 hover:text-sky-300 hover:bg-slate-800/50 rounded-xl transition-all"
-            >
-              <Lock className="w-3.5 h-3.5" />
-              <span>Change Password</span>
-            </button>
-            <button 
               onClick={handleSignOut} 
               className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-rose-400 hover:bg-rose-500/10 rounded-xl transition-all font-semibold"
             >
@@ -794,23 +824,6 @@ export default function AdminPage() {
               <span>Sign Out</span>
             </button>
           </div>
-
-          {/* Change Password Dialog */}
-          {showPasswordChange && (
-            <form onSubmit={handleChangePassword} className="mt-3 p-3 bg-slate-950 rounded-xl border border-slate-800 space-y-2">
-              <input
-                type="password"
-                placeholder="New Master Password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-xs text-white"
-                required
-              />
-              <button type="submit" className="w-full py-1.5 bg-sky-500 text-white rounded-lg text-xs font-bold hover:bg-sky-400">
-                Update Password
-              </button>
-            </form>
-          )}
         </div>
 
         {/* ========================================================================= */}

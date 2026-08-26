@@ -21,8 +21,8 @@ export default function EventsPage() {
   const [eventsData, setEventsData] = useState<EventItem[]>([]);
   const [visibleCount, setVisibleCount] = useState(6);
 
-  const loadData = () => {
-    setEventsData(DataStore.getEvents());
+  const loadData = async () => {
+    setEventsData(await DataStore.getEvents());
   };
 
   useEffect(() => {

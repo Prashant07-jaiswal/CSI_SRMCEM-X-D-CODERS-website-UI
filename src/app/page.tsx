@@ -26,9 +26,9 @@ export default function Home() {
     setFlippedCards(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
-  const loadData = () => {
-    setStats(DataStore.getStats());
-    const events = DataStore.getEvents();
+  const loadData = async () => {
+    setStats(await DataStore.getStats());
+    const events = await DataStore.getEvents();
     const upcoming = events.find(e => e.category === "upcoming") || events[0] || null;
     setFeaturedEvent(upcoming);
   };

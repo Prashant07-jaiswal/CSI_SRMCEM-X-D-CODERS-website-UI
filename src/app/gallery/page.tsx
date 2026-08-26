@@ -11,8 +11,8 @@ export default function GalleryPage() {
   const [galleryData, setGalleryData] = useState<GalleryItem[]>([]);
   const { config } = useTheme();
 
-  const loadData = () => {
-    setGalleryData(DataStore.getGallery());
+  const loadData = async () => {
+    setGalleryData(await DataStore.getGallery());
   };
 
   useEffect(() => {

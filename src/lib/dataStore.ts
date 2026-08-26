@@ -441,119 +441,138 @@ export const defaultStats: ClubStats = {
 };
 
 // ============================================================================
-// STORAGE HELPERS (LOCALSTORAGE SYNC)
+// STORAGE HELPERS (SUPABASE-BACKED)
 // ============================================================================
+// Same "one JSON blob per collection" idea as before, except the blob now
+// lives in the `site_content` table in Supabase instead of localStorage.
+// That's what makes an edit in /admin visible to every visitor, everywhere,
+// instead of just the browser that made the edit.
 
-const STORAGE_KEYS = {
-  EVENTS: "csi_cms_events_v2",
-  TEAM: "csi_cms_team_v2",
-  LEGACY: "csi_cms_legacy_v2",
-  SUBTEAMS: "csi_cms_subteams_v2",
-  COREVALUES: "csi_cms_corevalues_v2",
-  NEWS: "csi_cms_news_v2",
-  GALLERY: "csi_cms_gallery_v2",
-  STATS: "csi_cms_stats_v2",
-  PASSWORD: "csi_cms_admin_pwd",
+import { supabase } from "./supabaseClient";
+
+const CONTENT_KEYS = {
+  EVENTS: "events",
+  TEAM: "team",
+  LEGACY: "legacyHeads",
+  SUBTEAMS: "subTeams",
+  COREVALUES: "coreValues",
+  NEWS: "newsIssues",
+  GALLERY: "gallery",
+  STATS: "stats",
 };
 
-// Helper: Safely get data from localStorage or fallback
-function getItem<T>(key: string, fallback: T): T {
-  if (typeof window === "undefined") return fallback;
+// Read one JSON blob by key. Falls back to the default seed data if the
+// row doesn't exist yet (e.g. brand-new Supabase project) or on any error.
+async function getContent<T>(key: string, fallback: T): Promise<T> {
   try {
-    const item = localStorage.getItem(key);
-    return item ? JSON.parse(item) : fallback;
+    const { data, error } = await supabase
+      .from("site_content")
+      .select("value")
+      .eq("key", key)
+      .maybeSingle();
+
+    if (error) {
+      console.error(`Error reading "${key}" from Supabase:`, error.message);
+      return fallback;
+    }
+    return data ? (data.value as T) : fallback;
   } catch (error) {
-    console.error(`Error reading ${key} from storage:`, error);
+    console.error(`Error reading "${key}" from Supabase:`, error);
     return fallback;
   }
 }
 
-// Helper: Safely set data to localStorage & notify
-function setItem<T>(key: string, value: T): void {
-  if (typeof window === "undefined") return;
+// Write one JSON blob by key. Requires an authenticated (logged-in) admin
+// session -- Row Level Security on the `site_content` table blocks writes
+// from anyone who isn't signed in. Returns any error so the caller (e.g.
+// the admin panel) can show a message instead of silently failing.
+async function setContent<T>(key: string, value: T): Promise<{ error: string | null }> {
   try {
-    localStorage.setItem(key, JSON.stringify(value));
-    window.dispatchEvent(new Event("csi_data_updated"));
+    const { error } = await supabase
+      .from("site_content")
+      .upsert({ key, value, updated_at: new Date().toISOString() });
+
+    if (error) {
+      console.error(`Error saving "${key}" to Supabase:`, error.message);
+      return { error: error.message };
+    }
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("csi_data_updated"));
+    }
+    return { error: null };
   } catch (error) {
-    console.error(`Error saving ${key} to storage:`, error);
+    console.error(`Error saving "${key}" to Supabase:`, error);
+    return { error: (error as Error).message };
   }
 }
 
-// Public CMS Getters & Setters
+// Public CMS Getters & Setters -- every function is now async (returns a
+// Promise), since it goes over the network to Supabase instead of reading
+// localStorage synchronously. Pages that call these need `await`.
 export const DataStore = {
   // Events
-  getEvents: (): EventItem[] => getItem(STORAGE_KEYS.EVENTS, defaultEvents),
-  saveEvents: (data: EventItem[]) => setItem(STORAGE_KEYS.EVENTS, data),
+  getEvents: (): Promise<EventItem[]> => getContent(CONTENT_KEYS.EVENTS, defaultEvents),
+  saveEvents: (data: EventItem[]) => setContent(CONTENT_KEYS.EVENTS, data),
 
   // Team
-  getTeam: (): TeamMemberItem[] => getItem(STORAGE_KEYS.TEAM, defaultTeam),
-  saveTeam: (data: TeamMemberItem[]) => setItem(STORAGE_KEYS.TEAM, data),
+  getTeam: (): Promise<TeamMemberItem[]> => getContent(CONTENT_KEYS.TEAM, defaultTeam),
+  saveTeam: (data: TeamMemberItem[]) => setContent(CONTENT_KEYS.TEAM, data),
 
   // Legacy Heads
-  getLegacyHeads: (): LegacyHeadItem[] => getItem(STORAGE_KEYS.LEGACY, defaultLegacyHeads),
-  saveLegacyHeads: (data: LegacyHeadItem[]) => setItem(STORAGE_KEYS.LEGACY, data),
+  getLegacyHeads: (): Promise<LegacyHeadItem[]> => getContent(CONTENT_KEYS.LEGACY, defaultLegacyHeads),
+  saveLegacyHeads: (data: LegacyHeadItem[]) => setContent(CONTENT_KEYS.LEGACY, data),
 
   // Sub-Teams
-  getSubTeams: (): SubTeamItem[] => getItem(STORAGE_KEYS.SUBTEAMS, defaultSubTeams),
-  saveSubTeams: (data: SubTeamItem[]) => setItem(STORAGE_KEYS.SUBTEAMS, data),
+  getSubTeams: (): Promise<SubTeamItem[]> => getContent(CONTENT_KEYS.SUBTEAMS, defaultSubTeams),
+  saveSubTeams: (data: SubTeamItem[]) => setContent(CONTENT_KEYS.SUBTEAMS, data),
 
   // Core Values
-  getCoreValues: (): CoreValueItem[] => getItem(STORAGE_KEYS.COREVALUES, defaultCoreValues),
-  saveCoreValues: (data: CoreValueItem[]) => setItem(STORAGE_KEYS.COREVALUES, data),
+  getCoreValues: (): Promise<CoreValueItem[]> => getContent(CONTENT_KEYS.COREVALUES, defaultCoreValues),
+  saveCoreValues: (data: CoreValueItem[]) => setContent(CONTENT_KEYS.COREVALUES, data),
 
   // News Issues
-  getNewsIssues: (): NewsIssueItem[] => {
-    const issues = getItem(STORAGE_KEYS.NEWS, defaultNewsIssues);
+  getNewsIssues: async (): Promise<NewsIssueItem[]> => {
+    const issues = await getContent(CONTENT_KEYS.NEWS, defaultNewsIssues);
     return issues.map(item => ({
       ...item,
       pdfUrl: item.pdfUrl && item.pdfUrl.includes("w3.org") ? "/documents/csi-gazette-october-2024.pdf" : item.pdfUrl
     }));
   },
-  saveNewsIssues: (data: NewsIssueItem[]) => setItem(STORAGE_KEYS.NEWS, data),
+  saveNewsIssues: (data: NewsIssueItem[]) => setContent(CONTENT_KEYS.NEWS, data),
 
   // Gallery
-  getGallery: (): GalleryItem[] => getItem(STORAGE_KEYS.GALLERY, defaultGallery),
-  saveGallery: (data: GalleryItem[]) => setItem(STORAGE_KEYS.GALLERY, data),
+  getGallery: (): Promise<GalleryItem[]> => getContent(CONTENT_KEYS.GALLERY, defaultGallery),
+  saveGallery: (data: GalleryItem[]) => setContent(CONTENT_KEYS.GALLERY, data),
 
   // Stats
-  getStats: (): ClubStats => getItem(STORAGE_KEYS.STATS, defaultStats),
-  saveStats: (data: ClubStats) => setItem(STORAGE_KEYS.STATS, data),
-
-  // Admin Password
-  getAdminPassword: (): string => {
-    if (typeof window === "undefined") return "admin123";
-    return localStorage.getItem(STORAGE_KEYS.PASSWORD) || "admin123";
-  },
-  saveAdminPassword: (pwd: string) => {
-    if (typeof window === "undefined") return;
-    localStorage.setItem(STORAGE_KEYS.PASSWORD, pwd);
-  },
+  getStats: (): Promise<ClubStats> => getContent(CONTENT_KEYS.STATS, defaultStats),
+  saveStats: (data: ClubStats) => setContent(CONTENT_KEYS.STATS, data),
 
   // Export Complete Backup JSON
-  exportBackup: (): WebsiteDataBackup => ({
+  exportBackup: async (): Promise<WebsiteDataBackup> => ({
     version: "2.0",
     exportedAt: new Date().toISOString(),
-    events: DataStore.getEvents(),
-    team: DataStore.getTeam(),
-    legacyHeads: DataStore.getLegacyHeads(),
-    subTeams: DataStore.getSubTeams(),
-    coreValues: DataStore.getCoreValues(),
-    newsIssues: DataStore.getNewsIssues(),
-    gallery: DataStore.getGallery(),
-    stats: DataStore.getStats(),
+    events: await DataStore.getEvents(),
+    team: await DataStore.getTeam(),
+    legacyHeads: await DataStore.getLegacyHeads(),
+    subTeams: await DataStore.getSubTeams(),
+    coreValues: await DataStore.getCoreValues(),
+    newsIssues: await DataStore.getNewsIssues(),
+    gallery: await DataStore.getGallery(),
+    stats: await DataStore.getStats(),
   }),
 
   // Import Complete Backup JSON
-  importBackup: (backup: Partial<WebsiteDataBackup>): boolean => {
+  importBackup: async (backup: Partial<WebsiteDataBackup>): Promise<boolean> => {
     try {
-      if (backup.events) DataStore.saveEvents(backup.events);
-      if (backup.team) DataStore.saveTeam(backup.team);
-      if (backup.legacyHeads) DataStore.saveLegacyHeads(backup.legacyHeads);
-      if (backup.subTeams) DataStore.saveSubTeams(backup.subTeams);
-      if (backup.coreValues) DataStore.saveCoreValues(backup.coreValues);
-      if (backup.newsIssues) DataStore.saveNewsIssues(backup.newsIssues);
-      if (backup.gallery) DataStore.saveGallery(backup.gallery);
-      if (backup.stats) DataStore.saveStats(backup.stats);
+      if (backup.events) await DataStore.saveEvents(backup.events);
+      if (backup.team) await DataStore.saveTeam(backup.team);
+      if (backup.legacyHeads) await DataStore.saveLegacyHeads(backup.legacyHeads);
+      if (backup.subTeams) await DataStore.saveSubTeams(backup.subTeams);
+      if (backup.coreValues) await DataStore.saveCoreValues(backup.coreValues);
+      if (backup.newsIssues) await DataStore.saveNewsIssues(backup.newsIssues);
+      if (backup.gallery) await DataStore.saveGallery(backup.gallery);
+      if (backup.stats) await DataStore.saveStats(backup.stats);
       return true;
     } catch (e) {
       console.error("Failed to import backup", e);
@@ -562,14 +581,38 @@ export const DataStore = {
   },
 
   // Reset Everything to Official Defaults
-  resetToDefaults: () => {
-    DataStore.saveEvents(defaultEvents);
-    DataStore.saveTeam(defaultTeam);
-    DataStore.saveLegacyHeads(defaultLegacyHeads);
-    DataStore.saveSubTeams(defaultSubTeams);
-    DataStore.saveCoreValues(defaultCoreValues);
-    DataStore.saveNewsIssues(defaultNewsIssues);
-    DataStore.saveGallery(defaultGallery);
-    DataStore.saveStats(defaultStats);
+  resetToDefaults: async () => {
+    await DataStore.saveEvents(defaultEvents);
+    await DataStore.saveTeam(defaultTeam);
+    await DataStore.saveLegacyHeads(defaultLegacyHeads);
+    await DataStore.saveSubTeams(defaultSubTeams);
+    await DataStore.saveCoreValues(defaultCoreValues);
+    await DataStore.saveNewsIssues(defaultNewsIssues);
+    await DataStore.saveGallery(defaultGallery);
+    await DataStore.saveStats(defaultStats);
   }
+};
+
+// ============================================================================
+// ADMIN AUTH (SUPABASE AUTH)
+// ============================================================================
+// Replaces the old "plaintext password in localStorage" scheme. Admin users
+// are created once from the Supabase Dashboard (Authentication -> Users ->
+// Add user) -- there's no public sign-up page.
+export const AdminAuth = {
+  login: async (email: string, password: string) => {
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    return { session: data.session, error: error?.message ?? null };
+  },
+  logout: () => supabase.auth.signOut(),
+  getSession: async () => {
+    const { data } = await supabase.auth.getSession();
+    return data.session;
+  },
+  onAuthStateChange: (callback: (isLoggedIn: boolean) => void) => {
+    const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+      callback(!!session);
+    });
+    return data.subscription;
+  },
 };

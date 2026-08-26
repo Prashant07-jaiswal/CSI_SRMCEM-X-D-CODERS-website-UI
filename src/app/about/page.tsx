@@ -260,22 +260,22 @@ export default function AboutPage() {
   const [legacyList, setLegacyList] = useState(pastHeads);
 
   useEffect(() => {
-    const loadData = () => {
-      const storedSubTeams = DataStore.getSubTeams();
+    const loadData = async () => {
+      const storedSubTeams = await DataStore.getSubTeams();
       if (storedSubTeams && storedSubTeams.length > 0) {
         setSubTeamsList(storedSubTeams.map(s => ({
           ...s,
           icon: getSubTeamIcon(s.title)
         })));
       }
-      const storedCoreValues = DataStore.getCoreValues();
+      const storedCoreValues = await DataStore.getCoreValues();
       if (storedCoreValues && storedCoreValues.length > 0) {
         setCoreValuesList(storedCoreValues.map(c => ({
           ...c,
           icon: getCoreValueIcon(c.title)
         })));
       }
-      const storedLegacy = DataStore.getLegacyHeads();
+      const storedLegacy = await DataStore.getLegacyHeads();
       if (storedLegacy && storedLegacy.length > 0) {
         setLegacyList(storedLegacy.map(l => ({
           name: l.name,

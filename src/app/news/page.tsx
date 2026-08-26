@@ -22,8 +22,8 @@ export default function NewsPage() {
   const handleZoomOut = () => setZoom(prev => Math.max(prev - 15, 60));
   const handleResetZoom = () => setZoom(100);
 
-  const loadData = () => {
-    setIssues(DataStore.getNewsIssues());
+  const loadData = async () => {
+    setIssues(await DataStore.getNewsIssues());
   };
 
   useEffect(() => {
