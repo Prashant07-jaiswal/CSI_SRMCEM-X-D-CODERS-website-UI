@@ -17,10 +17,15 @@ export interface EventItem {
   registrationUrl?: string;
 }
 
+export type TeamCategory = "president" | "vicepresident" | "lead" | "colead" | "member";
+
 export interface TeamMemberItem {
   id: string;
   name: string;
   position: string;
+  category: TeamCategory;
+  domain?: string;
+  branch?: string;
   image: string;
   bio: string;
   skills: string[];
@@ -165,7 +170,8 @@ export const defaultTeam: TeamMemberItem[] = [
   { 
     id: "team-1", 
     name: "Abhay Shanker Tiwari", 
-    position: "FOUNDER & CEO", 
+    position: "FOUNDER & CEO",
+    category: "president",
     image: "https://images.unsplash.com/photo-1556157382-97eda2d62296?auto=format&fit=crop&q=80&w=300", 
     bio: "Visionary leader driving the club's mission to foster technological excellence and innovation.", 
     skills: ["Leadership", "Vision", "Strategy"], 
@@ -174,7 +180,8 @@ export const defaultTeam: TeamMemberItem[] = [
   { 
     id: "team-2", 
     name: "Abhishek Soni", 
-    position: "CO-FOUNDER & COO", 
+    position: "CO-FOUNDER & COO",
+    category: "vicepresident",
     image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=300", 
     bio: "Co-Founder & COO directing operations, business strategy, engineering workflows, and team execution.", 
     skills: ["Operations", "Strategy", "Execution"], 
@@ -183,7 +190,8 @@ export const defaultTeam: TeamMemberItem[] = [
   { 
     id: "team-3", 
     name: "Vanshika Saxena", 
-    position: "CORE COMMITTEE MEMBER", 
+    position: "CORE COMMITTEE MEMBER",
+    category: "member",
     image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=300", 
     bio: "Core contributor focusing on community engagement and managing technical events smoothly.", 
     skills: ["Management", "Community", "Events"], 
@@ -192,7 +200,8 @@ export const defaultTeam: TeamMemberItem[] = [
   { 
     id: "team-4", 
     name: "Abhinav Singh", 
-    position: "CORE COMMITTEE MEMBER", 
+    position: "CORE COMMITTEE MEMBER",
+    category: "member",
     image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=300", 
     bio: "Technical lead ensuring all systems and projects run efficiently without any bottlenecks.", 
     skills: ["Engineering", "Architecture", "Cloud"], 
@@ -508,6 +517,15 @@ async function setContent<T>(key: string, value: T): Promise<{ error: string | n
   }
 }
 
+function inferTeamCategory(position: string): TeamCategory {
+  const normalized = position.toLowerCase();
+  if (normalized.includes("vice president") || normalized.includes("coo")) return "vicepresident";
+  if (normalized.includes("co-head") || normalized.includes("cohead")) return "colead";
+  if (normalized.includes("president") || normalized.includes("founder") || normalized.includes("ceo")) return "president";
+  if (normalized.includes("head") || normalized.includes("lead")) return "lead";
+  return "member";
+}
+
 // Public CMS Getters & Setters -- every function is now async (returns a
 // Promise), since it goes over the network to Supabase instead of reading
 // localStorage synchronously. Pages that call these need `await`.
@@ -517,7 +535,15 @@ export const DataStore = {
   saveEvents: (data: EventItem[]) => setContent(CONTENT_KEYS.EVENTS, data),
 
   // Team
-  getTeam: (): Promise<TeamMemberItem[]> => getContent(CONTENT_KEYS.TEAM, defaultTeam),
+  getTeam: async (): Promise<TeamMemberItem[]> => {
+    const team = await getContent<Partial<TeamMemberItem>[]>(CONTENT_KEYS.TEAM, defaultTeam);
+    return team.map(member => ({
+      ...member,
+      category: member.category || inferTeamCategory(member.position || ""),
+      skills: member.skills || [],
+      socials: member.socials || {},
+    } as TeamMemberItem));
+  },
   saveTeam: (data: TeamMemberItem[]) => setContent(CONTENT_KEYS.TEAM, data),
 
   // Legacy Heads

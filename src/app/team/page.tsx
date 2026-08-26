@@ -6,6 +6,7 @@ import { FaLinkedin, FaGithub, FaInstagram } from "react-icons/fa";
 import { Sparkles } from "lucide-react";
 import { useTheme } from "@/lib/themeContext";
 import { cn } from "@/lib/utils";
+import { DataStore, TeamCategory } from "@/lib/dataStore";
 
 const defaultTeam = [
   // L1
@@ -163,15 +164,15 @@ const NetworkNode = ({ member, direction, isFaded, setHoveredId, size = "lg" }: 
         </motion.div>
 
         {/* Floating Label (Hides when open) */}
-        <div className={`absolute top-full left-1/2 -translate-x-1/2 mt-3 text-center w-max pointer-events-none transition-opacity duration-300 ${isOpen ? 'opacity-0' : 'opacity-100'}`}>
+        <div className={`absolute top-full left-1/2 -translate-x-1/2 mt-3 text-center w-44 max-w-[11rem] pointer-events-none transition-opacity duration-300 z-10 ${isOpen ? 'opacity-0' : 'opacity-100'}`}>
           <h3 
-            className={`text-white font-bold bg-slate-900/90 rounded-full border backdrop-blur-md shadow-xl ${size === 'lg' ? 'text-base md:text-lg px-5 py-2' : 'text-xs md:text-sm px-3 py-1'}`}
+            className={`min-h-9 flex items-center justify-center text-white font-bold bg-slate-900/95 rounded-full border backdrop-blur-md shadow-xl whitespace-normal break-words leading-tight ${size === 'lg' ? 'text-base md:text-lg px-3 py-2' : 'text-xs md:text-sm px-2 py-1'}`}
             style={{ borderColor: `${config.primaryAccent}40` }}
           >
             {member.name}
           </h3>
           <p 
-            className={`mt-2 tracking-[0.2em] uppercase font-bold drop-shadow-md ${size === 'lg' ? 'text-xs md:text-sm' : 'text-[8px] md:text-[10px]'}`}
+            className={`mt-2 tracking-[0.15em] uppercase font-bold drop-shadow-md break-words leading-tight ${size === 'lg' ? 'text-xs md:text-sm' : 'text-[8px] md:text-[10px]'}`}
             style={{ color: config.secondaryAccent }}
           >
             {member.position}
@@ -386,22 +387,19 @@ export default function TeamPage() {
 
   useEffect(() => {
     setIsMounted(true);
-    setTeamData(defaultTeam);
+    DataStore.getTeam().then(setTeamData);
   }, []);
 
   if (!isMounted) return null;
 
-  const presidents = teamData.filter(m => m.level === 1);
-  const vps = teamData.filter(m => m.level === 2);
-  const heads = teamData.filter(m => m.level === 3);
-  const coheads = teamData.filter(m => m.level === 4);
-  const members = teamData.filter(m => m.level === 5);
+  const categoryMembers = (category: TeamCategory) => teamData.filter(m => m.category === category);
+  const presidents = categoryMembers("president");
+  const vps = categoryMembers("vicepresident");
+  const heads = categoryMembers("lead");
+  const coheads = categoryMembers("colead");
+  const members = categoryMembers("member");
   
-  const techMembers = members.filter(m => m.domain === "technical");
-  const contentMembers = members.filter(m => m.domain === "content");
-  const photoMembers = members.filter(m => m.domain === "photo");
-  const prMembers = members.filter(m => m.domain === "pr");
-  const designMembers = members.filter(m => m.domain === "design");
+  const memberBranches = Array.from(new Set(members.map(m => m.domain || "General")));
 
   return (
     <div className="relative min-h-screen overflow-x-hidden pb-32">
@@ -449,34 +447,15 @@ export default function TeamPage() {
           }}
         />
 
-        {/* Level 1: President */}
-        <div className="relative flex justify-center w-full">
-          {presidents.map((m) => (
-            <NetworkNode 
-              key={m.id} 
-              member={m} 
-              direction="right" 
-              isFaded={hoveredId !== null && hoveredId !== m.id}
-              setHoveredId={setHoveredId}
-            />
-          ))}
-        </div>
+        {presidents.length > 0 && <div className="relative flex justify-center w-full">
+          {presidents.map((m) => <NetworkNode key={m.id} member={m} direction="right" isFaded={hoveredId !== null && hoveredId !== m.id} setHoveredId={setHoveredId} />)}
+        </div>}
 
-        {/* Level 2: VP */}
-        <div className="relative flex justify-center w-full">
-          {vps.map((m) => (
-            <NetworkNode 
-              key={m.id} 
-              member={m} 
-              direction="left" 
-              isFaded={hoveredId !== null && hoveredId !== m.id}
-              setHoveredId={setHoveredId}
-            />
-          ))}
-        </div>
+        {vps.length > 0 && <div className="relative flex justify-center w-full">
+          {vps.map((m) => <NetworkNode key={m.id} member={m} direction="left" isFaded={hoveredId !== null && hoveredId !== m.id} setHoveredId={setHoveredId} />)}
+        </div>}
 
-        {/* Level 3: Heads */}
-        <div className="relative flex flex-wrap justify-center items-center gap-16 md:gap-32 w-full max-w-[1400px] z-30">
+        {heads.length > 0 && <div className="relative flex flex-wrap justify-center items-center gap-24 md:gap-48 w-full max-w-[1400px] z-30">
           {heads.map((member, idx) => {
             return (
               <NetworkNode 
@@ -488,10 +467,9 @@ export default function TeamPage() {
               />
             );
           })}
-        </div>
+        </div>}
 
-        {/* Level 4: Co-heads */}
-        <div className="relative flex flex-wrap justify-center items-center gap-12 md:gap-20 w-full max-w-[1200px] pt-16 z-20">
+        {coheads.length > 0 && <div className="relative flex flex-wrap justify-center items-center gap-20 md:gap-36 w-full max-w-[1200px] pt-16 z-20">
           {coheads.map((member, idx) => {
             return (
               <NetworkNode 
@@ -503,18 +481,22 @@ export default function TeamPage() {
               />
             );
           })}
-        </div>
+        </div>}
 
-        {/* Level 5: Team Members (Domain Columns) */}
-        <div 
+        {members.length > 0 && <div 
           className="relative flex flex-nowrap justify-start lg:justify-center items-start gap-8 md:gap-16 w-full pt-20 overflow-x-auto pb-16 px-4 scrollbar-hide"
         >
-          <TeamBranch title="Technical" members={techMembers} hoveredId={hoveredId} setHoveredId={setHoveredId} cardDirection="right" />
-          <TeamBranch title="Content" members={contentMembers} hoveredId={hoveredId} setHoveredId={setHoveredId} cardDirection="right" />
-          <TeamBranch title="Design" members={designMembers} hoveredId={hoveredId} setHoveredId={setHoveredId} cardDirection="bottom" />
-          <TeamBranch title="PR & Mktg" members={prMembers} hoveredId={hoveredId} setHoveredId={setHoveredId} cardDirection="left" />
-          <TeamBranch title="Photo & Social" members={photoMembers} hoveredId={hoveredId} setHoveredId={setHoveredId} cardDirection="left" />
-        </div>
+          {memberBranches.map((domain, index) => (
+            <TeamBranch
+              key={domain}
+              title={domain}
+              members={members.filter(member => (member.domain || "General") === domain)}
+              hoveredId={hoveredId}
+              setHoveredId={setHoveredId}
+              cardDirection={index < memberBranches.length / 2 ? "right" : "left"}
+            />
+          ))}
+        </div>}
 
       </div>
 

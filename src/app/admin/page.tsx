@@ -8,7 +8,7 @@ import {
   Search, Copy, Eye, SlidersHorizontal, RefreshCw, EyeOff, Star
 } from "lucide-react";
 import {
-  DataStore, AdminAuth, EventItem, TeamMemberItem, LegacyHeadItem, SubTeamItem,
+  DataStore, AdminAuth, EventItem, TeamMemberItem, TeamCategory, LegacyHeadItem, SubTeamItem,
   CoreValueItem, NewsIssueItem, GalleryItem, ClubStats
 } from "@/lib/dataStore";
 import { cn } from "@/lib/utils";
@@ -379,6 +379,9 @@ export default function AdminPage() {
       setTeamForm({
         name: "",
         position: "CORE COMMITTEE MEMBER",
+        category: "member",
+        domain: "technical",
+        branch: "CSE",
         image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300",
         bio: "",
         skillsText: "Development, Problem Solving",
@@ -389,7 +392,7 @@ export default function AdminPage() {
 
   const handleSaveTeam = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!teamForm.name || !teamForm.position) return;
+    if (!teamForm.name || !teamForm.position || !teamForm.category) return;
     const skillsArray = (teamForm.skillsText || "")
       .split(",")
       .map(s => s.trim())
@@ -408,6 +411,9 @@ export default function AdminPage() {
         id: `team-${Date.now()}`,
         name: teamForm.name || "",
         position: teamForm.position || "CORE COMMITTEE MEMBER",
+        category: teamForm.category as TeamCategory,
+        domain: teamForm.category === "member" ? teamForm.domain : undefined,
+        branch: teamForm.category === "member" ? teamForm.branch : undefined,
         image: teamForm.image || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300",
         bio: teamForm.bio || "",
         skills: skillsArray,
@@ -782,10 +788,7 @@ export default function AdminPage() {
     const matchesSearch = m.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       m.position.toLowerCase().includes(searchQuery.toLowerCase()) ||
       m.skills.some(s => s.toLowerCase().includes(searchQuery.toLowerCase()));
-    const isExecutive = m.position.toUpperCase().includes("CEO") ||
-      m.position.toUpperCase().includes("COO") ||
-      m.position.toUpperCase().includes("FOUNDER") ||
-      m.position.toUpperCase().includes("PRESIDENT");
+    const isExecutive = m.category === "president" || m.category === "vicepresident";
     const matchesRole = teamRoleFilter === "all" ||
       (teamRoleFilter === "executive" && isExecutive) ||
       (teamRoleFilter === "core" && !isExecutive);
@@ -1631,11 +1634,11 @@ export default function AdminPage() {
       {/* UNIVERSAL RESPONSIVE MODAL POPUP FOR ADD / EDIT */}
       {/* ========================================================================= */}
       {modalMode && (
-        <div className="fixed inset-0 z-[150] bg-black/85 backdrop-blur-md overflow-y-auto overflow-x-hidden pt-20 sm:pt-24 pb-12 px-4 flex flex-col justify-start sm:justify-center items-center min-h-screen">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 max-w-xl w-full my-auto max-h-[85vh] overflow-y-auto shadow-2xl relative">
+        <div className="fixed inset-0 z-[150] bg-black/85 backdrop-blur-md overflow-hidden p-4 sm:p-8 flex items-center justify-center">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-xl w-full max-h-[calc(100vh-2rem)] sm:max-h-[calc(100vh-4rem)] overflow-hidden shadow-2xl relative flex flex-col">
 
             {/* Sticky Header with Title and Close Button */}
-            <div className="flex items-center justify-between pb-4 mb-6 border-b border-slate-800/80 sticky top-0 bg-slate-900 z-20 -mx-6 sm:-mx-8 px-6 sm:px-8 -mt-2 pt-2">
+            <div className="flex items-center justify-between p-6 sm:p-8 pb-4 border-b border-slate-800/80 bg-slate-900 z-20 shrink-0">
               <h3 className="text-lg sm:text-xl font-bold text-white pr-2 truncate">
                 {modalMode === "add" ? "Add New" : "Edit"} {
                   activeTab === "events" ? "Event" :
@@ -1654,6 +1657,7 @@ export default function AdminPage() {
               </button>
             </div>
 
+            <div className="overflow-y-auto p-6 sm:p-8 pt-5">
             {/* EVENT FORM */}
             {activeTab === "events" && (
               <form onSubmit={handleSaveEvent} className="space-y-4">
@@ -1733,6 +1737,22 @@ export default function AdminPage() {
                 <div>
                   <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Position / Role</label>
                   <input type="text" placeholder="e.g. FOUNDER & CEO or CORE COMMITTEE MEMBER" required value={teamForm.position || ""} onChange={(e) => setTeamForm({ ...teamForm, position: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Hierarchy Category</label>
+                    <select required value={teamForm.category || "member"} onChange={(e) => setTeamForm({ ...teamForm, category: e.target.value as TeamCategory })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm">
+                      <option value="president">President</option>
+                      <option value="vicepresident">Vice President</option>
+                      <option value="lead">Lead</option>
+                      <option value="colead">Co-lead</option>
+                      <option value="member">Member</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Branch / Domain</label>
+                    <input type="text" placeholder="e.g. Technical or CSE" value={teamForm.category === "member" ? `${teamForm.domain || ""}${teamForm.domain && teamForm.branch ? " / " : ""}${teamForm.branch || ""}` : ""} disabled={teamForm.category !== "member"} onChange={(e) => { const [domain, ...branch] = e.target.value.split("/"); setTeamForm({ ...teamForm, domain: domain.trim(), branch: branch.join("/").trim() }); }} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm disabled:opacity-40" />
+                  </div>
                 </div>
                 <div>
                   <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Profile Photo</label>
@@ -2076,6 +2096,8 @@ export default function AdminPage() {
                 <button type="submit" className="w-full py-3 bg-sky-500 hover:bg-sky-400 text-white font-bold rounded-xl text-sm transition-all shadow-md">Save Photo</button>
               </form>
             )}
+
+            </div>
 
           </div>
         </div>
