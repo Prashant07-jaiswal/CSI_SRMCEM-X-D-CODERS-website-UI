@@ -1,15 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { 
-  Trash2, Plus, Calendar as CalendarIcon, Users, Image as ImageIcon, 
-  Award, LayoutDashboard, LogOut, Newspaper, BarChart3, Download, Upload, 
+import { useState, useEffect, useRef } from "react";
+import {
+  Trash2, Plus, Calendar as CalendarIcon, Users, Image as ImageIcon,
+  Award, LayoutDashboard, LogOut, Newspaper, BarChart3, Download, Upload,
   RotateCcw, Edit3, Check, X, Shield, Sparkles, ExternalLink, FileText, CheckCircle2,
-  Search, Copy, Eye, SlidersHorizontal, RefreshCw, EyeOff
+  Search, Copy, Eye, SlidersHorizontal, RefreshCw, EyeOff, Star
 } from "lucide-react";
-import { 
-  DataStore, AdminAuth, EventItem, TeamMemberItem, LegacyHeadItem, SubTeamItem, 
-  CoreValueItem, NewsIssueItem, GalleryItem, ClubStats 
+import {
+  DataStore, AdminAuth, EventItem, TeamMemberItem, LegacyHeadItem, SubTeamItem,
+  CoreValueItem, NewsIssueItem, GalleryItem, ClubStats
 } from "@/lib/dataStore";
 import { cn } from "@/lib/utils";
 
@@ -44,6 +44,7 @@ export default function AdminPage() {
     liveProjects: "10+",
     placementRate: "100%"
   });
+  const [featuredEventIds, setFeaturedEventIds] = useState<string[]>([]);
 
   // Modal / Form States
   const [modalMode, setModalMode] = useState<"add" | "edit" | null>(null);
@@ -58,10 +59,18 @@ export default function AdminPage() {
   const [coreValueForm, setCoreValueForm] = useState<Partial<CoreValueItem> & { pointsText?: string }>({});
   const [newsForm, setNewsForm] = useState<Partial<NewsIssueItem> & { topicsText?: string }>({});
   const [galleryForm, setGalleryForm] = useState<Partial<GalleryItem>>({});
-  
+  // uploading flags – one per field
+  const [uploading, setUploading] = useState<Record<string, boolean>>({});
+  const eventImageInputRef  = useRef<HTMLInputElement>(null);
+  const teamImageInputRef   = useRef<HTMLInputElement>(null);
+  const legacyImageInputRef = useRef<HTMLInputElement>(null);
+  const newsImageInputRef   = useRef<HTMLInputElement>(null);
+  const newsPdfInputRef     = useRef<HTMLInputElement>(null);
+  const galleryImageInputRef= useRef<HTMLInputElement>(null);
+
   // Load from DataStore (now async -- data comes from Supabase)
   const reloadData = async () => {
-    const [events, team, legacyHeads, subTeams, coreValues, newsIssues, gallery, stats] = await Promise.all([
+    const [events, team, legacyHeads, subTeams, coreValues, newsIssues, gallery, stats, featuredIds] = await Promise.all([
       DataStore.getEvents(),
       DataStore.getTeam(),
       DataStore.getLegacyHeads(),
@@ -70,6 +79,7 @@ export default function AdminPage() {
       DataStore.getNewsIssues(),
       DataStore.getGallery(),
       DataStore.getStats(),
+      DataStore.getFeaturedEventIds(),
     ]);
     setEvents(events);
     setTeam(team);
@@ -79,6 +89,7 @@ export default function AdminPage() {
     setNewsIssues(newsIssues);
     setGallery(gallery);
     setStats(stats);
+    setFeaturedEventIds(featuredIds);
   };
 
   // On mount: check if there's already a logged-in Supabase session
@@ -167,6 +178,90 @@ export default function AdminPage() {
     }
   };
 
+  // --- SHARED FILE → BASE64 HELPER (no bucket needed) --- //
+  const readFileAsDataUrl = (file: File): Promise<string> =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload  = () => resolve(reader.result as string);
+      reader.onerror = () => reject(new Error("Failed to read file"));
+      reader.readAsDataURL(file);
+    });
+
+  const setFieldUploading = (key: string, val: boolean) =>
+    setUploading(prev => ({ ...prev, [key]: val }));
+
+  // Event banner image
+  const handleEventImageUpload = async (file: File) => {
+    setFieldUploading("eventImage", true);
+    try {
+      const url = await readFileAsDataUrl(file);
+      setEventForm(prev => ({ ...prev, image: url }));
+      showToast("Event image loaded! Save the event to apply.");
+    } catch { showToast("Could not read image. Try again."); }
+    finally { setFieldUploading("eventImage", false); }
+  };
+
+  // Team member photo
+  const handleTeamImageUpload = async (file: File) => {
+    setFieldUploading("teamImage", true);
+    try {
+      const url = await readFileAsDataUrl(file);
+      setTeamForm(prev => ({ ...prev, image: url }));
+      showToast("Photo loaded! Save the member to apply.");
+    } catch { showToast("Could not read image. Try again."); }
+    finally { setFieldUploading("teamImage", false); }
+  };
+
+  // Legacy leader photo
+  const handleLegacyImageUpload = async (file: File) => {
+    setFieldUploading("legacyImage", true);
+    try {
+      const url = await readFileAsDataUrl(file);
+      setLegacyForm(prev => ({ ...prev, image: url }));
+      showToast("Photo loaded! Save the leader to apply.");
+    } catch { showToast("Could not read image. Try again."); }
+    finally { setFieldUploading("legacyImage", false); }
+  };
+
+  // News cover image
+  const handleNewsImageUpload = async (file: File) => {
+    setFieldUploading("newsImage", true);
+    try {
+      const url = await readFileAsDataUrl(file);
+      setNewsForm(prev => ({ ...prev, coverImage: url }));
+      showToast("Cover image loaded! Save the gazette to apply.");
+    } catch { showToast("Could not read image. Try again."); }
+    finally { setFieldUploading("newsImage", false); }
+  };
+
+  // News PDF file
+  const handleNewsPdfUpload = async (file: File) => {
+    if (file.size > 15_000_000) {
+      if (!confirm(`PDF is ${(file.size/1024/1024).toFixed(1)} MB — large PDFs may hit Supabase row limits.\nContinue anyway?`)) return;
+    }
+    setFieldUploading("newsPdf", true);
+    try {
+      const url = await readFileAsDataUrl(file);
+      const sizeLabel = file.size > 1_048_576
+        ? `${(file.size / 1_048_576).toFixed(1)} MB`
+        : `${(file.size / 1024).toFixed(0)} KB`;
+      setNewsForm(prev => ({ ...prev, pdfUrl: url, fileSize: sizeLabel }));
+      showToast("PDF loaded! Save the gazette to apply.");
+    } catch { showToast("Could not read PDF. Try again."); }
+    finally { setFieldUploading("newsPdf", false); }
+  };
+
+  // Gallery image
+  const handleGalleryImageUpload = async (file: File) => {
+    setFieldUploading("galleryImage", true);
+    try {
+      const url = await readFileAsDataUrl(file);
+      setGalleryForm(prev => ({ ...prev, image: url }));
+      showToast("Gallery image loaded! Save the photo to apply.");
+    } catch { showToast("Could not read image. Try again."); }
+    finally { setFieldUploading("galleryImage", false); }
+  };
+
   // --- EVENTS CRUD --- //
   const openEventModal = (item?: EventItem) => {
     if (item) {
@@ -224,12 +319,49 @@ export default function AdminPage() {
     showToast(`Event status updated to "${newCategory}"`);
   };
 
-  const handleDeleteEvent = (id: string) => {
+  const handleDeleteEvent = async (id: string) => {
     if (!confirm("Are you sure you want to delete this event?")) return;
     const updated = events.filter(e => e.id !== id);
     setEvents(updated);
-    DataStore.saveEvents(updated);
+    await DataStore.saveEvents(updated);
+    if (featuredEventIds.includes(id)) {
+      const newFeatured = featuredEventIds.filter(fId => fId !== id);
+      setFeaturedEventIds(newFeatured);
+      await DataStore.saveFeaturedEventIds(newFeatured);
+    }
     showToast("Event deleted.");
+  };
+
+  const handleToggleFeatured = async (eventId: string) => {
+    // Only allow events that exist in the events list
+    const eventExists = events.some(e => e.id === eventId);
+    if (!eventExists) {
+      showToast("Error: Only already uploaded events can be featured.");
+      return;
+    }
+
+    let newFeatured: string[];
+    const isAlreadyFeatured = featuredEventIds.includes(eventId);
+
+    if (isAlreadyFeatured) {
+      newFeatured = featuredEventIds.filter(id => id !== eventId);
+      setFeaturedEventIds(newFeatured);
+      await DataStore.saveFeaturedEventIds(newFeatured);
+      showToast("Removed from Featured Highlights.");
+    } else {
+      if (featuredEventIds.length >= 2) {
+        // Replace second item if 2 are already chosen
+        newFeatured = [featuredEventIds[0], eventId];
+        setFeaturedEventIds(newFeatured);
+        await DataStore.saveFeaturedEventIds(newFeatured);
+        showToast("Featured list updated (max 2 highlights allowed).");
+      } else {
+        newFeatured = [...featuredEventIds, eventId];
+        setFeaturedEventIds(newFeatured);
+        await DataStore.saveFeaturedEventIds(newFeatured);
+        showToast("Added to Featured Highlights!");
+      }
+    }
   };
 
   // --- TEAM CRUD --- //
@@ -650,35 +782,35 @@ export default function AdminPage() {
     const matchesSearch = m.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       m.position.toLowerCase().includes(searchQuery.toLowerCase()) ||
       m.skills.some(s => s.toLowerCase().includes(searchQuery.toLowerCase()));
-    const isExecutive = m.position.toUpperCase().includes("CEO") || 
-      m.position.toUpperCase().includes("COO") || 
+    const isExecutive = m.position.toUpperCase().includes("CEO") ||
+      m.position.toUpperCase().includes("COO") ||
       m.position.toUpperCase().includes("FOUNDER") ||
       m.position.toUpperCase().includes("PRESIDENT");
-    const matchesRole = teamRoleFilter === "all" || 
+    const matchesRole = teamRoleFilter === "all" ||
       (teamRoleFilter === "executive" && isExecutive) ||
       (teamRoleFilter === "core" && !isExecutive);
     return matchesSearch && matchesRole;
   });
 
-  const filteredLegacy = legacyHeads.filter(l => 
+  const filteredLegacy = legacyHeads.filter(l =>
     l.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     l.role.toLowerCase().includes(searchQuery.toLowerCase()) ||
     (l.placedAt && l.placedAt.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
-  const filteredSubTeams = subTeams.filter(s => 
+  const filteredSubTeams = subTeams.filter(s =>
     s.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     s.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
     s.frontDesc.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const filteredCoreValues = coreValues.filter(c => 
+  const filteredCoreValues = coreValues.filter(c =>
     c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     c.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
     c.frontDesc.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const filteredNews = newsIssues.filter(n => 
+  const filteredNews = newsIssues.filter(n =>
     n.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     n.volume.toLowerCase().includes(searchQuery.toLowerCase()) ||
     n.month.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -718,9 +850,9 @@ export default function AdminPage() {
           <form onSubmit={handleLogin} className="space-y-5">
             <div>
               <label className="block text-xs font-mono uppercase text-slate-400 mb-2">Email</label>
-              <input 
-                type="email" 
-                placeholder="admin@example.com" 
+              <input
+                type="email"
+                placeholder="admin@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 autoComplete="username"
@@ -729,9 +861,9 @@ export default function AdminPage() {
             </div>
             <div>
               <label className="block text-xs font-mono uppercase text-slate-400 mb-2">Password</label>
-              <input 
-                type="password" 
-                placeholder="Enter password" 
+              <input
+                type="password"
+                placeholder="Enter password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 autoComplete="current-password"
@@ -741,8 +873,8 @@ export default function AdminPage() {
             {loginError && (
               <p className="text-rose-400 text-xs font-mono">{loginError}</p>
             )}
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="w-full bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-bold py-3.5 rounded-xl transition-all shadow-[0_0_25px_rgba(56,189,248,0.3)] hover:scale-[1.02]"
             >
               Sign In to CMS
@@ -755,12 +887,12 @@ export default function AdminPage() {
 
   // Helper Sidebar Tab button
   const SidebarTab = ({ id, label, icon: Icon, count }: { id: ActiveTab; label: string; icon: any; count?: number }) => (
-    <button 
+    <button
       onClick={() => { setActiveTab(id); setModalMode(null); setSearchQuery(""); }}
       className={cn(
         "w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all font-medium text-sm text-left group",
-        activeTab === id 
-          ? "bg-sky-500 text-white shadow-lg shadow-sky-500/25 font-bold" 
+        activeTab === id
+          ? "bg-sky-500 text-white shadow-lg shadow-sky-500/25 font-bold"
           : "text-slate-400 hover:bg-slate-800/80 hover:text-white"
       )}
     >
@@ -790,7 +922,7 @@ export default function AdminPage() {
       )}
 
       <div className="flex flex-col lg:flex-row gap-8">
-        
+
         {/* ========================================================================= */}
         {/* SIDEBAR NAVIGATION */}
         {/* ========================================================================= */}
@@ -803,7 +935,7 @@ export default function AdminPage() {
               CSI_SRMCEM X D&apos;CODERS
             </h2>
           </div>
-          
+
           <div className="space-y-1">
             <SidebarTab id="dashboard" label="Overview" icon={LayoutDashboard} />
             <SidebarTab id="events" label="Events & Workshops" icon={CalendarIcon} count={events.length} />
@@ -816,8 +948,8 @@ export default function AdminPage() {
           </div>
 
           <div className="mt-8 pt-4 border-t border-slate-800 space-y-2">
-            <button 
-              onClick={handleSignOut} 
+            <button
+              onClick={handleSignOut}
               className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-rose-400 hover:bg-rose-500/10 rounded-xl transition-all font-semibold"
             >
               <LogOut className="w-3.5 h-3.5" />
@@ -830,7 +962,7 @@ export default function AdminPage() {
         {/* MAIN CONTENT AREA */}
         {/* ========================================================================= */}
         <div className="flex-1 bg-slate-900/40 border border-slate-800 rounded-3xl p-6 md:p-8 backdrop-blur-xl min-h-[650px] relative">
-          
+
           {/* 1. OVERVIEW DASHBOARD */}
           {activeTab === "dashboard" && (
             <div className="space-y-8">
@@ -920,8 +1052,15 @@ export default function AdminPage() {
             <div className="space-y-6">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <h2 className="text-2xl font-extrabold text-white">Events &amp; Workshops Manager</h2>
-                  <p className="text-xs text-slate-400 mt-0.5">Add, edit, or delete flagship hackathons, bootcamps, and workshops.</p>
+                  <div className="flex items-center gap-2 mb-1">
+                    <h2 className="text-2xl font-extrabold text-white">Events &amp; Workshops Manager</h2>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-amber-500/15 text-amber-300 border border-amber-500/30">
+                      ★ {featuredEventIds.length}/2 Featured in Menu
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-400 mt-0.5">
+                    Add, edit, or delete events. Click the <strong>★ Feature</strong> button to pin up to 2 events to the top-right website menu.
+                  </p>
                 </div>
                 <button
                   onClick={() => openEventModal()}
@@ -977,8 +1116,8 @@ export default function AdminPage() {
                               className={cn(
                                 "px-2 py-0.5 text-[10px] font-bold uppercase rounded-md border bg-transparent cursor-pointer focus:outline-none",
                                 ev.category === "upcoming" ? "bg-sky-500/20 text-sky-300 border-sky-500/30" :
-                                ev.category === "current" ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30" :
-                                "bg-slate-800 text-slate-400 border-slate-700"
+                                  ev.category === "current" ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30" :
+                                    "bg-slate-800 text-slate-400 border-slate-700"
                               )}
                             >
                               <option value="upcoming" className="bg-slate-900 text-sky-300">Upcoming</option>
@@ -993,6 +1132,19 @@ export default function AdminPage() {
                         </div>
                       </div>
                       <div className="flex items-center gap-2 shrink-0 self-end md:self-center">
+                        <button
+                          onClick={() => handleToggleFeatured(ev.id)}
+                          className={cn(
+                            "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition-all",
+                            featuredEventIds.includes(ev.id)
+                              ? "bg-amber-500/15 border-amber-500/40 text-amber-300 hover:bg-amber-500/25"
+                              : "bg-slate-800/80 border-slate-700 text-slate-400 hover:text-white hover:border-slate-600"
+                          )}
+                          title={featuredEventIds.includes(ev.id) ? "Remove from Navbar Featured" : "Pin to Navbar Featured"}
+                        >
+                          <Star className={cn("w-3.5 h-3.5", featuredEventIds.includes(ev.id) && "fill-amber-400 text-amber-400")} />
+                          <span className="hidden sm:inline">{featuredEventIds.includes(ev.id) ? "Featured" : "Feature"}</span>
+                        </button>
                         <button onClick={() => openEventModal(ev)} className="p-2 hover:bg-slate-800 text-slate-300 hover:text-sky-400 rounded-lg transition-colors" title="Edit">
                           <Edit3 className="w-4 h-4" />
                         </button>
@@ -1481,21 +1633,21 @@ export default function AdminPage() {
       {modalMode && (
         <div className="fixed inset-0 z-[150] bg-black/85 backdrop-blur-md overflow-y-auto overflow-x-hidden pt-20 sm:pt-24 pb-12 px-4 flex flex-col justify-start sm:justify-center items-center min-h-screen">
           <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 max-w-xl w-full my-auto max-h-[85vh] overflow-y-auto shadow-2xl relative">
-            
+
             {/* Sticky Header with Title and Close Button */}
             <div className="flex items-center justify-between pb-4 mb-6 border-b border-slate-800/80 sticky top-0 bg-slate-900 z-20 -mx-6 sm:-mx-8 px-6 sm:px-8 -mt-2 pt-2">
               <h3 className="text-lg sm:text-xl font-bold text-white pr-2 truncate">
                 {modalMode === "add" ? "Add New" : "Edit"} {
                   activeTab === "events" ? "Event" :
-                  activeTab === "team" ? "Team Member" :
-                  activeTab === "about" ? (aboutSubTab === "subteams" ? "Sub-Team Domain Wing" : "Core Value Pillar") :
-                  activeTab === "legacy" ? "Hall of Fame Leader" :
-                  activeTab === "news" ? "News Gazette Edition" : "Gallery Photo"
+                    activeTab === "team" ? "Team Member" :
+                      activeTab === "about" ? (aboutSubTab === "subteams" ? "Sub-Team Domain Wing" : "Core Value Pillar") :
+                        activeTab === "legacy" ? "Hall of Fame Leader" :
+                          activeTab === "news" ? "News Gazette Edition" : "Gallery Photo"
                 }
               </h3>
-              <button 
+              <button
                 type="button"
-                onClick={() => setModalMode(null)} 
+                onClick={() => setModalMode(null)}
                 className="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white transition-all shrink-0 border border-slate-700/50"
               >
                 <X className="w-5 h-5" />
@@ -1534,11 +1686,28 @@ export default function AdminPage() {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Banner Image URL</label>
-                  <input type="text" placeholder="e.g. /images/... or https://..." value={eventForm.image || ""} onChange={(e) => setEventForm({ ...eventForm, image: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
+                  <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Banner Image</label>
+                  <div className="flex gap-2 mb-2">
+                    <button type="button" disabled={uploading.eventImage}
+                      onClick={() => eventImageInputRef.current?.click()}
+                      className={cn("flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold border transition-all",
+                        uploading.eventImage ? "bg-slate-800 border-slate-700 text-slate-500 cursor-not-allowed" : "bg-sky-500/10 border-sky-500/30 text-sky-400 hover:bg-sky-500/20")}>
+                      <Upload className="w-3.5 h-3.5" />
+                      {uploading.eventImage ? "Loading…" : "Upload from Device"}
+                    </button>
+                    <input ref={eventImageInputRef} type="file" accept="image/*" className="hidden"
+                      onChange={(e) => { const f = e.target.files?.[0]; if (f) handleEventImageUpload(f); e.target.value = ""; }} />
+                  </div>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] font-mono text-slate-500 uppercase select-none">URL</span>
+                    <input type="text" placeholder="or paste https://... image URL" value={eventForm.image || ""}
+                      onChange={(e) => setEventForm({ ...eventForm, image: e.target.value })}
+                      className="w-full pl-10 pr-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm font-mono" />
+                  </div>
                   {eventForm.image && (
-                    <div className="mt-2 rounded-xl overflow-hidden border border-slate-800 h-24 bg-black">
+                    <div className="mt-2 rounded-xl overflow-hidden border border-slate-700 h-28 bg-slate-950 relative">
                       <img src={eventForm.image} alt="Preview" className="w-full h-full object-cover" onError={(e) => { (e.target as any).style.display = 'none'; }} />
+                      {uploading.eventImage && <div className="absolute inset-0 bg-slate-950/80 flex items-center justify-center"><div className="w-6 h-6 border-2 border-sky-500 border-t-transparent rounded-full animate-spin" /></div>}
                     </div>
                   )}
                 </div>
@@ -1566,12 +1735,28 @@ export default function AdminPage() {
                   <input type="text" placeholder="e.g. FOUNDER & CEO or CORE COMMITTEE MEMBER" required value={teamForm.position || ""} onChange={(e) => setTeamForm({ ...teamForm, position: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
                 </div>
                 <div>
-                  <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Profile Photo URL</label>
-                  <input type="text" placeholder="e.g. /images/... or https://..." value={teamForm.image || ""} onChange={(e) => setTeamForm({ ...teamForm, image: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
+                  <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Profile Photo</label>
+                  <div className="flex gap-2 mb-2">
+                    <button type="button" disabled={uploading.teamImage}
+                      onClick={() => teamImageInputRef.current?.click()}
+                      className={cn("flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold border transition-all",
+                        uploading.teamImage ? "bg-slate-800 border-slate-700 text-slate-500 cursor-not-allowed" : "bg-sky-500/10 border-sky-500/30 text-sky-400 hover:bg-sky-500/20")}>
+                      <Upload className="w-3.5 h-3.5" />
+                      {uploading.teamImage ? "Loading…" : "Upload from Device"}
+                    </button>
+                    <input ref={teamImageInputRef} type="file" accept="image/*" className="hidden"
+                      onChange={(e) => { const f = e.target.files?.[0]; if (f) handleTeamImageUpload(f); e.target.value = ""; }} />
+                  </div>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] font-mono text-slate-500 uppercase select-none">URL</span>
+                    <input type="text" placeholder="or paste https://... photo URL" value={teamForm.image || ""}
+                      onChange={(e) => setTeamForm({ ...teamForm, image: e.target.value })}
+                      className="w-full pl-10 pr-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm font-mono" />
+                  </div>
                   {teamForm.image && (
-                    <div className="mt-2 flex items-center gap-3 p-2 bg-slate-950 rounded-xl border border-slate-800">
+                    <div className="mt-2 flex items-center gap-3 p-2 bg-slate-950 rounded-xl border border-slate-800 relative">
                       <img src={teamForm.image} alt="Preview" className="w-10 h-10 rounded-full object-cover border border-slate-700" onError={(e) => { (e.target as any).style.display = 'none'; }} />
-                      <span className="text-xs text-slate-400 font-mono truncate">Preview Thumbnail</span>
+                      <span className="text-xs text-slate-400 font-mono">{uploading.teamImage ? "Processing…" : "Photo preview"}</span>
                     </div>
                   )}
                 </div>
@@ -1703,12 +1888,28 @@ export default function AdminPage() {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Photo URL</label>
-                  <input type="text" placeholder="e.g. /images/... or https://..." value={legacyForm.image || ""} onChange={(e) => setLegacyForm({ ...legacyForm, image: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
+                  <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Leader Photo</label>
+                  <div className="flex gap-2 mb-2">
+                    <button type="button" disabled={uploading.legacyImage}
+                      onClick={() => legacyImageInputRef.current?.click()}
+                      className={cn("flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold border transition-all",
+                        uploading.legacyImage ? "bg-slate-800 border-slate-700 text-slate-500 cursor-not-allowed" : "bg-sky-500/10 border-sky-500/30 text-sky-400 hover:bg-sky-500/20")}>
+                      <Upload className="w-3.5 h-3.5" />
+                      {uploading.legacyImage ? "Loading…" : "Upload from Device"}
+                    </button>
+                    <input ref={legacyImageInputRef} type="file" accept="image/*" className="hidden"
+                      onChange={(e) => { const f = e.target.files?.[0]; if (f) handleLegacyImageUpload(f); e.target.value = ""; }} />
+                  </div>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] font-mono text-slate-500 uppercase select-none">URL</span>
+                    <input type="text" placeholder="or paste https://... photo URL" value={legacyForm.image || ""}
+                      onChange={(e) => setLegacyForm({ ...legacyForm, image: e.target.value })}
+                      className="w-full pl-10 pr-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm font-mono" />
+                  </div>
                   {legacyForm.image && (
                     <div className="mt-2 flex items-center gap-3 p-2 bg-slate-950 rounded-xl border border-slate-800">
                       <img src={legacyForm.image} alt="Preview" className="w-10 h-10 rounded-full object-cover border border-slate-700" onError={(e) => { (e.target as any).style.display = 'none'; }} />
-                      <span className="text-xs text-slate-400 font-mono truncate">Photo Preview</span>
+                      <span className="text-xs text-slate-400 font-mono">{uploading.legacyImage ? "Processing…" : "Photo preview"}</span>
                     </div>
                   )}
                 </div>
@@ -1741,17 +1942,62 @@ export default function AdminPage() {
                     <input type="text" placeholder="e.g. 2024" value={newsForm.year || ""} onChange={(e) => setNewsForm({ ...newsForm, year: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
                   </div>
                 </div>
+                {/* PDF Upload */}
                 <div>
-                  <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Direct PDF URL / Document Path</label>
-                  <input type="text" required placeholder="e.g. /documents/gazette.pdf or https://example.com/gazette.pdf" value={newsForm.pdfUrl || ""} onChange={(e) => setNewsForm({ ...newsForm, pdfUrl: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm font-mono" />
+                  <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Gazette PDF</label>
+                  <div className="flex gap-2 mb-2">
+                    <button type="button" disabled={uploading.newsPdf}
+                      onClick={() => newsPdfInputRef.current?.click()}
+                      className={cn("flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold border transition-all",
+                        uploading.newsPdf ? "bg-slate-800 border-slate-700 text-slate-500 cursor-not-allowed" : "bg-purple-500/10 border-purple-500/30 text-purple-400 hover:bg-purple-500/20")}>
+                      <Upload className="w-3.5 h-3.5" />
+                      {uploading.newsPdf ? "Loading PDF…" : "Upload PDF from Device"}
+                    </button>
+                    <input ref={newsPdfInputRef} type="file" accept="application/pdf" className="hidden"
+                      onChange={(e) => { const f = e.target.files?.[0]; if (f) handleNewsPdfUpload(f); e.target.value = ""; }} />
+                  </div>
+                  {/* Shows filename when a data-url PDF is loaded */}
+                  {newsForm.pdfUrl?.startsWith("data:") ? (
+                    <div className="flex items-center gap-2 px-3 py-2 bg-purple-500/10 border border-purple-500/30 rounded-xl text-xs text-purple-300 font-mono">
+                      <FileText className="w-4 h-4 shrink-0" />
+                      PDF file loaded — save gazette to apply
+                    </div>
+                  ) : (
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] font-mono text-slate-500 uppercase select-none">URL</span>
+                      <input type="text" placeholder="or paste /documents/gazette.pdf or https://..." value={newsForm.pdfUrl || ""}
+                        onChange={(e) => setNewsForm({ ...newsForm, pdfUrl: e.target.value })}
+                        className="w-full pl-10 pr-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm font-mono" />
+                    </div>
+                  )}
+                  {newsForm.pdfUrl && !newsForm.pdfUrl.startsWith("data:") && (
+                    <p className="text-[10px] text-slate-500 mt-1 font-mono">Direct link: {newsForm.pdfUrl}</p>
+                  )}
                 </div>
+                {/* Cover Image Upload */}
                 <div>
-                  <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Cover Thumbnail URL</label>
-                  <input type="text" placeholder="e.g. /images/... or https://..." value={newsForm.coverImage || ""} onChange={(e) => setNewsForm({ ...newsForm, coverImage: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
+                  <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Cover Thumbnail</label>
+                  <div className="flex gap-2 mb-2">
+                    <button type="button" disabled={uploading.newsImage}
+                      onClick={() => newsImageInputRef.current?.click()}
+                      className={cn("flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold border transition-all",
+                        uploading.newsImage ? "bg-slate-800 border-slate-700 text-slate-500 cursor-not-allowed" : "bg-sky-500/10 border-sky-500/30 text-sky-400 hover:bg-sky-500/20")}>
+                      <Upload className="w-3.5 h-3.5" />
+                      {uploading.newsImage ? "Loading…" : "Upload Cover Image"}
+                    </button>
+                    <input ref={newsImageInputRef} type="file" accept="image/*" className="hidden"
+                      onChange={(e) => { const f = e.target.files?.[0]; if (f) handleNewsImageUpload(f); e.target.value = ""; }} />
+                  </div>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] font-mono text-slate-500 uppercase select-none">URL</span>
+                    <input type="text" placeholder="or paste https://... image URL" value={newsForm.coverImage || ""}
+                      onChange={(e) => setNewsForm({ ...newsForm, coverImage: e.target.value })}
+                      className="w-full pl-10 pr-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm font-mono" />
+                  </div>
                   {newsForm.coverImage && (
                     <div className="mt-2 flex items-center gap-3 p-2 bg-slate-950 rounded-xl border border-slate-800">
                       <img src={newsForm.coverImage} alt="Preview" className="w-12 h-16 rounded object-cover border border-slate-700" onError={(e) => { (e.target as any).style.display = 'none'; }} />
-                      <span className="text-xs text-slate-400 font-mono truncate">Cover Thumbnail Preview</span>
+                      <span className="text-xs text-slate-400 font-mono">{uploading.newsImage ? "Processing…" : "Cover thumbnail preview"}</span>
                     </div>
                   )}
                 </div>
@@ -1789,11 +2035,28 @@ export default function AdminPage() {
                   <input type="text" required value={galleryForm.title || ""} onChange={(e) => setGalleryForm({ ...galleryForm, title: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
                 </div>
                 <div>
-                  <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Image URL</label>
-                  <input type="text" required placeholder="e.g. /images/... or https://..." value={galleryForm.image || ""} onChange={(e) => setGalleryForm({ ...galleryForm, image: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm" />
+                  <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Gallery Image</label>
+                  <div className="flex gap-2 mb-2">
+                    <button type="button" disabled={uploading.galleryImage}
+                      onClick={() => galleryImageInputRef.current?.click()}
+                      className={cn("flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold border transition-all",
+                        uploading.galleryImage ? "bg-slate-800 border-slate-700 text-slate-500 cursor-not-allowed" : "bg-sky-500/10 border-sky-500/30 text-sky-400 hover:bg-sky-500/20")}>
+                      <Upload className="w-3.5 h-3.5" />
+                      {uploading.galleryImage ? "Loading…" : "Upload from Device"}
+                    </button>
+                    <input ref={galleryImageInputRef} type="file" accept="image/*" className="hidden"
+                      onChange={(e) => { const f = e.target.files?.[0]; if (f) handleGalleryImageUpload(f); e.target.value = ""; }} />
+                  </div>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] font-mono text-slate-500 uppercase select-none">URL</span>
+                    <input type="text" placeholder="or paste https://... image URL" value={galleryForm.image || ""}
+                      onChange={(e) => setGalleryForm({ ...galleryForm, image: e.target.value })}
+                      className="w-full pl-10 pr-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm font-mono" />
+                  </div>
                   {galleryForm.image && (
-                    <div className="mt-2 rounded-xl overflow-hidden border border-slate-800 h-28 bg-black">
+                    <div className="mt-2 rounded-xl overflow-hidden border border-slate-700 h-28 bg-slate-950 relative">
                       <img src={galleryForm.image} alt="Preview" className="w-full h-full object-cover" onError={(e) => { (e.target as any).style.display = 'none'; }} />
+                      {uploading.galleryImage && <div className="absolute inset-0 bg-slate-950/80 flex items-center justify-center"><div className="w-6 h-6 border-2 border-sky-500 border-t-transparent rounded-full animate-spin" /></div>}
                     </div>
                   )}
                 </div>

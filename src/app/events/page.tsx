@@ -49,6 +49,19 @@ export default function EventsPage() {
     exit: { opacity: 0, scale: 0.95, transition: { duration: 0.3 } }
   };
 
+  // ── Detail Modal ──────────────────────────────────────────────────────────
+  const [selectedEvent, setSelectedEvent] = useState<EventItem | null>(null);
+
+  // Prevent body scroll when modal is open
+  useEffect(() => {
+    if (selectedEvent) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => { document.body.style.overflow = ""; };
+  }, [selectedEvent]);
+
   return (
     <div className="relative min-h-screen overflow-hidden pb-32">
       {/* Ambient Backgrounds */}
@@ -175,6 +188,7 @@ export default function EventsPage() {
                   <div className="p-8 md:p-10 pt-0">
                     <button
                       type="button"
+                      onClick={() => setSelectedEvent(event)}
                       className="w-full py-4 rounded-2xl bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600 hover:from-sky-400 hover:to-blue-500 text-white font-bold flex items-center justify-center gap-2 text-sm shadow-[0_0_25px_rgba(56,189,248,0.3)] transition-all duration-300 hover:scale-[1.02] cursor-pointer"
                     >
                       View Details
@@ -214,6 +228,122 @@ export default function EventsPage() {
           </div>
         )}
       </div>
+
+      {/* ── Event Detail Modal ───────────────────────────────────────────────── */}
+      <AnimatePresence>
+        {selectedEvent && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              key="backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25 }}
+              onClick={() => setSelectedEvent(null)}
+              className="fixed inset-0 z-[160] bg-black/80 backdrop-blur-md"
+            />
+
+            {/* Modal Panel */}
+            <motion.div
+              key="modal"
+              initial={{ opacity: 0, y: 60, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 40, scale: 0.96 }}
+              transition={{ type: "spring", stiffness: 320, damping: 32 }}
+              className="fixed inset-x-4 bottom-0 sm:inset-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 z-[161] w-full sm:max-w-2xl max-h-[90vh] overflow-y-auto bg-slate-900 border border-slate-700/80 rounded-t-[32px] sm:rounded-[28px] shadow-[0_0_80px_rgba(56,189,248,0.15)]"
+            >
+              {/* Close button */}
+              <button
+                onClick={() => setSelectedEvent(null)}
+                className="absolute top-4 right-4 z-10 p-2 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-400 hover:text-white transition-all border border-slate-700"
+                aria-label="Close"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+
+              {/* Banner */}
+              <div className="relative h-52 sm:h-64 w-full overflow-hidden rounded-t-[32px] sm:rounded-t-[28px]">
+                <img
+                  src={selectedEvent.image}
+                  alt={selectedEvent.title}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/30 to-transparent" />
+                {/* Category badge */}
+                <div className="absolute top-4 left-4">
+                  <span className={cn(
+                    "px-3 py-1 text-xs font-mono font-bold rounded-full uppercase tracking-wider border backdrop-blur-md",
+                    selectedEvent.category === "upcoming" ? "bg-sky-500/25 text-sky-300 border-sky-500/40" :
+                    selectedEvent.category === "current" ? "bg-emerald-500/25 text-emerald-300 border-emerald-500/40 animate-pulse" :
+                    "bg-slate-900/90 text-slate-400 border-slate-700"
+                  )}>
+                    {selectedEvent.category === "upcoming" ? "✦ Upcoming" : selectedEvent.category === "current" ? "● Live Now" : "Past Event"}
+                  </span>
+                </div>
+              </div>
+
+              {/* Content */}
+              <div className="p-7 sm:p-9">
+                <h2 className="text-2xl sm:text-3xl font-extrabold text-white mb-5 tracking-tight leading-tight">
+                  {selectedEvent.title}
+                </h2>
+
+                {/* Meta pills */}
+                <div className="flex flex-wrap gap-3 mb-7">
+                  <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800 border border-slate-700 text-xs font-mono text-slate-300">
+                    <Calendar className="w-4 h-4 text-sky-400 shrink-0" />
+                    {selectedEvent.date}
+                  </div>
+                  <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800 border border-slate-700 text-xs font-mono text-slate-300">
+                    <Clock className="w-4 h-4 text-sky-400 shrink-0" />
+                    {selectedEvent.time}
+                  </div>
+                  <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800 border border-slate-700 text-xs font-mono text-slate-300">
+                    <MapPin className="w-4 h-4 text-sky-400 shrink-0" />
+                    {selectedEvent.location}
+                  </div>
+                </div>
+
+                {/* Divider */}
+                <div className="h-px bg-slate-800 mb-7" />
+
+                {/* Full Description */}
+                <div className="mb-8">
+                  <p className="text-xs font-mono uppercase tracking-widest text-sky-400 mb-3">About this Event</p>
+                  <p className="text-slate-300 text-sm sm:text-base leading-relaxed whitespace-pre-line">
+                    {selectedEvent.description || "No description provided."}
+                  </p>
+                </div>
+
+                {/* Registration CTA */}
+                {selectedEvent.category !== "past" ? (
+                  selectedEvent.registrationUrl ? (
+                    <a
+                      href={selectedEvent.registrationUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block w-full text-center py-4 rounded-2xl bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600 hover:from-sky-400 hover:to-blue-500 text-white font-bold text-sm shadow-[0_0_25px_rgba(56,189,248,0.35)] transition-all hover:scale-[1.02]"
+                    >
+                      Register Now →
+                    </a>
+                  ) : (
+                    <div className="w-full text-center py-4 rounded-2xl bg-slate-800 border border-slate-700 text-slate-400 font-bold text-sm">
+                      Registration link coming soon
+                    </div>
+                  )
+                ) : (
+                  <div className="w-full text-center py-4 rounded-2xl bg-slate-800 border border-slate-700 text-slate-500 font-bold text-sm">
+                    Registration Closed
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -103,6 +103,7 @@ export interface WebsiteDataBackup {
   newsIssues: NewsIssueItem[];
   gallery: GalleryItem[];
   stats: ClubStats;
+  featuredEventIds?: string[];
 }
 
 // ============================================================================
@@ -459,6 +460,7 @@ const CONTENT_KEYS = {
   NEWS: "newsIssues",
   GALLERY: "gallery",
   STATS: "stats",
+  FEATURED: "featuredEventIds",
 };
 
 // Read one JSON blob by key. Falls back to the default seed data if the
@@ -548,6 +550,11 @@ export const DataStore = {
   getStats: (): Promise<ClubStats> => getContent(CONTENT_KEYS.STATS, defaultStats),
   saveStats: (data: ClubStats) => setContent(CONTENT_KEYS.STATS, data),
 
+  // Featured Highlights — up to 2 event IDs shown in the navbar
+  getFeaturedEventIds: (): Promise<string[]> =>
+    getContent<string[]>(CONTENT_KEYS.FEATURED, [defaultEvents[0]?.id ?? "", defaultEvents[1]?.id ?? ""].filter(Boolean)),
+  saveFeaturedEventIds: (ids: string[]) => setContent(CONTENT_KEYS.FEATURED, ids),
+
   // Export Complete Backup JSON
   exportBackup: async (): Promise<WebsiteDataBackup> => ({
     version: "2.0",
@@ -560,6 +567,7 @@ export const DataStore = {
     newsIssues: await DataStore.getNewsIssues(),
     gallery: await DataStore.getGallery(),
     stats: await DataStore.getStats(),
+    featuredEventIds: await DataStore.getFeaturedEventIds(),
   }),
 
   // Import Complete Backup JSON
@@ -573,6 +581,7 @@ export const DataStore = {
       if (backup.newsIssues) await DataStore.saveNewsIssues(backup.newsIssues);
       if (backup.gallery) await DataStore.saveGallery(backup.gallery);
       if (backup.stats) await DataStore.saveStats(backup.stats);
+      if (backup.featuredEventIds) await DataStore.saveFeaturedEventIds(backup.featuredEventIds);
       return true;
     } catch (e) {
       console.error("Failed to import backup", e);
@@ -590,6 +599,7 @@ export const DataStore = {
     await DataStore.saveNewsIssues(defaultNewsIssues);
     await DataStore.saveGallery(defaultGallery);
     await DataStore.saveStats(defaultStats);
+    await DataStore.saveFeaturedEventIds([defaultEvents[0]?.id ?? "", defaultEvents[1]?.id ?? ""].filter(Boolean));
   }
 };
 
