@@ -241,7 +241,7 @@ const NetworkNode = ({ member, direction, isFaded, setHoveredId, size = "lg" }: 
                   animate={{ opacity: 1, scale: 1, x: 0, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ duration: 0.3, delay: 0.1, ease: "easeOut" }}
-                  className="w-[300px] bg-slate-950/95 backdrop-blur-2xl border rounded-2xl p-6 pointer-events-auto shadow-2xl"
+                  className="w-[min(300px,calc(100vw-2rem))] bg-slate-950/95 backdrop-blur-2xl border rounded-2xl p-6 pointer-events-auto shadow-2xl"
                   style={{ 
                     borderColor: `${config.primaryAccent}60`,
                     boxShadow: `0 20px 60px -10px ${config.primaryAccent}35`
@@ -282,24 +282,6 @@ const NetworkNode = ({ member, direction, isFaded, setHoveredId, size = "lg" }: 
                     ))}
                   </div>
 
-                  {member.branch && (
-                    <div 
-                      className="mb-5 flex items-center gap-2 border px-3 py-1.5 rounded-md w-max"
-                      style={{
-                        borderColor: `${config.primaryAccent}40`,
-                        backgroundColor: `${config.primaryAccent}10`
-                      }}
-                    >
-                       <span 
-                         className="text-[8px] font-bold uppercase tracking-widest"
-                         style={{ color: config.secondaryAccent }}
-                       >
-                         Branch:
-                       </span>
-                       <span className="text-[10px] font-bold text-white uppercase tracking-wider">{member.branch}</span>
-                    </div>
-                  )}
-
                   <div className="flex items-center gap-4 pt-4 border-t border-slate-800/80">
                     {member.socials?.linkedin && (
                       <a href={member.socials.linkedin} target="_blank" rel="noreferrer" className="text-slate-400 hover:text-sky-400 transition-colors">
@@ -333,7 +315,7 @@ const TeamBranch = ({ title, members, hoveredId, setHoveredId, cardDirection = "
   const isBranchActive = members.some(m => m.id === hoveredId);
 
   return (
-    <div className={`flex flex-col items-start relative w-max mt-20 shrink-0 ${isBranchActive ? 'z-50' : 'z-20'}`}>
+    <div className={`flex flex-col items-start relative w-max shrink-0 ${isBranchActive ? 'z-50' : 'z-20'}`}>
       <h3 
         className="text-xs md:text-sm font-black text-white tracking-[0.2em] uppercase bg-slate-950/90 backdrop-blur-md px-4 md:px-6 py-2 rounded-full border z-20 whitespace-nowrap"
         style={{ 
@@ -353,9 +335,9 @@ const TeamBranch = ({ title, members, hoveredId, setHoveredId, cardDirection = "
         }}
       />
 
-      <div className="flex flex-col gap-12 md:gap-16 pt-12 pl-[60px] md:pl-[80px] pr-4 relative z-20">
+      <div className="flex flex-col gap-4 pt-12 pl-[60px] md:pl-[80px] pr-4 relative z-20">
         {members.map((m) => (
-          <div key={m.id} className="relative flex items-center">
+          <div key={m.id} className="relative flex items-center min-h-[160px] md:min-h-[176px]">
             {/* Horizontal Branch Line connecting to spine */}
             <div 
               className="absolute right-full top-1/2 w-[30px] md:w-[40px] h-[2px] -translate-y-1/2" 
@@ -399,7 +381,15 @@ export default function TeamPage() {
   const coheads = categoryMembers("colead");
   const members = categoryMembers("member");
   
-  const memberBranches = Array.from(new Set(members.map(m => m.domain || "General")));
+  const branchGroups = new Map<string, { title: string; members: any[] }>();
+  members.forEach(member => {
+    const branch = member.branch?.trim() || "General";
+    const key = branch.toLowerCase();
+    const group = branchGroups.get(key) || { title: branch, members: [] };
+    group.members.push(member);
+    branchGroups.set(key, group);
+  });
+  const memberBranches = Array.from(branchGroups.values());
 
   return (
     <div className="relative min-h-screen overflow-x-hidden pb-32">
@@ -436,7 +426,7 @@ export default function TeamPage() {
       </section>
 
       {/* Hierarchical Neural Tree */}
-      <div className="relative z-10 w-full max-w-[1400px] mx-auto px-4 flex flex-col items-center gap-32 md:gap-48 mb-32">
+      <div className="relative z-10 w-full max-w-[1400px] mx-auto px-4 flex flex-col items-center gap-16 md:gap-24 mb-32">
         
         {/* Background Vertical Connection Line */}
         <div 
@@ -447,15 +437,15 @@ export default function TeamPage() {
           }}
         />
 
-        {presidents.length > 0 && <div className="relative flex justify-center w-full">
+        {presidents.length > 0 && <div className="relative flex justify-center items-start min-h-[150px] md:min-h-[170px] w-full">
           {presidents.map((m) => <NetworkNode key={m.id} member={m} direction="right" isFaded={hoveredId !== null && hoveredId !== m.id} setHoveredId={setHoveredId} />)}
         </div>}
 
-        {vps.length > 0 && <div className="relative flex justify-center w-full">
+        {vps.length > 0 && <div className="relative flex justify-center items-start min-h-[150px] md:min-h-[170px] w-full">
           {vps.map((m) => <NetworkNode key={m.id} member={m} direction="left" isFaded={hoveredId !== null && hoveredId !== m.id} setHoveredId={setHoveredId} />)}
         </div>}
 
-        {heads.length > 0 && <div className="relative flex flex-wrap justify-center items-center gap-24 md:gap-48 w-full max-w-[1400px] z-30">
+        {heads.length > 0 && <div className="relative flex flex-wrap justify-center items-start gap-12 md:gap-24 min-h-[150px] md:min-h-[170px] w-full max-w-[1200px] z-30">
           {heads.map((member, idx) => {
             return (
               <NetworkNode 
@@ -469,7 +459,7 @@ export default function TeamPage() {
           })}
         </div>}
 
-        {coheads.length > 0 && <div className="relative flex flex-wrap justify-center items-center gap-20 md:gap-36 w-full max-w-[1200px] pt-16 z-20">
+        {coheads.length > 0 && <div className="relative flex flex-wrap justify-center items-start gap-12 md:gap-24 min-h-[150px] md:min-h-[170px] w-full max-w-[1200px] z-20">
           {coheads.map((member, idx) => {
             return (
               <NetworkNode 
@@ -484,13 +474,13 @@ export default function TeamPage() {
         </div>}
 
         {members.length > 0 && <div 
-          className="relative flex flex-nowrap justify-start lg:justify-center items-start gap-8 md:gap-16 w-full pt-20 overflow-x-auto pb-16 px-4 scrollbar-hide"
+          className="relative flex flex-nowrap justify-start lg:justify-center items-start gap-6 md:gap-10 w-full overflow-x-auto pb-16 px-4 scrollbar-hide"
         >
-          {memberBranches.map((domain, index) => (
+          {memberBranches.map((branch, index) => (
             <TeamBranch
-              key={domain}
-              title={domain}
-              members={members.filter(member => (member.domain || "General") === domain)}
+              key={branch.title}
+              title={branch.title}
+              members={branch.members}
               hoveredId={hoveredId}
               setHoveredId={setHoveredId}
               cardDirection={index < memberBranches.length / 2 ? "right" : "left"}

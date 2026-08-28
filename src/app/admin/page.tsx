@@ -381,7 +381,7 @@ export default function AdminPage() {
         position: "CORE COMMITTEE MEMBER",
         category: "member",
         domain: "technical",
-        branch: "CSE",
+        branch: "",
         image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300",
         bio: "",
         skillsText: "Development, Problem Solving",
@@ -393,6 +393,7 @@ export default function AdminPage() {
   const handleSaveTeam = (e: React.FormEvent) => {
     e.preventDefault();
     if (!teamForm.name || !teamForm.position || !teamForm.category) return;
+    if (teamForm.category === "member" && !teamForm.branch?.trim()) return;
     const skillsArray = (teamForm.skillsText || "")
       .split(",")
       .map(s => s.trim())
@@ -1750,8 +1751,8 @@ export default function AdminPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Branch / Domain</label>
-                    <input type="text" placeholder="e.g. Technical or CSE" value={teamForm.category === "member" ? `${teamForm.domain || ""}${teamForm.domain && teamForm.branch ? " / " : ""}${teamForm.branch || ""}` : ""} disabled={teamForm.category !== "member"} onChange={(e) => { const [domain, ...branch] = e.target.value.split("/"); setTeamForm({ ...teamForm, domain: domain.trim(), branch: branch.join("/").trim() }); }} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm disabled:opacity-40" />
+                    <label className="block text-xs font-mono uppercase text-slate-400 mb-1">Branch</label>
+                    <input type="text" required={teamForm.category === "member"} placeholder="e.g. Technical" value={teamForm.category === "member" ? teamForm.branch || "" : ""} disabled={teamForm.category !== "member"} onChange={(e) => setTeamForm({ ...teamForm, branch: e.target.value })} className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm disabled:opacity-40" />
                   </div>
                 </div>
                 <div>
