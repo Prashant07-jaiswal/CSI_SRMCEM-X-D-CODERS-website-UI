@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { 
-  ArrowRight, Code, Cpu, Globe, Sparkles, Flame, Users, CheckCircle2, ExternalLink 
+import {
+  ArrowRight, Code, Cpu, Globe, Sparkles, Flame, Users, CheckCircle2, ExternalLink, Calendar, MapPin, Clock
 } from "lucide-react";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "@/lib/themeContext";
 import { cn } from "@/lib/utils";
 import { HeroLogo } from "@/components/ui/HeroLogo";
@@ -22,6 +22,17 @@ export default function Home() {
   const [featuredEvents, setFeaturedEvents] = useState<EventItem[]>([]);
   const [totalEvents, setTotalEvents] = useState(0);
   const [flippedCards, setFlippedCards] = useState<Record<string, boolean>>({});
+  const [selectedEvent, setSelectedEvent] = useState<EventItem | null>(null);
+
+  // Prevent body scroll when modal is open
+  useEffect(() => {
+    if (selectedEvent) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => { document.body.style.overflow = ""; };
+  }, [selectedEvent]);
 
   const toggleCardFlip = (key: string) => {
     setFlippedCards(prev => ({ ...prev, [key]: !prev[key] }));
@@ -31,15 +42,15 @@ export default function Home() {
     setStats(await DataStore.getStats());
     const events = await DataStore.getEvents();
     setTotalEvents(events.length);
-    
+
     // Filter out past events
     let activeEvents = events.filter(e => e.category !== "past");
-    
+
     // Sort: current first, then upcoming
     activeEvents.sort((a, b) => {
       if (a.category === "current" && b.category !== "current") return -1;
       if (b.category === "current" && a.category !== "current") return 1;
-      
+
       const dateA = new Date(a.date).getTime();
       const dateB = new Date(b.date).getTime();
       const validA = isNaN(dateA) ? 0 : dateA;
@@ -67,7 +78,7 @@ export default function Home() {
       {/* ========================================================================= */}
       <section className="min-h-[85vh] lg:min-h-[90vh] flex items-center px-4 sm:px-8 md:px-12 lg:px-20 xl:px-24 relative z-10 pt-20 sm:pt-24 lg:pt-16 pb-12">
         <div className="w-full max-w-7xl mx-auto flex flex-col-reverse lg:flex-row items-center justify-between gap-10 lg:gap-14">
-          
+
           {/* Left Side: Text Content */}
           <motion.div
             initial={{ opacity: 0, x: -50 }}
@@ -81,7 +92,7 @@ export default function Home() {
                 SRMCEM&apos;s Premier Tech Club
               </span>
             </div>
-            
+
             <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-6xl xl:text-7xl 2xl:text-8xl font-extrabold tracking-tighter mb-4 sm:mb-5 leading-none">
               <span className={cn(
                 "block text-transparent bg-clip-text bg-gradient-to-r",
@@ -98,11 +109,11 @@ export default function Home() {
                 X D&apos;CODERS
               </span>
             </h1>
-            
+
             <p className="max-w-xl text-base sm:text-lg md:text-xl text-slate-300 mb-8 leading-relaxed font-normal">
               Empowering students through technology, innovation, and collaboration. We are building the future of engineering.
             </p>
-            
+
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:w-auto">
               <Link
                 href="/events"
@@ -138,10 +149,10 @@ export default function Home() {
             </h2>
             <div className={cn("w-24 h-1 mx-auto rounded-full bg-gradient-to-r", config.gradientText)} />
           </div>
-          
+
           <div className="grid md:grid-cols-3 gap-8">
             {/* Card 1: Hackathons */}
-            <div 
+            <div
               onClick={() => toggleCardFlip('hackathons')}
               className="group h-84 [perspective:1000px] cursor-pointer"
             >
@@ -182,7 +193,7 @@ export default function Home() {
             </div>
 
             {/* Card 2: Workshops */}
-            <div 
+            <div
               onClick={() => toggleCardFlip('workshops')}
               className="group h-84 [perspective:1000px] cursor-pointer"
             >
@@ -223,7 +234,7 @@ export default function Home() {
             </div>
 
             {/* Card 3: Open Source */}
-            <div 
+            <div
               onClick={() => toggleCardFlip('opensource')}
               className="group h-84 [perspective:1000px] cursor-pointer"
             >
@@ -306,7 +317,7 @@ export default function Home() {
       {/* ========================================================================= */}
       <section className="py-24 px-4 md:px-16 lg:px-24 relative overflow-hidden border-t border-slate-800/80">
         <div className={cn("absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-4xl h-[400px] blur-[140px] pointer-events-none -z-10", config.glowClass1)} />
-        
+
         <div className="max-w-7xl mx-auto">
           {/* Section Header */}
           <div className="text-center max-w-4xl mx-auto mb-16 p-8 md:p-12 rounded-3xl bg-slate-900/60 border border-slate-800 backdrop-blur-xl">
@@ -411,14 +422,14 @@ export default function Home() {
                 </li>
               </ul>
             </div>
-            
+
             {/* The Original Rainbow Gradient Border Card with Inner Glow Effect */}
             <div className="flex-1 w-full max-w-md lg:max-w-none">
               <div className="relative p-1 rounded-3xl bg-gradient-to-br from-blue-500 via-purple-500 to-orange-500 shadow-[0_0_50px_rgba(139,92,246,0.35)] hover:shadow-[0_0_60px_rgba(139,92,246,0.5)] transition-shadow duration-500">
                 <div className="bg-slate-950 rounded-[22px] p-10 md:p-12 text-center flex flex-col items-center justify-center relative overflow-hidden">
                   <div className="absolute -top-20 -right-20 w-48 h-48 bg-purple-500/25 blur-[60px] rounded-full pointer-events-none" />
                   <div className="absolute -bottom-20 -left-20 w-48 h-48 bg-blue-500/25 blur-[60px] rounded-full pointer-events-none" />
-                  
+
                   <span className="text-xs font-mono font-bold uppercase tracking-widest text-purple-300 mb-2">
                     Verified Club Milestone
                   </span>
@@ -454,8 +465,8 @@ export default function Home() {
                 Featured Highlights
               </h2>
             </div>
-            <Link 
-              href="/events" 
+            <Link
+              href="/events"
               className="text-sky-400 hover:text-sky-300 font-semibold text-sm transition-colors flex items-center gap-1"
             >
               View All Events ({totalEvents}) &rarr;
@@ -465,13 +476,13 @@ export default function Home() {
           {/* Cards Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
             {featuredEvents.map((event) => (
-              <div 
+              <div
                 key={event.id}
                 className="group relative bg-slate-900/60 border border-slate-800 hover:border-sky-500/50 rounded-3xl p-8 flex flex-col justify-between overflow-hidden shadow-xl backdrop-blur-xl transition-all duration-300 hover:shadow-[0_0_35px_rgba(56,189,248,0.15)] min-h-[280px]"
               >
                 {/* Background */}
                 <div className="absolute inset-0 bg-gradient-to-br from-slate-900/90 to-slate-950/90 z-0" />
-                
+
                 {/* Content */}
                 <div className="relative z-10 flex flex-col h-full justify-between">
                   <div>
@@ -480,8 +491,8 @@ export default function Home() {
                       <span className={cn(
                         "px-3 py-1 text-[10px] font-mono font-bold rounded-full uppercase tracking-wider border shadow-sm",
                         event.category === "upcoming" ? "bg-sky-500/20 text-sky-300 border-sky-500/30 shadow-[0_0_10px_rgba(56,189,248,0.2)]" :
-                        event.category === "current" ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30 shadow-[0_0_10px_rgba(16,185,129,0.2)] animate-pulse" :
-                        "bg-slate-800/80 text-slate-400 border-slate-700"
+                          event.category === "current" ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30 shadow-[0_0_10px_rgba(16,185,129,0.2)] animate-pulse" :
+                            "bg-slate-800/80 text-slate-400 border-slate-700"
                       )}>
                         {event.category === "upcoming" ? "Upcoming" : event.category === "current" ? "Live Now" : "Past Event"}
                       </span>
@@ -497,29 +508,42 @@ export default function Home() {
                         {event.description}
                       </p>
                       {event.description && event.description.length > 120 && (
-                        <Link href="/events" className="text-sm text-slate-400 hover:text-slate-300 transition-colors mt-1 inline-block">
+                        <button onClick={() => setSelectedEvent(event)} className="text-sm text-slate-400 hover:text-slate-300 transition-colors mt-1 inline-block cursor-pointer">
                           Read more
-                        </Link>
+                        </button>
                       )}
                     </div>
                   </div>
 
                   {/* Bottom Actions */}
                   <div className="flex items-center justify-between mt-8">
-                    <Link
-                      href="/events"
-                      className="px-6 py-2.5 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-bold rounded-xl text-sm transition-all shadow-[0_0_15px_rgba(56,189,248,0.3)] hover:scale-105 flex items-center gap-2"
-                    >
-                      Register Now
-                      <ExternalLink className="w-3.5 h-3.5" />
-                    </Link>
-                    
-                    <Link
-                      href="/events"
-                      className="text-slate-400 hover:text-white font-medium text-sm transition-colors flex items-center gap-1 group-hover:translate-x-1 duration-300"
+                    {event.registrationUrl ? (
+                      <a
+                        href={event.registrationUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-6 py-2.5 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-bold rounded-xl text-sm transition-all shadow-[0_0_15px_rgba(56,189,248,0.3)] hover:scale-105 flex items-center gap-2"
+                      >
+                        Register Now
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </a>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={(e) => e.preventDefault()}
+                        className="px-6 py-2.5 bg-slate-800 text-slate-400 font-bold rounded-xl text-sm border border-slate-700 cursor-not-allowed opacity-70 flex items-center gap-2"
+                      >
+                        Registration Closed
+                      </button>
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={() => setSelectedEvent(event)}
+                      className="text-slate-400 hover:text-white font-medium text-sm transition-colors flex items-center gap-1 group-hover:translate-x-1 duration-300 cursor-pointer"
                     >
                       Explore Details &rarr;
-                    </Link>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -527,6 +551,119 @@ export default function Home() {
           </div>
         </section>
       )}
+
+      {/* ── Event Detail Modal (Duplicated from Events page) ────────────────── */}
+      <AnimatePresence>
+        {selectedEvent && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              key="backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25 }}
+              onClick={() => setSelectedEvent(null)}
+              className="fixed inset-0 z-[160] bg-black/80 backdrop-blur-md"
+            />
+
+            {/* Modal Panel */}
+            <motion.div
+              key="modal"
+              initial={{ opacity: 0, y: 60, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 40, scale: 0.96 }}
+              transition={{ type: "spring", stiffness: 320, damping: 32 }}
+              className="fixed inset-x-4 bottom-0 sm:inset-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 z-[161] w-full sm:max-w-2xl h-auto max-h-[90vh] flex flex-col bg-slate-900 border border-slate-700/80 rounded-t-[32px] sm:rounded-[28px] shadow-[0_0_80px_rgba(56,189,248,0.15)] overflow-hidden"
+            >
+              {/* Close button */}
+              <button
+                onClick={() => setSelectedEvent(null)}
+                className="absolute top-4 right-4 z-10 p-2 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-400 hover:text-white transition-all border border-slate-700"
+                aria-label="Close"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+
+              {/* Banner (Static) */}
+              <div className="relative shrink-0 h-48 sm:h-56 w-full overflow-hidden bg-slate-950">
+                <img
+                  src={selectedEvent.image}
+                  alt={selectedEvent.title}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/20 to-transparent" />
+                {/* Category badge */}
+                <div className="absolute top-4 left-4">
+                  <span className={cn(
+                    "px-3 py-1 text-xs font-mono font-bold rounded-full uppercase tracking-wider border backdrop-blur-md",
+                    selectedEvent.category === "upcoming" ? "bg-sky-500/25 text-sky-300 border-sky-500/40" :
+                      selectedEvent.category === "current" ? "bg-emerald-500/25 text-emerald-300 border-emerald-500/40 animate-pulse" :
+                        "bg-slate-900/90 text-slate-400 border-slate-700"
+                  )}>
+                    {selectedEvent.category === "upcoming" ? "✦ Upcoming" : selectedEvent.category === "current" ? "● Live Now" : "Past Event"}
+                  </span>
+                </div>
+              </div>
+
+              {/* Meta Info Bar (Static) */}
+              <div className="shrink-0 bg-slate-900 border-b border-slate-700/80 px-6 py-4 flex flex-row items-center justify-between gap-4 overflow-x-auto text-xs font-mono text-slate-300 z-10 shadow-sm hide-scrollbar">
+                <div className="flex items-center gap-2 whitespace-nowrap">
+                  <Calendar className="w-4 h-4 text-sky-400 shrink-0" />
+                  <span>{selectedEvent.date}</span>
+                </div>
+                <div className="flex items-center gap-2 whitespace-nowrap">
+                  <Clock className="w-4 h-4 text-sky-400 shrink-0" />
+                  <span>{selectedEvent.time}</span>
+                </div>
+                <div className="flex items-center gap-2 whitespace-nowrap">
+                  <MapPin className="w-4 h-4 text-sky-400 shrink-0" />
+                  <span>{selectedEvent.location}</span>
+                </div>
+              </div>
+
+              {/* Content (Scrollable) */}
+              <div className="p-6 sm:p-8 overflow-y-auto flex-1 custom-scrollbar">
+                <h2 className="text-2xl sm:text-3xl font-extrabold text-white mb-6 tracking-tight leading-tight">
+                  {selectedEvent.title}
+                </h2>
+
+                {/* Full Description */}
+                <div className="mb-8">
+                  <p className="text-xs font-mono uppercase tracking-widest text-sky-400 mb-3">About this Event</p>
+                  <p className="text-slate-300 text-sm sm:text-base leading-relaxed whitespace-pre-line">
+                    {selectedEvent.description || "No description provided."}
+                  </p>
+                </div>
+
+                {/* Registration CTA */}
+                {selectedEvent.category !== "past" ? (
+                  selectedEvent.registrationUrl ? (
+                    <a
+                      href={selectedEvent.registrationUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block w-full text-center py-4 rounded-2xl bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600 hover:from-sky-400 hover:to-blue-500 text-white font-bold text-sm shadow-[0_0_25px_rgba(56,189,248,0.35)] transition-all hover:scale-[1.02]"
+                    >
+                      Register Now →
+                    </a>
+                  ) : (
+                    <div className="w-full text-center py-4 rounded-2xl bg-slate-800 border border-slate-700 text-slate-400 font-bold text-sm">
+                      Registration link coming soon
+                    </div>
+                  )
+                ) : (
+                  <div className="w-full text-center py-4 rounded-2xl bg-slate-800 border border-slate-700 text-slate-500 font-bold text-sm">
+                    Registration Closed
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
     </div>
   );
