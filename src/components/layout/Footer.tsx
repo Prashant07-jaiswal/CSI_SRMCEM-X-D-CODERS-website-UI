@@ -11,7 +11,7 @@ export function Footer() {
   return (
     <footer className="w-full bg-black/60 border-t border-white/10 backdrop-blur-md pt-12 pb-6 px-4 md:px-16 lg:px-24 transition-colors duration-300">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
-        
+
         {/* Left Side: Brand & Copyright */}
         <div className="flex flex-col items-center md:items-start">
           <Link href="/" className={cn("text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r mb-2", config.gradientText)}>
@@ -30,14 +30,11 @@ export function Footer() {
           <a href="https://www.linkedin.com/company/computer-society-of-india-csi-srmcem/" target="_blank" rel="noreferrer" aria-label="LinkedIn" className="w-10 h-10 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-blue-400 hover:border-blue-500/50 hover:bg-blue-950/30 transition-all duration-300 shadow-sm">
             <FaLinkedin className="w-4 h-4" />
           </a>
-          <a href="https://github.com" target="_blank" rel="noreferrer" aria-label="GitHub" className="w-10 h-10 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-white hover:border-slate-500 hover:bg-slate-800 transition-all duration-300 shadow-sm">
+          <a href="https://github.com/leadcsidcoders-beep" target="_blank" rel="noreferrer" aria-label="GitHub" className="w-10 h-10 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-white hover:border-slate-500 hover:bg-slate-800 transition-all duration-300 shadow-sm">
             <FaGithub className="w-4 h-4" />
           </a>
           <a href="https://www.instagram.com/csi_srmcem?igsi=OXdwNGl0Y2JhNmVo" target="_blank" rel="noreferrer" aria-label="Instagram" className="w-10 h-10 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-sky-300 hover:border-sky-400/50 hover:bg-sky-950/30 transition-all duration-300 shadow-sm">
             <FaInstagram className="w-4 h-4" />
-          </a>
-          <a href="https://x.com" target="_blank" rel="noreferrer" aria-label="Twitter/X" className="w-10 h-10 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-white hover:border-slate-400 hover:bg-slate-800 transition-all duration-300 shadow-sm">
-            <FaXTwitter className="w-4 h-4" />
           </a>
         </div>
 
