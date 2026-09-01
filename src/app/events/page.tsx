@@ -199,7 +199,7 @@ export default function EventsPage() {
                       onClick={() => setSelectedEvent(event)}
                       className="w-full py-3 rounded-xl bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600 hover:from-sky-400 hover:to-blue-500 text-white font-bold flex items-center justify-center gap-2 text-sm shadow-[0_0_20px_rgba(56,189,248,0.25)] transition-all duration-300 hover:scale-[1.02] cursor-pointer"
                     >
-                      View Details
+                      {event.category !== "past" ? "View Details & Register" : "View Details"}
                       <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </button>
                   </div>
