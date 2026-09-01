@@ -366,7 +366,7 @@ export default function AboutPage() {
         </motion.div>
 
         {/* 5 Interactive Sub-Teams Domain Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3.5 max-w-6xl mx-auto">
           {subTeamsList.map((item, i) => {
             const style = ecosystemStyles[item.color] || ecosystemStyles.sky;
             const Icon = item.icon || Layers;
@@ -378,7 +378,7 @@ export default function AboutPage() {
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.08 }}
                 onClick={() => toggleCardFlip(`subteam-${i}`)}
-                className="group h-[380px] [perspective:1000px] cursor-pointer"
+                className="group w-full max-w-[220px] h-[300px] [perspective:1000px] cursor-pointer mx-auto"
               >
                 <div className={cn(
                   "relative w-full h-full transition-transform duration-700 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]",
@@ -387,48 +387,48 @@ export default function AboutPage() {
                   
                   {/* Front Side */}
                   <div className={cn(
-                    "absolute inset-0 [backface-visibility:hidden] bg-slate-900/70 border rounded-3xl p-6 flex flex-col justify-between shadow-xl transition-all duration-300 backdrop-blur-xl",
+                    "absolute inset-0 [backface-visibility:hidden] bg-slate-900/70 border rounded-2xl p-4 flex flex-col justify-between shadow-xl transition-all duration-300 backdrop-blur-xl",
                     style.border,
                     style.hoverBorder,
                     style.frontGlow
                   )}>
                     <div>
-                      <div className={cn("w-12 h-12 rounded-2xl mb-4 border border-white/5 flex items-center justify-center shadow-sm", style.iconBg)}>
-                        <Icon className={cn("w-6 h-6", style.iconColor)} />
+                      <div className={cn("w-9 h-9 rounded-xl mb-2.5 border border-white/5 flex items-center justify-center shadow-sm", style.iconBg)}>
+                        <Icon className={cn("w-4.5 h-4.5", style.iconColor)} />
                       </div>
-                      <span className={cn("px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider mb-2 inline-block border", style.badgeBg, style.badgeText, style.badgeBorder)}>
+                      <span className={cn("px-2 py-0.5 rounded-full text-[9px] font-mono font-bold uppercase tracking-wider mb-1.5 inline-block border", style.badgeBg, style.badgeText, style.badgeBorder)}>
                         {item.category}
                       </span>
-                      <h3 className="text-xl font-bold text-white mb-2">{item.title}</h3>
-                      <p className="text-slate-400 text-xs leading-relaxed">{item.frontDesc}</p>
+                      <h3 className="text-sm sm:text-base font-bold text-white mb-1 tracking-tight truncate">{item.title}</h3>
+                      <p className="text-slate-400 text-[11px] leading-relaxed line-clamp-4 font-light">{item.frontDesc}</p>
                     </div>
                   </div>
 
                   {/* Back Side */}
                   <div className={cn(
-                    "absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)] border rounded-3xl p-6 flex flex-col justify-between overflow-hidden transition-all duration-300",
+                    "absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)] border rounded-2xl p-4 flex flex-col justify-between overflow-hidden transition-all duration-300",
                     style.backBg
                   )}>
                     <div>
-                      <div className="flex items-center gap-2 mb-2">
-                        <Icon className={cn("w-5 h-5", style.iconColor)} />
-                        <h4 className="text-sm font-bold text-white tracking-wide">{item.title}</h4>
+                      <div className="flex items-center gap-1.5 mb-1.5">
+                        <Icon className={cn("w-4 h-4 shrink-0", style.iconColor)} />
+                        <h4 className="text-xs font-bold text-white tracking-wide truncate">{item.title}</h4>
                       </div>
-                      <p className="text-xs text-slate-300 leading-relaxed font-light mb-3">
+                      <p className="text-[10px] text-slate-300 leading-relaxed font-light mb-2 line-clamp-3">
                         {item.backDesc}
                       </p>
 
-                      <div className="space-y-1.5">
+                      <div className="space-y-1">
                         {item.points.map((pt, idx) => (
-                          <div key={idx} className="flex items-center gap-2 text-xs text-slate-300 font-mono">
-                            <CheckCircle2 className={cn("w-3.5 h-3.5 shrink-0", style.iconColor)} />
-                            <span className="line-clamp-1">{pt}</span>
+                          <div key={idx} className="flex items-center gap-1.5 text-[10px] text-slate-300 font-mono">
+                            <CheckCircle2 className={cn("w-3 h-3 shrink-0", style.iconColor)} />
+                            <span className="truncate">{pt}</span>
                           </div>
                         ))}
                       </div>
                     </div>
                     
-                    <div className="w-8 h-0.5 rounded-full bg-white/20 mt-1" />
+                    <div className="w-6 h-0.5 rounded-full bg-white/20 mt-1" />
                   </div>
 
                 </div>
@@ -464,7 +464,7 @@ export default function AboutPage() {
         </motion.div>
 
         {/* 4 Interactive Core Values Domain Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto">
           {coreValuesList.map((item, i) => {
             const style = ecosystemStyles[item.color] || ecosystemStyles.sky;
             const Icon = item.icon || Lightbulb;
@@ -476,7 +476,7 @@ export default function AboutPage() {
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1 }}
                 onClick={() => toggleCardFlip(`core-${i}`)}
-                className="group h-[380px] [perspective:1000px] cursor-pointer"
+                className="group w-full max-w-[240px] h-[300px] [perspective:1000px] cursor-pointer mx-auto"
               >
                 <div className={cn(
                   "relative w-full h-full transition-transform duration-700 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]",
@@ -485,48 +485,48 @@ export default function AboutPage() {
                   
                   {/* Front Side */}
                   <div className={cn(
-                    "absolute inset-0 [backface-visibility:hidden] bg-slate-900/70 border rounded-3xl p-7 flex flex-col justify-between shadow-xl transition-all duration-300 backdrop-blur-xl",
+                    "absolute inset-0 [backface-visibility:hidden] bg-slate-900/70 border rounded-2xl p-4.5 flex flex-col justify-between shadow-xl transition-all duration-300 backdrop-blur-xl",
                     style.border,
                     style.hoverBorder,
                     style.frontGlow
                   )}>
                     <div>
-                      <div className={cn("w-14 h-14 rounded-2xl mb-5 border border-white/5 flex items-center justify-center shadow-sm", style.iconBg)}>
-                        <Icon className={cn("w-7 h-7", style.iconColor)} />
+                      <div className={cn("w-9 h-9 rounded-xl mb-2.5 border border-white/5 flex items-center justify-center shadow-sm", style.iconBg)}>
+                        <Icon className={cn("w-4.5 h-4.5", style.iconColor)} />
                       </div>
-                      <span className={cn("px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider mb-2.5 inline-block border", style.badgeBg, style.badgeText, style.badgeBorder)}>
+                      <span className={cn("px-2 py-0.5 rounded-full text-[9px] font-mono font-bold uppercase tracking-wider mb-1.5 inline-block border", style.badgeBg, style.badgeText, style.badgeBorder)}>
                         {item.category}
                       </span>
-                      <h3 className="text-xl font-extrabold text-white mb-2.5 tracking-tight">{item.title}</h3>
-                      <p className="text-slate-400 text-xs leading-relaxed">{item.frontDesc}</p>
+                      <h3 className="text-sm sm:text-base font-extrabold text-white mb-1 tracking-tight truncate">{item.title}</h3>
+                      <p className="text-slate-400 text-[11px] leading-relaxed line-clamp-4 font-light">{item.frontDesc}</p>
                     </div>
                   </div>
 
                   {/* Back Side */}
                   <div className={cn(
-                    "absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)] border rounded-3xl p-7 flex flex-col justify-between overflow-hidden transition-all duration-300",
+                    "absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)] border rounded-2xl p-4.5 flex flex-col justify-between overflow-hidden transition-all duration-300",
                     style.backBg
                   )}>
                     <div>
-                      <div className="flex items-center gap-2 mb-3">
-                        <Icon className={cn("w-5 h-5", style.iconColor)} />
-                        <h4 className="text-base font-bold text-white tracking-wide">{item.title}</h4>
+                      <div className="flex items-center gap-1.5 mb-1.5">
+                        <Icon className={cn("w-4 h-4 shrink-0", style.iconColor)} />
+                        <h4 className="text-xs font-bold text-white tracking-wide truncate">{item.title}</h4>
                       </div>
-                      <p className="text-xs text-slate-300 leading-relaxed font-light mb-4">
+                      <p className="text-[10px] text-slate-300 leading-relaxed font-light mb-2 line-clamp-3">
                         {item.backDesc}
                       </p>
 
-                      <div className="space-y-2">
+                      <div className="space-y-1">
                         {item.points.map((pt, idx) => (
-                          <div key={idx} className="flex items-center gap-2 text-xs text-slate-200">
-                            <CheckCircle2 className={cn("w-3.5 h-3.5 shrink-0", style.iconColor)} />
-                            <span>{pt}</span>
+                          <div key={idx} className="flex items-center gap-1.5 text-[10px] text-slate-200">
+                            <CheckCircle2 className={cn("w-3 h-3 shrink-0", style.iconColor)} />
+                            <span className="truncate">{pt}</span>
                           </div>
                         ))}
                       </div>
                     </div>
                     
-                    <div className="w-8 h-0.5 rounded-full bg-white/20 mt-2" />
+                    <div className="w-6 h-0.5 rounded-full bg-white/20 mt-1" />
                   </div>
 
                 </div>
@@ -599,13 +599,13 @@ export default function AboutPage() {
       {/* ========================================================================= */}
       {/* 4. FACULTY MENTOR SUPPORT — "OUR GUIDING FORCE" (3D FLIP CARD RESTORED) */}
       {/* ========================================================================= */}
-      <section className="py-24 px-4 md:px-16 lg:px-24 max-w-5xl mx-auto relative">
+      <section className="py-24 px-4 md:px-8 lg:px-16 max-w-7xl mx-auto relative">
         <motion.div
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
           variants={fadeUp}
-          className="text-center mb-16"
+          className="text-center mb-12"
         >
           <span className="px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-sky-400 bg-sky-500/10 rounded-full border border-sky-500/30 inline-block mb-4 shadow-[0_0_15px_rgba(56,189,248,0.2)]">
             Visionary Mentorship
@@ -616,59 +616,88 @@ export default function AboutPage() {
           <p className="text-slate-400 max-w-xl mx-auto">Under the leadership, guidance, and continuous support of our faculty mentors.</p>
         </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
-          onClick={() => toggleCardFlip('mentor')}
-          className="group h-[560px] md:h-[480px] [perspective:1000px] w-full cursor-pointer"
-        >
-          <div className={cn(
-            "relative w-full h-full transition-transform duration-700 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)] group-hover:scale-[1.01]",
-            flippedCards['mentor'] && "[transform:rotateY(180deg)] scale-[1.01]"
-          )}>
-
-            {/* Front Side */}
-            <div className="absolute inset-0 [backface-visibility:hidden] bg-slate-900/80 border border-slate-800 rounded-3xl p-8 md:p-14 flex flex-col md:flex-row items-center justify-center gap-10 shadow-2xl group-hover:border-sky-500/50 group-hover:shadow-[0_0_35px_rgba(56,189,248,0.3)] transition-all backdrop-blur-xl">
-              <div className="w-48 h-48 sm:w-56 sm:h-56 md:w-60 md:h-60 rounded-full overflow-hidden border-4 border-sky-500/40 shadow-[0_0_30px_rgba(56,189,248,0.3)] shrink-0 bg-slate-950 flex items-center justify-center">
-                <img
-                  src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=400&h=400"
-                  alt="Pankaj Kumar"
-                  className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
-                />
-              </div>
-              <div className="text-center md:text-left flex-1">
-                <span className="px-3.5 py-1 bg-sky-500/20 text-sky-300 text-xs font-bold rounded-full uppercase tracking-wider mb-4 inline-block border border-sky-500/30">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 xl:gap-8 w-full">
+          {/* Card 1: Pankaj Kumar */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            className="group bg-slate-900/80 border border-slate-800 rounded-3xl p-6 lg:p-8 flex flex-col xl:flex-row items-center text-center xl:text-left gap-6 xl:gap-8 shadow-xl hover:border-sky-500/50 hover:shadow-[0_0_35px_rgba(56,189,248,0.3)] transition-all backdrop-blur-xl h-full"
+          >
+            <div className="w-32 h-32 md:w-36 md:h-36 xl:w-44 xl:h-44 rounded-full overflow-hidden border-4 border-sky-500/40 shadow-[0_0_30px_rgba(56,189,248,0.3)] bg-slate-950 flex shrink-0 items-center justify-center">
+              <img
+                src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=400&h=400"
+                alt="Pankaj Kumar"
+                className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
+              />
+            </div>
+            
+            <div className="flex flex-col flex-1 items-center xl:items-start justify-between w-full h-full">
+              <div>
+                <span className="px-3 py-1 bg-sky-500/20 text-sky-300 text-[10px] md:text-xs font-bold rounded-full uppercase tracking-wider mb-3 inline-block border border-sky-500/30">
                   Faculty Mentor
                 </span>
-                <h3 className="text-3xl md:text-4xl font-extrabold text-white mb-2 tracking-tight">Pankaj Kumar</h3>
-                <p className="text-lg md:text-xl text-sky-400 font-semibold">HOD, Department of Computer Science &amp; Engineering (CSE)</p>
+                <h3 className="text-xl md:text-2xl xl:text-3xl font-extrabold text-white mb-2 tracking-tight">Pankaj Kumar</h3>
+                <p className="text-sm md:text-base text-sky-400 font-semibold mb-4">Department of Computer Science &amp; Engineering (CSE)</p>
+                
+                <p className="text-slate-300 leading-relaxed font-light text-sm italic max-w-md mx-auto xl:mx-0 mb-6 xl:mb-8">
+                  &ldquo;The goal of CSI_SRMCEM X D&apos;CODERS is not just to write code, but to engineer solutions that impact society. I am incredibly proud of the innovative spirit, technical excellence, and 100% placement record our students consistently maintain under this chapter.&rdquo;
+                </p>
               </div>
-            </div>
-
-            {/* Back Side */}
-            <div className="absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)] bg-gradient-to-br from-slate-950 via-slate-900 to-sky-950/80 border border-sky-500/50 rounded-3xl p-8 md:p-14 flex flex-col items-center justify-center text-center shadow-[0_0_40px_rgba(56,189,248,0.35)] backdrop-blur-xl">
-              <span className="px-3.5 py-1 bg-sky-500/20 text-sky-300 text-xs font-bold rounded-full uppercase tracking-wider mb-4 border border-sky-500/30">
-                Mentor&apos;s Word
-              </span>
-              <h3 className="text-2xl md:text-3xl font-extrabold text-white mb-4">Engineering Real Impact</h3>
-              <p className="text-slate-300 leading-relaxed mb-6 max-w-2xl font-light text-base md:text-lg">
-                &ldquo;The goal of CSI_SRMCEM X D&apos;CODERS is not just to write code, but to engineer solutions that impact society. I am incredibly proud of the innovative spirit, technical excellence, and 100% placement record our students consistently maintain under this chapter.&rdquo;
-              </p>
-              <div className="flex items-center gap-4">
+              
+              <div className="mt-auto xl:mt-0 w-full xl:w-auto">
                 <a 
                   href="#" 
-                  onClick={(e) => e.stopPropagation()}
-                  className="px-6 py-3 rounded-full bg-white/5 hover:bg-sky-500/20 border border-white/10 hover:border-sky-500/40 text-slate-300 hover:text-white transition-all flex items-center gap-2 text-xs md:text-sm font-semibold"
+                  className="px-5 py-2.5 rounded-full bg-white/5 hover:bg-sky-500/20 border border-white/10 hover:border-sky-500/40 text-slate-300 hover:text-white transition-all flex items-center justify-center xl:justify-start gap-2 text-xs md:text-sm font-semibold w-full xl:w-fit"
                 >
                   <FaLinkedin className="w-4 h-4 text-sky-400" />
                   <span>Connect on LinkedIn</span>
                 </a>
               </div>
             </div>
+          </motion.div>
 
-          </div>
-        </motion.div>
+          {/* Card 2: Shaurabh Kumar */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.1 }}
+            className="group bg-slate-900/80 border border-slate-800 rounded-3xl p-6 lg:p-8 flex flex-col xl:flex-row items-center text-center xl:text-left gap-6 xl:gap-8 shadow-xl hover:border-sky-500/50 hover:shadow-[0_0_35px_rgba(56,189,248,0.3)] transition-all backdrop-blur-xl h-full"
+          >
+            <div className="w-32 h-32 md:w-36 md:h-36 xl:w-44 xl:h-44 rounded-full overflow-hidden border-4 border-sky-500/40 shadow-[0_0_30px_rgba(56,189,248,0.3)] bg-slate-950 flex shrink-0 items-center justify-center">
+              <img
+                src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=400&h=400"
+                alt="Shaurabh Kumar"
+                className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
+              />
+            </div>
+            
+            <div className="flex flex-col flex-1 items-center xl:items-start justify-between w-full h-full">
+              <div>
+                <span className="px-3 py-1 bg-sky-500/20 text-sky-300 text-[10px] md:text-xs font-bold rounded-full uppercase tracking-wider mb-3 inline-block border border-sky-500/30">
+                  Head of Department
+                </span>
+                <h3 className="text-xl md:text-2xl xl:text-3xl font-extrabold text-white mb-2 tracking-tight">Shaurabh Kumar</h3>
+                <p className="text-sm md:text-base text-sky-400 font-semibold mb-4">HOD of Computer Science &amp; Engineering (CSE)</p>
+                
+                <p className="text-slate-300 leading-relaxed font-light text-sm italic max-w-md mx-auto xl:mx-0 mb-6 xl:mb-8">
+                  &ldquo;The goal of CSI_SRMCEM X D&apos;CODERS is not just to write code, but to engineer solutions that impact society. I am incredibly proud of the innovative spirit, technical excellence, and 100% placement record our students consistently maintain under this chapter.&rdquo;
+                </p>
+              </div>
+              
+              <div className="mt-auto xl:mt-0 w-full xl:w-auto">
+                <a 
+                  href="#" 
+                  className="px-5 py-2.5 rounded-full bg-white/5 hover:bg-sky-500/20 border border-white/10 hover:border-sky-500/40 text-slate-300 hover:text-white transition-all flex items-center justify-center xl:justify-start gap-2 text-xs md:text-sm font-semibold w-full xl:w-fit"
+                >
+                  <FaLinkedin className="w-4 h-4 text-sky-400" />
+                  <span>Connect on LinkedIn</span>
+                </a>
+              </div>
+            </div>
+          </motion.div>
+        </div>
       </section>
 
       {/* ========================================================================= */}
@@ -691,7 +720,7 @@ export default function AboutPage() {
           <p className="text-slate-400 max-w-xl mx-auto">The visionaries and student leaders who led CSI_SRMCEM X D&apos;CODERS to historic heights.</p>
         </motion.div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto">
           {legacyList.map((head, i) => (
             <motion.div
               key={head.name + i}
@@ -700,7 +729,7 @@ export default function AboutPage() {
               viewport={{ once: true }}
               transition={{ delay: i * 0.1 }}
               onClick={() => toggleCardFlip(`head-${i}`)}
-              className="group h-[380px] [perspective:1000px] cursor-pointer"
+              className="group w-full max-w-[240px] h-[300px] [perspective:1000px] cursor-pointer mx-auto"
             >
               <div className={cn(
                 "relative w-full h-full transition-transform duration-700 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]",
@@ -708,7 +737,7 @@ export default function AboutPage() {
               )}>
 
                 {/* Front Side */}
-                <div className="absolute inset-0 [backface-visibility:hidden] rounded-3xl overflow-hidden border border-slate-800 bg-slate-900/80 group-hover:border-sky-500/50 shadow-xl transition-all duration-300">
+                <div className="absolute inset-0 [backface-visibility:hidden] rounded-2xl overflow-hidden border border-slate-800 bg-slate-900/80 group-hover:border-sky-500/50 shadow-xl transition-all duration-300">
                   <img
                     src={head.image}
                     alt={head.name}
@@ -716,27 +745,27 @@ export default function AboutPage() {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-transparent" />
                   
-                  <div className="absolute bottom-0 left-0 w-full p-6 text-left">
-                    <span className="px-2.5 py-0.5 bg-sky-500/20 text-sky-300 border border-sky-500/30 text-[10px] font-mono font-bold rounded-full uppercase tracking-wider mb-2 inline-block">
+                  <div className="absolute bottom-0 left-0 w-full p-4 text-left">
+                    <span className="px-2 py-0.5 bg-sky-500/20 text-sky-300 border border-sky-500/30 text-[9px] font-mono font-bold rounded-full uppercase tracking-wider mb-1.5 inline-block">
                       {head.role}
                     </span>
-                    <h3 className="text-xl font-bold text-white">{head.name}</h3>
+                    <h3 className="text-base font-bold text-white truncate">{head.name}</h3>
                   </div>
                 </div>
 
                 {/* Back Side */}
-                <div className="absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)] bg-gradient-to-br from-slate-950 via-slate-900 to-sky-950/70 border border-sky-500/50 rounded-3xl p-6 flex flex-col justify-between text-center shadow-[0_0_25px_rgba(56,189,248,0.25)] backdrop-blur-xl">
+                <div className="absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)] bg-gradient-to-br from-slate-950 via-slate-900 to-sky-950/70 border border-sky-500/50 rounded-2xl p-4.5 flex flex-col justify-between text-center shadow-[0_0_25px_rgba(56,189,248,0.25)] backdrop-blur-xl">
                   <div>
-                    <span className="px-3 py-1 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[11px] font-mono font-bold rounded-full uppercase tracking-wider mb-4 inline-block">
+                    <span className="px-2.5 py-0.5 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[9px] font-mono font-bold rounded-full uppercase tracking-wider mb-2.5 inline-block">
                       Successfully Placed
                     </span>
-                    <h3 className="text-2xl font-extrabold text-white mb-1 tracking-tight">{head.placedAt}</h3>
-                    <p className="text-xs text-sky-400 font-mono mb-4">{head.role}</p>
-                    <div className="w-12 h-[1px] bg-sky-500/40 mx-auto mb-4" />
-                    <p className="text-slate-300 text-xs leading-relaxed font-light">{head.backBio}</p>
+                    <h3 className="text-base font-extrabold text-white mb-0.5 tracking-tight truncate">{head.placedAt}</h3>
+                    <p className="text-[10px] text-sky-400 font-mono mb-2 truncate">{head.role}</p>
+                    <div className="w-8 h-[1px] bg-sky-500/40 mx-auto mb-2" />
+                    <p className="text-slate-300 text-[10.5px] leading-relaxed font-light line-clamp-4">{head.backBio}</p>
                   </div>
 
-                  <div className="w-8 h-0.5 rounded-full bg-white/20 mx-auto" />
+                  <div className="w-6 h-0.5 rounded-full bg-white/20 mx-auto" />
                 </div>
 
               </div>
