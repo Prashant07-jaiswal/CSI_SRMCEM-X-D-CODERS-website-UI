@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { motion, type Variants } from "framer-motion";
-import { 
-  Code, Users, Cpu, Terminal, Sparkles, ChevronDown, CheckCircle2, Flame, 
+import {
+  Code, Users, Cpu, Terminal, Sparkles, ChevronDown, CheckCircle2, Flame,
   Award, Mail, ExternalLink, PenTool, Calendar, Camera, Layers, Lightbulb
 } from "lucide-react";
 import { FaLinkedin } from "react-icons/fa";
@@ -384,7 +384,7 @@ export default function AboutPage() {
                   "relative w-full h-full transition-transform duration-700 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]",
                   flippedCards[`subteam-${i}`] && "[transform:rotateY(180deg)]"
                 )}>
-                  
+
                   {/* Front Side */}
                   <div className={cn(
                     "absolute inset-0 [backface-visibility:hidden] bg-slate-900/70 border rounded-2xl p-4 flex flex-col justify-between shadow-xl transition-all duration-300 backdrop-blur-xl",
@@ -427,7 +427,7 @@ export default function AboutPage() {
                         ))}
                       </div>
                     </div>
-                    
+
                     <div className="w-6 h-0.5 rounded-full bg-white/20 mt-1" />
                   </div>
 
@@ -482,7 +482,7 @@ export default function AboutPage() {
                   "relative w-full h-full transition-transform duration-700 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]",
                   flippedCards[`core-${i}`] && "[transform:rotateY(180deg)]"
                 )}>
-                  
+
                   {/* Front Side */}
                   <div className={cn(
                     "absolute inset-0 [backface-visibility:hidden] bg-slate-900/70 border rounded-2xl p-4.5 flex flex-col justify-between shadow-xl transition-all duration-300 backdrop-blur-xl",
@@ -525,7 +525,7 @@ export default function AboutPage() {
                         ))}
                       </div>
                     </div>
-                    
+
                     <div className="w-6 h-0.5 rounded-full bg-white/20 mt-1" />
                   </div>
 
@@ -631,7 +631,7 @@ export default function AboutPage() {
                 className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
               />
             </div>
-            
+
             <div className="flex flex-col flex-1 items-center xl:items-start justify-between w-full h-full">
               <div>
                 <span className="px-3 py-1 bg-sky-500/20 text-sky-300 text-[10px] md:text-xs font-bold rounded-full uppercase tracking-wider mb-3 inline-block border border-sky-500/30">
@@ -639,15 +639,15 @@ export default function AboutPage() {
                 </span>
                 <h3 className="text-xl md:text-2xl xl:text-3xl font-extrabold text-white mb-2 tracking-tight">Pankaj Kumar</h3>
                 <p className="text-sm md:text-base text-sky-400 font-semibold mb-4">Department of Computer Science &amp; Engineering (CSE)</p>
-                
+
                 <p className="text-slate-300 leading-relaxed font-light text-sm italic max-w-md mx-auto xl:mx-0 mb-6 xl:mb-8">
                   &ldquo;The goal of CSI_SRMCEM X D&apos;CODERS is not just to write code, but to engineer solutions that impact society. I am incredibly proud of the innovative spirit, technical excellence, and 100% placement record our students consistently maintain under this chapter.&rdquo;
                 </p>
               </div>
-              
+
               <div className="mt-auto xl:mt-0 w-full xl:w-auto">
-                <a 
-                  href="#" 
+                <a
+                  href="#"
                   className="px-5 py-2.5 rounded-full bg-white/5 hover:bg-sky-500/20 border border-white/10 hover:border-sky-500/40 text-slate-300 hover:text-white transition-all flex items-center justify-center xl:justify-start gap-2 text-xs md:text-sm font-semibold w-full xl:w-fit"
                 >
                   <FaLinkedin className="w-4 h-4 text-sky-400" />
@@ -667,12 +667,12 @@ export default function AboutPage() {
           >
             <div className="w-32 h-32 md:w-36 md:h-36 xl:w-44 xl:h-44 rounded-full overflow-hidden border-4 border-sky-500/40 shadow-[0_0_30px_rgba(56,189,248,0.3)] bg-slate-950 flex shrink-0 items-center justify-center">
               <img
-                src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=400&h=400"
+                src="c:\Users\jaisw\Downloads\saurabh.jpg.jpeg"
                 alt="Shaurabh Kumar"
                 className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
               />
             </div>
-            
+
             <div className="flex flex-col flex-1 items-center xl:items-start justify-between w-full h-full">
               <div>
                 <span className="px-3 py-1 bg-sky-500/20 text-sky-300 text-[10px] md:text-xs font-bold rounded-full uppercase tracking-wider mb-3 inline-block border border-sky-500/30">
@@ -680,15 +680,15 @@ export default function AboutPage() {
                 </span>
                 <h3 className="text-xl md:text-2xl xl:text-3xl font-extrabold text-white mb-2 tracking-tight">Shaurabh Kumar</h3>
                 <p className="text-sm md:text-base text-sky-400 font-semibold mb-4">HOD of Computer Science &amp; Engineering (CSE)</p>
-                
+
                 <p className="text-slate-300 leading-relaxed font-light text-sm italic max-w-md mx-auto xl:mx-0 mb-6 xl:mb-8">
                   &ldquo;The goal of CSI_SRMCEM X D&apos;CODERS is not just to write code, but to engineer solutions that impact society. I am incredibly proud of the innovative spirit, technical excellence, and 100% placement record our students consistently maintain under this chapter.&rdquo;
                 </p>
               </div>
-              
+
               <div className="mt-auto xl:mt-0 w-full xl:w-auto">
-                <a 
-                  href="#" 
+                <a
+                  href="#"
                   className="px-5 py-2.5 rounded-full bg-white/5 hover:bg-sky-500/20 border border-white/10 hover:border-sky-500/40 text-slate-300 hover:text-white transition-all flex items-center justify-center xl:justify-start gap-2 text-xs md:text-sm font-semibold w-full xl:w-fit"
                 >
                   <FaLinkedin className="w-4 h-4 text-sky-400" />
@@ -744,7 +744,7 @@ export default function AboutPage() {
                     className="w-full h-full object-cover grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-500"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-transparent" />
-                  
+
                   <div className="absolute bottom-0 left-0 w-full p-4 text-left">
                     <span className="px-2 py-0.5 bg-sky-500/20 text-sky-300 border border-sky-500/30 text-[9px] font-mono font-bold rounded-full uppercase tracking-wider mb-1.5 inline-block">
                       {head.role}
@@ -797,7 +797,7 @@ export default function AboutPage() {
           {faqs.map((faq, index) => {
             const isOpen = openFaq === index;
             return (
-              <div 
+              <div
                 key={index}
                 className="rounded-2xl bg-slate-900/60 border border-slate-800 overflow-hidden backdrop-blur-xl transition-colors duration-200 hover:border-slate-700 shadow-md"
               >

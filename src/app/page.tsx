@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { 
-  ArrowRight, Code, Cpu, Globe, Sparkles, Flame, Users, CheckCircle2 
+  ArrowRight, Code, Cpu, Globe, Sparkles, Flame, Users, CheckCircle2, ExternalLink 
 } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -19,7 +19,8 @@ export default function Home() {
     liveProjects: "10+",
     placementRate: "100%"
   });
-  const [featuredEvent, setFeaturedEvent] = useState<EventItem | null>(null);
+  const [featuredEvents, setFeaturedEvents] = useState<EventItem[]>([]);
+  const [totalEvents, setTotalEvents] = useState(0);
   const [flippedCards, setFlippedCards] = useState<Record<string, boolean>>({});
 
   const toggleCardFlip = (key: string) => {
@@ -29,8 +30,24 @@ export default function Home() {
   const loadData = async () => {
     setStats(await DataStore.getStats());
     const events = await DataStore.getEvents();
-    const upcoming = events.find(e => e.category === "upcoming") || events[0] || null;
-    setFeaturedEvent(upcoming);
+    setTotalEvents(events.length);
+    
+    // Filter out past events
+    let activeEvents = events.filter(e => e.category !== "past");
+    
+    // Sort: current first, then upcoming
+    activeEvents.sort((a, b) => {
+      if (a.category === "current" && b.category !== "current") return -1;
+      if (b.category === "current" && a.category !== "current") return 1;
+      
+      const dateA = new Date(a.date).getTime();
+      const dateB = new Date(b.date).getTime();
+      const validA = isNaN(dateA) ? 0 : dateA;
+      const validB = isNaN(dateB) ? 0 : dateB;
+      return validB - validA;
+    });
+
+    setFeaturedEvents(activeEvents.slice(0, 2));
   };
 
   useEffect(() => {
@@ -423,35 +440,90 @@ export default function Home() {
       </section>
 
       {/* ========================================================================= */}
-      {/* 5. FEATURED EVENT BANNER */}
+      {/* 5. FEATURED HIGHLIGHTS */}
       {/* ========================================================================= */}
-      {featuredEvent && (
-        <section className="py-24 px-4 md:px-16 lg:px-24">
-          <div className="max-w-7xl mx-auto relative rounded-3xl overflow-hidden border border-slate-800 group shadow-2xl">
-            <div className="absolute inset-0 bg-slate-950" />
-            <div 
-              style={{ backgroundImage: `url(${featuredEvent.image})` }}
-              className="absolute inset-0 bg-cover bg-center opacity-20 group-hover:opacity-30 transition-opacity duration-500" 
-            />
-            <div className="absolute inset-0 bg-gradient-to-r from-sky-950/40 to-blue-950/40" />
-            
-            <div className="relative z-10 p-10 md:p-16 flex flex-col md:flex-row items-center justify-between gap-8">
-              <div>
-                <span className="px-3 py-1 text-xs font-bold bg-sky-500/20 text-sky-400 border border-sky-500/30 rounded-full uppercase tracking-wider mb-4 inline-block shadow-sm">
-                  Featured Event
-                </span>
-                <h2 className="text-3xl md:text-5xl font-bold text-white mb-4">{featuredEvent.title}</h2>
-                <p className="text-base md:text-lg text-slate-300 max-w-xl">
-                  {featuredEvent.description}
-                </p>
-              </div>
-              <Link
-                href="/events"
-                className="px-8 py-4 bg-white hover:bg-sky-50 text-slate-950 font-bold rounded-full transition-all duration-300 hover:scale-105 shadow-[0_0_25px_rgba(255,255,255,0.2)] whitespace-nowrap"
-              >
-                Explore Details &rarr;
-              </Link>
+      {featuredEvents.length > 0 && (
+        <section className="py-24 px-4 md:px-16 lg:px-24 max-w-7xl mx-auto">
+          {/* Section Header */}
+          <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div>
+              <span className="px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-sky-400 bg-sky-500/10 rounded-full border border-sky-500/30 inline-block mb-4">
+                Live &amp; Flagship Programs
+              </span>
+              <h2 className="text-4xl md:text-5xl font-extrabold text-white tracking-tight">
+                Featured Highlights
+              </h2>
             </div>
+            <Link 
+              href="/events" 
+              className="text-sky-400 hover:text-sky-300 font-semibold text-sm transition-colors flex items-center gap-1"
+            >
+              View All Events ({totalEvents}) &rarr;
+            </Link>
+          </div>
+
+          {/* Cards Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+            {featuredEvents.map((event) => (
+              <div 
+                key={event.id}
+                className="group relative bg-slate-900/60 border border-slate-800 hover:border-sky-500/50 rounded-3xl p-8 flex flex-col justify-between overflow-hidden shadow-xl backdrop-blur-xl transition-all duration-300 hover:shadow-[0_0_35px_rgba(56,189,248,0.15)] min-h-[280px]"
+              >
+                {/* Background */}
+                <div className="absolute inset-0 bg-gradient-to-br from-slate-900/90 to-slate-950/90 z-0" />
+                
+                {/* Content */}
+                <div className="relative z-10 flex flex-col h-full justify-between">
+                  <div>
+                    {/* Top Meta Info */}
+                    <div className="flex items-center justify-between mb-6">
+                      <span className={cn(
+                        "px-3 py-1 text-[10px] font-mono font-bold rounded-full uppercase tracking-wider border shadow-sm",
+                        event.category === "upcoming" ? "bg-sky-500/20 text-sky-300 border-sky-500/30 shadow-[0_0_10px_rgba(56,189,248,0.2)]" :
+                        event.category === "current" ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30 shadow-[0_0_10px_rgba(16,185,129,0.2)] animate-pulse" :
+                        "bg-slate-800/80 text-slate-400 border-slate-700"
+                      )}>
+                        {event.category === "upcoming" ? "Upcoming" : event.category === "current" ? "Live Now" : "Past Event"}
+                      </span>
+                      <span className="text-xs text-slate-500 font-mono">{event.date || "Every Week"}</span>
+                    </div>
+
+                    {/* Title & Description */}
+                    <h3 className="text-2xl font-bold text-white mb-3 group-hover:text-sky-300 transition-colors">
+                      {event.title}
+                    </h3>
+                    <div className="mb-2">
+                      <p className="text-sm text-slate-400 leading-relaxed font-light line-clamp-3">
+                        {event.description}
+                      </p>
+                      {event.description && event.description.length > 120 && (
+                        <Link href="/events" className="text-sm text-slate-400 hover:text-slate-300 transition-colors mt-1 inline-block">
+                          Read more
+                        </Link>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Bottom Actions */}
+                  <div className="flex items-center justify-between mt-8">
+                    <Link
+                      href="/events"
+                      className="px-6 py-2.5 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-bold rounded-xl text-sm transition-all shadow-[0_0_15px_rgba(56,189,248,0.3)] hover:scale-105 flex items-center gap-2"
+                    >
+                      Register Now
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </Link>
+                    
+                    <Link
+                      href="/events"
+                      className="text-slate-400 hover:text-white font-medium text-sm transition-colors flex items-center gap-1 group-hover:translate-x-1 duration-300"
+                    >
+                      Explore Details &rarr;
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </section>
       )}
