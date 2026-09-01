@@ -680,7 +680,7 @@ export default function AboutPage() {
             </div>
           </motion.div>
 
-          {/* Coordinator 2: Er. Saurabh Bahadur Bais */}
+          {/* Coordinator 2: Er. Saurabh Bahadur*/}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -709,7 +709,7 @@ export default function AboutPage() {
                     D&apos;CODERS Faculty Coordinator
                   </span>
                   <h3 className="text-2xl sm:text-3xl font-extrabold text-white mb-1.5 tracking-tight group-hover:text-blue-300 transition-colors">
-                    Saurabh Bahadur Bais
+                    Saurabh Bahadur 
                   </h3>
                   <p className="text-sm font-semibold text-slate-300">
                     Assistant Professor
