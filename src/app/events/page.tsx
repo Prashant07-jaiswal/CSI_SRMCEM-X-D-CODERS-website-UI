@@ -31,7 +31,15 @@ export default function EventsPage() {
     return () => window.removeEventListener("csi_data_updated", loadData);
   }, []);
 
-  const filteredEvents = eventsData.filter(event => event.category === activeTab);
+  const filteredEvents = eventsData
+    .filter(event => event.category === activeTab)
+    .sort((a, b) => {
+      const dateA = new Date(a.date).getTime();
+      const dateB = new Date(b.date).getTime();
+      const validA = isNaN(dateA) ? 0 : dateA;
+      const validB = isNaN(dateB) ? 0 : dateB;
+      return validB - validA;
+    });
   const visibleEvents = filteredEvents.slice(0, visibleCount);
 
   useEffect(() => {
