@@ -599,106 +599,151 @@ export default function AboutPage() {
       {/* ========================================================================= */}
       {/* 4. FACULTY MENTOR SUPPORT — "OUR GUIDING FORCE" (3D FLIP CARD RESTORED) */}
       {/* ========================================================================= */}
-      <section className="py-24 px-4 md:px-8 lg:px-16 max-w-7xl mx-auto relative">
+      <section className="py-24 px-4 md:px-16 lg:px-24 max-w-7xl mx-auto relative">
         <motion.div
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
           variants={fadeUp}
-          className="text-center mb-12"
+          className="text-center mb-16"
         >
           <span className="px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-sky-400 bg-sky-500/10 rounded-full border border-sky-500/30 inline-block mb-4 shadow-[0_0_15px_rgba(56,189,248,0.2)]">
             Visionary Mentorship
           </span>
           <h2 className="text-4xl md:text-5xl font-extrabold text-white mb-4">
-            Our Guiding <span className={cn("text-transparent bg-clip-text bg-gradient-to-r", config.gradientText)}>Force</span>
+            Faculty <span className={cn("text-transparent bg-clip-text bg-gradient-to-r", config.gradientText)}>Coordinators</span>
           </h2>
-          <p className="text-slate-400 max-w-xl mx-auto">Under the leadership, guidance, and continuous support of our faculty mentors.</p>
+          <p className="text-slate-400 max-w-xl mx-auto">
+            Guiding CSI_SRMCEM X D&apos;CODERS towards technical excellence, innovation, and leadership.
+          </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 xl:gap-8 w-full">
-          {/* Card 1: Pankaj Kumar */}
+        {/* 2-Column Responsive Hover Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-10">
+
+          {/* Coordinator 1: Dr. Pankaj Kumar */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            whileInView={{ opacity: 1, scale: 1 }}
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="group bg-slate-900/80 border border-slate-800 rounded-3xl p-6 lg:p-8 flex flex-col xl:flex-row items-center text-center xl:text-left gap-6 xl:gap-8 shadow-xl hover:border-sky-500/50 hover:shadow-[0_0_35px_rgba(56,189,248,0.3)] transition-all backdrop-blur-xl h-full"
+            transition={{ duration: 0.6 }}
+            className="group relative bg-slate-900/80 border border-slate-800 hover:border-sky-500/50 rounded-3xl p-8 sm:p-10 backdrop-blur-2xl shadow-2xl hover:shadow-[0_0_40px_rgba(56,189,248,0.25)] transition-all duration-500 flex flex-col justify-between overflow-hidden hover:-translate-y-1.5"
           >
-            <div className="w-32 h-32 md:w-36 md:h-36 xl:w-44 xl:h-44 rounded-full overflow-hidden border-4 border-sky-500/40 shadow-[0_0_30px_rgba(56,189,248,0.3)] bg-slate-950 flex shrink-0 items-center justify-center">
-              <img
-                src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=400&h=400"
-                alt="Pankaj Kumar"
-                className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
-              />
+            {/* Ambient Corner Glow */}
+            <div className="absolute top-0 right-0 w-48 h-48 bg-sky-500/10 rounded-full blur-[50px] group-hover:bg-sky-500/20 transition-all pointer-events-none" />
+
+            <div>
+              {/* Header Badge & Avatar */}
+              <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 mb-6">
+                <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-2xl overflow-hidden border-2 border-sky-500/40 shadow-[0_0_20px_rgba(56,189,248,0.2)] shrink-0 bg-slate-950 group-hover:scale-105 transition-transform duration-500">
+                  <img
+                    src="/documents/pankaj-new.jpg"
+                    alt="Dr. Pankaj Kumar"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+
+                <div className="text-center sm:text-left flex-1">
+                  <span className="px-3 py-1 bg-sky-500/15 text-sky-300 text-xs font-mono font-bold rounded-full uppercase tracking-wider mb-2.5 inline-block border border-sky-500/30">
+                    CSI Faculty Coordinator
+                  </span>
+                  <h3 className="text-2xl sm:text-3xl font-extrabold text-white mb-1.5 tracking-tight group-hover:text-sky-300 transition-colors">
+                    Dr. Pankaj Kumar
+                  </h3>
+                  <p className="text-sm font-semibold text-slate-300">
+                    Head of Department (HOD)
+                  </p>
+                  <p className="text-xs text-sky-400 font-mono mt-0.5">
+                    Computer Science &amp; Engineering (CSE)
+                  </p>
+                </div>
+              </div>
+
+              {/* Bio & Guidance */}
+              <p className="text-slate-300 text-sm leading-relaxed font-light mb-8">
+                &ldquo;Guiding students to bridge technical excellence with real-world innovation, driving industry-leading achievements and 100% placement readiness.&rdquo;
+              </p>
             </div>
 
-            <div className="flex flex-col flex-1 items-center xl:items-start justify-between w-full h-full">
-              <div>
-                <span className="px-3 py-1 bg-sky-500/20 text-sky-300 text-[10px] md:text-xs font-bold rounded-full uppercase tracking-wider mb-3 inline-block border border-sky-500/30">
-                  Faculty Mentor
-                </span>
-                <h3 className="text-xl md:text-2xl xl:text-3xl font-extrabold text-white mb-2 tracking-tight">Pankaj Kumar</h3>
-                <p className="text-sm md:text-base text-sky-400 font-semibold mb-4">Department of Computer Science &amp; Engineering (CSE)</p>
-
-                <p className="text-slate-300 leading-relaxed font-light text-sm italic max-w-md mx-auto xl:mx-0 mb-6 xl:mb-8">
-                  &ldquo;The goal of CSI_SRMCEM X D&apos;CODERS is not just to write code, but to engineer solutions that impact society. I am incredibly proud of the innovative spirit, technical excellence, and 100% placement record our students consistently maintain under this chapter.&rdquo;
-                </p>
-              </div>
-
-              <div className="mt-auto xl:mt-0 w-full xl:w-auto">
-                <a
-                  href="#"
-                  className="px-5 py-2.5 rounded-full bg-white/5 hover:bg-sky-500/20 border border-white/10 hover:border-sky-500/40 text-slate-300 hover:text-white transition-all flex items-center justify-center xl:justify-start gap-2 text-xs md:text-sm font-semibold w-full xl:w-fit"
-                >
-                  <FaLinkedin className="w-4 h-4 text-sky-400" />
-                  <span>Connect on LinkedIn</span>
-                </a>
-              </div>
+            {/* Action Area */}
+            <div className="pt-4 border-t border-slate-800/80 flex items-center justify-between">
+              <span className="text-xs font-mono text-slate-400">SRMCEM, Lucknow</span>
+              <a
+                href="https://www.linkedin.com/in/dr-pankaj-kumar-47950476/"
+                target="_blank"
+                rel="noreferrer"
+                className="px-5 py-2.5 rounded-xl bg-white/5 hover:bg-sky-500/20 border border-white/10 hover:border-sky-500/40 text-slate-200 hover:text-white transition-all flex items-center gap-2 text-xs font-bold cursor-pointer shadow-sm group/btn"
+              >
+                <FaLinkedin className="w-4 h-4 text-sky-400 group-hover/btn:scale-110 transition-transform" />
+                <span>Connect on LinkedIn</span>
+              </a>
             </div>
           </motion.div>
 
-          {/* Card 2: Shaurabh Kumar */}
+          {/* Coordinator 2: Er. Saurabh Bahadur Bais */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            whileInView={{ opacity: 1, scale: 1 }}
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ delay: 0.1 }}
-            className="group bg-slate-900/80 border border-slate-800 rounded-3xl p-6 lg:p-8 flex flex-col xl:flex-row items-center text-center xl:text-left gap-6 xl:gap-8 shadow-xl hover:border-sky-500/50 hover:shadow-[0_0_35px_rgba(56,189,248,0.3)] transition-all backdrop-blur-xl h-full"
+            transition={{ duration: 0.6, delay: 0.15 }}
+            className="group relative bg-slate-900/80 border border-slate-800 hover:border-blue-500/50 rounded-3xl p-8 sm:p-10 backdrop-blur-2xl shadow-2xl hover:shadow-[0_0_40px_rgba(59,130,246,0.25)] transition-all duration-500 flex flex-col justify-between overflow-hidden hover:-translate-y-1.5"
           >
-            <div className="w-32 h-32 md:w-36 md:h-36 xl:w-44 xl:h-44 rounded-full overflow-hidden border-4 border-sky-500/40 shadow-[0_0_30px_rgba(56,189,248,0.3)] bg-slate-950 flex shrink-0 items-center justify-center">
-              <img
-                src="c:\Users\jaisw\Downloads\saurabh.jpg.jpeg"
-                alt="Shaurabh Kumar"
-                className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
-              />
+            {/* Ambient Corner Glow */}
+            <div className="absolute top-0 right-0 w-48 h-48 bg-blue-500/10 rounded-full blur-[50px] group-hover:bg-blue-500/20 transition-all pointer-events-none" />
+
+            <div>
+              <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 mb-6">
+                <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-2xl overflow-hidden border-2 border-blue-500/40 shadow-[0_0_20px_rgba(59,130,246,0.2)] shrink-0 bg-slate-950 group-hover:scale-105 transition-transform duration-500">
+                  <img
+                    src="/documents/saurabh-new.jpg"
+                    alt="Er. Saurabh Bahadur"
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = "https://ui-avatars.com/api/?name=Saurabh+Bahadur+Bais&background=0f172a&color=38bdf8&bold=true";
+                    }}
+                  />
+                </div>
+
+                <div className="text-center sm:text-left flex-1">
+                  <span className="px-3 py-1 bg-blue-500/15 text-blue-300 text-xs font-mono font-bold rounded-full uppercase tracking-wider mb-2.5 inline-block border border-blue-500/30">
+                    D&apos;CODERS Faculty Coordinator
+                  </span>
+                  <h3 className="text-2xl sm:text-3xl font-extrabold text-white mb-1.5 tracking-tight group-hover:text-blue-300 transition-colors">
+                    Saurabh Bahadur Bais
+                  </h3>
+                  <p className="text-sm font-semibold text-slate-300">
+                    Assistant Professor
+                  </p>
+                  <p className="text-xs text-blue-400 font-mono mt-0.5">
+                    Computer Science &amp; Engineering (CSE)
+                  </p>
+                </div>
+              </div>
+
+              {/* Bio & Guidance */}
+              <p className="text-slate-300 text-sm leading-relaxed font-light mb-8">
+                &ldquo;Fostering hands-on development, competitive programming, and problem-solving mindsets to empower the next generation of software engineers.&rdquo;
+              </p>
             </div>
 
-            <div className="flex flex-col flex-1 items-center xl:items-start justify-between w-full h-full">
-              <div>
-                <span className="px-3 py-1 bg-sky-500/20 text-sky-300 text-[10px] md:text-xs font-bold rounded-full uppercase tracking-wider mb-3 inline-block border border-sky-500/30">
-                  Head of Department
-                </span>
-                <h3 className="text-xl md:text-2xl xl:text-3xl font-extrabold text-white mb-2 tracking-tight">Shaurabh Kumar</h3>
-                <p className="text-sm md:text-base text-sky-400 font-semibold mb-4">HOD of Computer Science &amp; Engineering (CSE)</p>
-
-                <p className="text-slate-300 leading-relaxed font-light text-sm italic max-w-md mx-auto xl:mx-0 mb-6 xl:mb-8">
-                  &ldquo;The goal of CSI_SRMCEM X D&apos;CODERS is not just to write code, but to engineer solutions that impact society. I am incredibly proud of the innovative spirit, technical excellence, and 100% placement record our students consistently maintain under this chapter.&rdquo;
-                </p>
-              </div>
-
-              <div className="mt-auto xl:mt-0 w-full xl:w-auto">
-                <a
-                  href="#"
-                  className="px-5 py-2.5 rounded-full bg-white/5 hover:bg-sky-500/20 border border-white/10 hover:border-sky-500/40 text-slate-300 hover:text-white transition-all flex items-center justify-center xl:justify-start gap-2 text-xs md:text-sm font-semibold w-full xl:w-fit"
-                >
-                  <FaLinkedin className="w-4 h-4 text-sky-400" />
-                  <span>Connect on LinkedIn</span>
-                </a>
-              </div>
+            {/* Action Area */}
+            <div className="pt-4 border-t border-slate-800/80 flex items-center justify-between">
+              <span className="text-xs font-mono text-slate-400">SRMCEM, Lucknow</span>
+              <a
+                href="https://www.linkedin.com/in/saurabhbahadur/"
+                target="_blank"
+                rel="noreferrer"
+                className="px-5 py-2.5 rounded-xl bg-white/5 hover:bg-blue-500/20 border border-white/10 hover:border-blue-500/40 text-slate-200 hover:text-white transition-all flex items-center gap-2 text-xs font-bold cursor-pointer shadow-sm group/btn"
+              >
+                <FaLinkedin className="w-4 h-4 text-blue-400 group-hover/btn:scale-110 transition-transform" />
+                <span>Connect on LinkedIn</span>
+              </a>
             </div>
           </motion.div>
+
         </div>
       </section>
+
 
       {/* ========================================================================= */}
       {/* 5. PAST CLUB HEADS — "HALL OF FAME" (3D FLIP CARDS RESTORED) */}
