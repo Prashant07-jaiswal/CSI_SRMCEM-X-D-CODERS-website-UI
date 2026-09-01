@@ -49,8 +49,8 @@ export default function EventsPage() {
   const cardVariants: Variants = {
     hidden: { opacity: 0, y: 30, scale: 0.95 },
     visible: (i: number) => ({
-      opacity: 1, 
-      y: 0, 
+      opacity: 1,
+      y: 0,
       scale: 1,
       transition: { delay: i * 0.08, duration: 0.5, ease: "easeOut" }
     }),
@@ -78,7 +78,7 @@ export default function EventsPage() {
 
       {/* Hero Section */}
       <section className="pt-32 px-4 md:px-16 lg:px-24 max-w-7xl mx-auto text-center mb-16">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
@@ -126,9 +126,9 @@ export default function EventsPage() {
 
       {/* Events Grid (Enlarged Card Dimensions & Premium Layout) */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.div 
+        <motion.div
           layout
-          className="grid grid-cols-1 lg:grid-cols-2 gap-10"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8"
         >
           <AnimatePresence mode="popLayout">
             {visibleEvents.length > 0 ? (
@@ -144,21 +144,21 @@ export default function EventsPage() {
                 >
                   <div>
                     {/* Event Image Banner */}
-                    <div className="relative h-64 sm:h-72 md:h-80 w-full overflow-hidden bg-slate-950">
-                      <img 
-                        src={event.image} 
-                        alt={event.title} 
+                    <div className="relative h-48 sm:h-52 w-full overflow-hidden bg-slate-950 shadow-[0_4px_20px_rgba(2,6,23,1)] z-10 -mb-[1px]">
+                      <img
+                        src={event.image}
+                        alt={event.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-85 group-hover:opacity-100"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
-                      
+
                       {/* Category Badge */}
                       <div className="absolute top-5 right-5">
                         <span className={cn(
                           "px-4 py-1.5 text-xs font-mono font-bold rounded-full uppercase tracking-wider backdrop-blur-md shadow-lg border",
                           event.category === "upcoming" ? "bg-sky-500/25 text-sky-300 border-sky-500/40 shadow-[0_0_15px_rgba(56,189,248,0.3)]" :
-                          event.category === "current" ? "bg-emerald-500/25 text-emerald-300 border-emerald-500/40 animate-pulse shadow-[0_0_15px_rgba(16,185,129,0.3)]" :
-                          "bg-slate-900/90 text-slate-400 border-slate-700"
+                            event.category === "current" ? "bg-emerald-500/25 text-emerald-300 border-emerald-500/40 animate-pulse shadow-[0_0_15px_rgba(16,185,129,0.3)]" :
+                              "bg-slate-900/90 text-slate-400 border-slate-700"
                         )}>
                           {event.category === "upcoming" ? "✦ Upcoming" : event.category === "current" ? "● Live Now" : "Past Event"}
                         </span>
@@ -166,38 +166,38 @@ export default function EventsPage() {
                     </div>
 
                     {/* Event Details */}
-                    <div className="p-8 md:p-10">
-                      <h3 className="text-2xl sm:text-3xl font-extrabold text-white mb-4 group-hover:text-sky-300 transition-colors tracking-tight">
+                    <div className="p-6">
+                      <h3 className="text-xl sm:text-2xl font-bold text-white mb-3 group-hover:text-sky-300 transition-colors tracking-tight line-clamp-2">
                         {event.title}
                       </h3>
-                      
+
                       {/* Meta Information Pills */}
-                      <div className="flex flex-wrap items-center gap-3 mb-6 text-xs sm:text-sm font-mono text-slate-300">
-                        <div className="flex items-center px-3.5 py-1.5 rounded-xl bg-slate-950/80 border border-slate-800">
-                          <Calendar className="w-4 h-4 mr-2 text-sky-400 shrink-0" />
+                      <div className="flex flex-wrap items-center gap-2 mb-5 text-xs font-mono text-slate-300">
+                        <div className="flex items-center px-2.5 py-1 rounded-lg bg-slate-950/80 border border-slate-800">
+                          <Calendar className="w-3.5 h-3.5 mr-1.5 text-sky-400 shrink-0" />
                           <span>{event.date}</span>
                         </div>
-                        <div className="flex items-center px-3.5 py-1.5 rounded-xl bg-slate-950/80 border border-slate-800">
-                          <Clock className="w-4 h-4 mr-2 text-sky-400 shrink-0" />
+                        <div className="flex items-center px-2.5 py-1 rounded-lg bg-slate-950/80 border border-slate-800">
+                          <Clock className="w-3.5 h-3.5 mr-1.5 text-sky-400 shrink-0" />
                           <span>{event.time}</span>
                         </div>
-                        <div className="flex items-center px-3.5 py-1.5 rounded-xl bg-slate-950/80 border border-slate-800">
-                          <MapPin className="w-4 h-4 mr-2 text-sky-400 shrink-0" />
-                          <span>{event.location}</span>
+                        <div className="flex items-center px-2.5 py-1 rounded-lg bg-slate-950/80 border border-slate-800">
+                          <MapPin className="w-3.5 h-3.5 mr-1.5 text-sky-400 shrink-0" />
+                          <span className="truncate max-w-[120px]">{event.location}</span>
                         </div>
                       </div>
-                      
-                      <p className="text-slate-300 text-sm sm:text-base leading-relaxed font-light line-clamp-4">
+
+                      <p className="text-slate-400 text-sm leading-relaxed font-light line-clamp-3">
                         {event.description}
                       </p>
                     </div>
                   </div>
 
-                  <div className="p-8 md:p-10 pt-0">
+                  <div className="p-6 pt-0 mt-auto">
                     <button
                       type="button"
                       onClick={() => setSelectedEvent(event)}
-                      className="w-full py-4 rounded-2xl bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600 hover:from-sky-400 hover:to-blue-500 text-white font-bold flex items-center justify-center gap-2 text-sm shadow-[0_0_25px_rgba(56,189,248,0.3)] transition-all duration-300 hover:scale-[1.02] cursor-pointer"
+                      className="w-full py-3 rounded-xl bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600 hover:from-sky-400 hover:to-blue-500 text-white font-bold flex items-center justify-center gap-2 text-sm shadow-[0_0_20px_rgba(56,189,248,0.25)] transition-all duration-300 hover:scale-[1.02] cursor-pointer"
                     >
                       View Details
                       <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -206,7 +206,7 @@ export default function EventsPage() {
                 </motion.div>
               ))
             ) : (
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -223,7 +223,7 @@ export default function EventsPage() {
             )}
           </AnimatePresence>
         </motion.div>
-        
+
         {/* Load More Pagination */}
         {filteredEvents.length > visibleCount && (
           <div className="text-center mt-16">
@@ -259,7 +259,7 @@ export default function EventsPage() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 40, scale: 0.96 }}
               transition={{ type: "spring", stiffness: 320, damping: 32 }}
-              className="fixed inset-x-4 bottom-0 sm:inset-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 z-[161] w-full sm:max-w-2xl max-h-[90vh] overflow-y-auto bg-slate-900 border border-slate-700/80 rounded-t-[32px] sm:rounded-[28px] shadow-[0_0_80px_rgba(56,189,248,0.15)]"
+              className="fixed inset-x-4 bottom-0 sm:inset-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 z-[161] w-full sm:max-w-2xl h-auto max-h-[90vh] flex flex-col bg-slate-900 border border-slate-700/80 rounded-t-[32px] sm:rounded-[28px] shadow-[0_0_80px_rgba(56,189,248,0.15)] overflow-hidden"
             >
               {/* Close button */}
               <button
@@ -272,51 +272,48 @@ export default function EventsPage() {
                 </svg>
               </button>
 
-              {/* Banner */}
-              <div className="relative h-52 sm:h-64 w-full overflow-hidden rounded-t-[32px] sm:rounded-t-[28px]">
+              {/* Banner (Static) */}
+              <div className="relative shrink-0 h-48 sm:h-56 w-full overflow-hidden bg-slate-950">
                 <img
                   src={selectedEvent.image}
                   alt={selectedEvent.title}
                   className="w-full h-full object-cover"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/30 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/20 to-transparent" />
                 {/* Category badge */}
                 <div className="absolute top-4 left-4">
                   <span className={cn(
                     "px-3 py-1 text-xs font-mono font-bold rounded-full uppercase tracking-wider border backdrop-blur-md",
                     selectedEvent.category === "upcoming" ? "bg-sky-500/25 text-sky-300 border-sky-500/40" :
-                    selectedEvent.category === "current" ? "bg-emerald-500/25 text-emerald-300 border-emerald-500/40 animate-pulse" :
-                    "bg-slate-900/90 text-slate-400 border-slate-700"
+                      selectedEvent.category === "current" ? "bg-emerald-500/25 text-emerald-300 border-emerald-500/40 animate-pulse" :
+                        "bg-slate-900/90 text-slate-400 border-slate-700"
                   )}>
                     {selectedEvent.category === "upcoming" ? "✦ Upcoming" : selectedEvent.category === "current" ? "● Live Now" : "Past Event"}
                   </span>
                 </div>
               </div>
 
-              {/* Content */}
-              <div className="p-7 sm:p-9">
-                <h2 className="text-2xl sm:text-3xl font-extrabold text-white mb-5 tracking-tight leading-tight">
+              {/* Meta Info Bar (Static) */}
+              <div className="shrink-0 bg-slate-900 border-b border-slate-700/80 px-6 py-4 flex flex-row items-center justify-between gap-4 overflow-x-auto text-xs font-mono text-slate-300 z-10 shadow-sm hide-scrollbar">
+                <div className="flex items-center gap-2 whitespace-nowrap">
+                  <Calendar className="w-4 h-4 text-sky-400 shrink-0" />
+                  <span>{selectedEvent.date}</span>
+                </div>
+                <div className="flex items-center gap-2 whitespace-nowrap">
+                  <Clock className="w-4 h-4 text-sky-400 shrink-0" />
+                  <span>{selectedEvent.time}</span>
+                </div>
+                <div className="flex items-center gap-2 whitespace-nowrap">
+                  <MapPin className="w-4 h-4 text-sky-400 shrink-0" />
+                  <span>{selectedEvent.location}</span>
+                </div>
+              </div>
+
+              {/* Content (Scrollable) */}
+              <div className="p-6 sm:p-8 overflow-y-auto flex-1 custom-scrollbar">
+                <h2 className="text-2xl sm:text-3xl font-extrabold text-white mb-6 tracking-tight leading-tight">
                   {selectedEvent.title}
                 </h2>
-
-                {/* Meta pills */}
-                <div className="flex flex-wrap gap-3 mb-7">
-                  <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800 border border-slate-700 text-xs font-mono text-slate-300">
-                    <Calendar className="w-4 h-4 text-sky-400 shrink-0" />
-                    {selectedEvent.date}
-                  </div>
-                  <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800 border border-slate-700 text-xs font-mono text-slate-300">
-                    <Clock className="w-4 h-4 text-sky-400 shrink-0" />
-                    {selectedEvent.time}
-                  </div>
-                  <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800 border border-slate-700 text-xs font-mono text-slate-300">
-                    <MapPin className="w-4 h-4 text-sky-400 shrink-0" />
-                    {selectedEvent.location}
-                  </div>
-                </div>
-
-                {/* Divider */}
-                <div className="h-px bg-slate-800 mb-7" />
 
                 {/* Full Description */}
                 <div className="mb-8">
